@@ -344,13 +344,13 @@ return [
             ],
         ],
         [
-            'text' => 'Consultas Informacion',
+            'text' => 'Admision',
             'icon' => 'fas fa-users',
             // 'can'  => 'users.index',
             'submenu' => [
                 [
-                    'text' => 'Consulta Correspondencia',
-                    'url' => '',
+                    'text' => 'Crear Admision',
+                    'url' => 'iniciar',
                     'icon' => 'fas fa-user',
                 ],
             ],
