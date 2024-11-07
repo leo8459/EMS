@@ -26,14 +26,16 @@ return new class extends Migration
             $table->decimal('precio', 10, 2);
             $table->string('numero_factura')->nullable();
             $table->string('nombre_remitente');
-            $table->string('nombre_envia');
+            $table->string('nombre_envia')->nullable();
             $table->string('carnet');
             $table->string('telefono_remitente');
             $table->string('nombre_destinatario');
-            $table->string('telefono_destinatario');
+            $table->string('telefono_destinatario')->nullable();
             $table->string('direccion');
+            $table->string('provincia')->nullable();
             $table->string('ciudad');
             $table->string('pais');
+            $table->integer('estado')->default(1);
             $table->timestamps();
         });
     }

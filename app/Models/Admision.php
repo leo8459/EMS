@@ -27,6 +27,7 @@ class Admision extends Model
         'nombre_destinatario',
         'telefono_destinatario',
         'direccion',
+        'provincia',
         'ciudad',
         'pais',
     ];
