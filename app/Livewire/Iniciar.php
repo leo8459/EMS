@@ -43,12 +43,13 @@ class Iniciar extends Component
             'pais' => 'required|string',
         ];
     }
+    //rescatar datos 
     public function mount()
     {
         $this->origen = Auth::user()->city; // Si tienes una ciudad por defecto
         $this->cantidad = 1; // Establece cantidad en 1
     }
-
+//mostrar
     public function render()
     {
         // Filtrar y paginar los registros

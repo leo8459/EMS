@@ -353,6 +353,28 @@ return [
                     'url' => 'iniciar',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Inventario Admision',
+                    'url' => 'inventario',
+                    'icon' => 'fas fa-user',
+                ],
+            ],
+        ],
+        [
+            'text' => 'EMS',
+            'icon' => 'fas fa-users',
+            // 'can'  => 'users.index',
+            'submenu' => [
+                [
+                    'text' => 'Recibir Admision',
+                    'url' => 'recibir',
+                    'icon' => 'fas fa-user',
+                ],
+                // [
+                //     'text' => 'Inventario Admision',
+                //     'url' => 'inventario',
+                //     'icon' => 'fas fa-user',
+                // ],
             ],
         ],
         [

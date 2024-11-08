@@ -71,6 +71,16 @@ Route::middleware('auth')->group(function () {
 
     //admisiones
     Route::get('/iniciar', [AdmisionesController::class, 'getAdmisiones']);
+    Route::get('/inventario', [AdmisionesController::class, 'inventarioadmision']);
+
+
+
+
+    //jotita
+    Route::get('/recibir', [AdmisionesController::class, 'recibiradmision']);
+
+
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

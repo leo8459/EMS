@@ -10,6 +10,7 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -32,5 +33,50 @@
                 {{ $slot }}
             </main>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <!-- SweetAlert2 con eventos de Livewire -->
+ <script>
+    document.addEventListener('livewire:load', function () {
+        // Escuchar el evento de éxito
+        Livewire.on('alerta-exito', function (datos) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: datos.mensaje,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+
+        // Escuchar el evento de error
+        Livewire.on('alerta-error', function (datos) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: datos.mensaje,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+
+        // Escuchar el evento de confirmación de eliminación
+        Livewire.on('confirmar-eliminacion', function (datos) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.emit('confirmarEliminacion', datos.id);
+                }
+            });
+        });
+    });
+</script>
     </body>
+    
 </html>

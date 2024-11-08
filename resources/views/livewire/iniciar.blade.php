@@ -13,8 +13,8 @@
                         <div class="card-header">
                             <!-- Barra de búsqueda y botón Nuevo Despacho -->
                             <div class="d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                    class="form-control" style="margin-right: 10px;">
+                                <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+
                                 <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#createPaqueteModal">
@@ -145,6 +145,13 @@
                                     <select class="form-control" id="servicio" wire:model="servicio" wire:ignore>
                                         <option value="">Seleccione el servicio</option>
                                         <option value="EMS">EMS</option>
+                                        <option value="CERTIFICADA">CERTIFICADA</option>
+                                        <option value="ORDINARIA">ORDINARIA</option>
+                                        <option value="ECA/PLIEGOS">ECA/PLIEGOS</option>
+                                        <option value="SUPEREXPRESS">SUPEREXPRESS</option>
+                                        <option value="EXPRESO">EXPRESO</option>
+                                        <option value="AVISO DE RECIBO">AVISO DE RECIBO</option>
+
                                     </select>
                                     
                                 </div>
@@ -155,9 +162,15 @@
                                     <select class="form-control" id="tipo_correspondencia" wire:model="tipo_correspondencia" wire:ignore>
                                         <option value="">Seleccione el tipo de correspondencia</option>
                                         <option value="CARTA">CARTA</option>
-                                        <option value="SACA M">SACA M</option>
+                                        <option value="ENCOMIENDA">ENCOMIENDA</option>
                                         <option value="DOCUMENTO">DOCUMENTO</option>
                                         <option value="PAQUETE">PAQUETE</option>
+                                        <option value="SACA M">SACA M</option>
+                                        <option value="REVISTA">REVISTA</option>
+                                        <option value="IMPRESO">IMPRESO</option>
+                                        <option value="CECOGRAMA">CECOGRAMA</option>
+                                        <option value="PEQUEÑO PAQUETE">PEQUEÑO PAQUETE</option>
+
                                     </select>
                                 </div>
                             </div>
@@ -232,7 +245,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="nombre_envia">Nombre y Apellido del que Envia*</label>
+                                    <label for="nombre_envia">Nombre y Apellido del que Envia</label>
                                     <input type="text" class="form-control" id="nombre_envia" wire:model="nombre_envia">
                                 </div>
                             </div>
@@ -263,7 +276,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="telefono_destinatario">Teléfono Destinatario*</label>
+                                    <label for="telefono_destinatario">Teléfono Destinatario</label>
                                     <input type="text" class="form-control" id="telefono_destinatario" wire:model="telefono_destinatario">
                                 </div>
                             </div>
