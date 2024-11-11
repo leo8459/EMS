@@ -31,4 +31,8 @@ class Admision extends Model
         'ciudad',
         'pais',
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -40,6 +40,12 @@ return new class extends Migration
             $table->string('pais');
             $table->integer('estado')->default(1);
             $table->timestamps();
+
+
+
+
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
         });
     }
     

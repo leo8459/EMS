@@ -78,7 +78,9 @@ Route::middleware('auth')->group(function () {
 
     //jotita
     Route::get('/recibir', [AdmisionesController::class, 'recibiradmision']);
+    Route::get('/emsinventario', [AdmisionesController::class, 'ems']);
 
+    Route::get('/asignarcartero', [AdmisionesController::class, 'asignar'])->name('asignarcartero');
 
 
 

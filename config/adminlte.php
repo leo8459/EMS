@@ -370,11 +370,11 @@ return [
                     'url' => 'recibir',
                     'icon' => 'fas fa-user',
                 ],
-                // [
-                //     'text' => 'Inventario Admision',
-                //     'url' => 'inventario',
-                //     'icon' => 'fas fa-user',
-                // ],
+                [
+                    'text' => 'Inventario EMS',
+                    'url' => 'emsinventario',
+                    'icon' => 'fas fa-user',
+                ],
             ],
         ],
         [
