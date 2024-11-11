@@ -100,6 +100,52 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <!-- Modal -->
+@if($showModal)
+<div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <form wire:submit.prevent="saveAdmissionData">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ingresar Peso EMS y Observación</h5>
+                    <button type="button" class="close" wire:click="$set('showModal', false)">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @foreach($admissionData as $id => $admission)
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between">
+                                <h6>Admisión Código: {{ $admission['codigo'] }}</h6>
+                                <button type="button" class="btn btn-danger btn-sm" wire:click="removeAdmissionFromModal({{ $id }})">
+                                    Sacar Admisión
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label for="peso_ems_{{ $id }}">Peso EMS</label>
+                                <input type="text" id="peso_ems_{{ $id }}" class="form-control" wire:model.defer="admissionData.{{ $id }}.peso_ems">
+                                @error('admissionData.' . $id . '.peso_ems') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="observacion_{{ $id }}">Observación</label>
+                                <textarea id="observacion_{{ $id }}" class="form-control" wire:model.defer="admissionData.{{ $id }}.observacion"></textarea>
+                                @error('admissionData.' . $id . '.observacion') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                        <hr>
+                    @endforeach
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar y Recibir</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
                         </div>
                         <div class="card-footer">
                             {{ $admisiones->links() }}

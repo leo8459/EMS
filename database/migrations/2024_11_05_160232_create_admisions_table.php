@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('tipo_correspondencia');
             $table->integer('cantidad');
             $table->decimal('peso', 8, 2);
+            $table->decimal('peso_ems', 8, 2);
+            $table->decimal('peso_regional', 8, 2);
+            $table->string('observacion');
             $table->string('destino');
             $table->string('codigo')->unique();
             $table->decimal('precio', 10, 2);
