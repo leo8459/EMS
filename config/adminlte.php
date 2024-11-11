@@ -375,6 +375,38 @@ return [
                     'url' => 'emsinventario',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Envios Encamino',
+                    'url' => 'encaminocartero',
+                    'icon' => 'fas fa-user',
+                ],
+                // [
+                //     'text' => 'Envios Entregados',
+                //     'url' => 'entregarcartero',
+                //     'icon' => 'fas fa-user',
+                // ],
+            ],
+        ],
+        [
+            'text' => 'Carteros',
+            'icon' => 'fas fa-users',
+            // 'can'  => 'users.index',
+            'submenu' => [
+                [
+                    'text' => 'Envios Entregados',
+                    'url' => 'entregarcartero',
+                    'icon' => 'fas fa-user',
+                ],
+                // [
+                //     'text' => 'Inventario EMS',
+                //     'url' => 'emsinventario',
+                //     'icon' => 'fas fa-user',
+                // ],
+                // [
+                //     'text' => 'Envios Encamino',
+                //     'url' => 'encaminocartero',
+                //     'icon' => 'fas fa-user',
+                // ],
             ],
         ],
         [

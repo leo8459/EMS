@@ -38,6 +38,9 @@ return new class extends Migration
             $table->string('provincia')->nullable();
             $table->string('ciudad');
             $table->string('pais');
+            $table->text('firma_entrega');
+            $table->string('photo')->nullable();
+
             $table->integer('estado')->default(1);
             $table->timestamps();
 

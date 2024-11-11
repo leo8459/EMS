@@ -30,6 +30,14 @@ class Admision extends Model
         'provincia',
         'ciudad',
         'pais',
+        'observacion_entrega',
+        'peso_ems',
+        'peso_regional',
+        'firma_entrega',
+        'recepcionado',
+        'estado',
+
+
     ];
     public function user()
     {

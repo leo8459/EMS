@@ -26,4 +26,12 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.asignarcartero');
     }
+    public function encamino ()
+    {
+        return view('admisiones.encaminocartero');
+    }
+    public function entregar ()
+    {
+        return view('admisiones.entregarcartero');
+    }
 }
