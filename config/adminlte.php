@@ -380,6 +380,16 @@ return [
                     'url' => 'encaminocartero',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Envios Encamino a Regional',
+                    'url' => 'recibirregional',
+                    'icon' => 'fas fa-user',
+                ],
+                // [
+                //     'text' => 'Envios Encamino a Regional',
+                //     'url' => 'recibirregional',
+                //     'icon' => 'fas fa-user',
+                // ],
                 // [
                 //     'text' => 'Envios Entregados',
                 //     'url' => 'entregarcartero',

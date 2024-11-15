@@ -34,6 +34,8 @@
             </main>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.0/dist/signature_pad.umd.min.js"></script>
+
  <!-- SweetAlert2 con eventos de Livewire -->
  <script>
     document.addEventListener('livewire:load', function () {

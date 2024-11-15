@@ -29,14 +29,7 @@
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 </div>
-                                <!-- Botón para redirigir a la ruta asignarcartero -->
-                                <div class="container-fluid">
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success">
-                                            Asignar Carteros
-                                        </a>
-                                    </div>
-                                </div>
+                            
                             </div>
                         </div>
                         @if (session()->has('message'))
@@ -53,7 +46,6 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" wire:click="toggleSelectAll" /></th>
                                         <th>#</th>
                                         <th>Origen</th>
                                         <th>Servicio</th>
@@ -72,14 +64,13 @@
                                     @foreach ($admisiones as $admisione)
                                         <tr>
                                             <td>
-                                                <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
                                             </td>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $admisione->origen }}</td>
                                             <td>{{ $admisione->servicio }}</td>
                                             <td>{{ $admisione->tipo_correspondencia }}</td>
                                             <td>{{ $admisione->cantidad }}</td>
-                                            <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
+                                            <td>{{ $admisione->peso_ems }}</td>
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
                                             <td>{{ $admisione->codigo }}</td>
@@ -92,37 +83,8 @@
                             </table>
                         
                             <!-- Botón para abrir el modal -->
-                            <button class="btn btn-warning mt-3" wire:click="abrirModal">Mandar a Regional</button>
                         </div>
-                        @if ($showModal)
-                        <div class="modal fade show d-block" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Confirmar Envío a Regional</h5>
-                                        <button type="button" class="close" wire:click="$set('showModal', false)">
-                                            <span>&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>¿Está seguro de que desea enviar las admisiones seleccionadas a la regional?</p>
-                                        <p><strong>Ciudad:</strong> {{ $ciudadModal }}</p>
-                                        <p><strong>Destino:</strong> {{ $destinoModal }}</p>
-                                        <ul>
-                                            @foreach ($selectedAdmisionesCodes as $codigo)
-                                                <li>Código: {{ $codigo }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button class="btn btn-primary" wire:click="mandarARegional">Confirmar</button>
-<button class="btn btn-success" wire:click="generarExcel">Generar Excel</button>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+                        
                     
                                             
                         <div class="card-footer">

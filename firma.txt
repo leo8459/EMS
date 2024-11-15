@@ -1,0 +1,138 @@
+<div>
+    <input type="hidden" class="form-control mb-2" name="firma" id="inputbase64" readonly>
+</div>
+<div id="message" class="alert alert-warning text-center d-none">
+    <div class="d-flex flex-column align-items-center">
+        <i class="fas fa-4x fa-exclamation-triangle text-warning"></i>
+        <span class="mt-2">Por favor ponga en modo horizontal la pantalla de su teléfono si desea
+            firmar</span>
+    </div>
+</div>
+
+<div class="container-lg " id="div1">
+    <div class="position-relative">
+        <!-- Mensaje de Generando Código -->
+        <div id="generatingMessage" class="text-center position-absolute w-100 h-100 d-none"
+            style="top: 0; left: 0;">
+            <div class="alert alert-info p-0 d-flex align-items-center justify-content-center"
+                style="width: 600px; height: 250px; margin: auto;">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="fas fa-4x fa-spinner fa-spin text-primary"></i>
+                    <span class="mt-2">Generando código de la imagen...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de Código Generado -->
+        <div id="generatedMessage" class="text-center position-absolute w-100 h-100 d-none"
+            style="top: 0; left: 0;">
+            <div class="alert alert-success p-0 d-flex align-items-center justify-content-center"
+                style="width: 600px; height: 250px; margin: auto;">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="fas fa-4x fa-check-circle text-success"></i>
+                    <span class="mt-2">El código de la imagen se generó correctamente.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas para la firma -->
+        <div class="text-center">
+            <canvas id="canvas" class="border border-secondary rounded bg-white" width="600"
+                height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="mb-3 text-center ">
+        <button type="button" id="guardar" class="btn btn-primary me-2"><i class="fas fa-save"></i>
+            Guardar</button>
+        <button type="button" id="limpiar" class="btn btn-secondary"><i class="fas fa-trash"></i>
+            Limpiar</button>
+    </div>
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.0/dist/signature_pad.umd.min.js"></script>
+   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('canvas');
+        const signaturePad = new SignaturePad(canvas);
+        const generateButton = document.getElementById('guardar');
+        const clearButton = document.getElementById('limpiar');
+        const base64Input = document.getElementById('inputbase64');
+        const submitButton = document.getElementById('submitButton');
+        const generatingMessage = document.getElementById('generatingMessage');
+        const generatedMessage = document.getElementById('generatedMessage');
+        const message = document.getElementById('message');
+        const div1 = document.getElementById('div1');
+
+        // Inicialmente deshabilitar el botón de enviar
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        function updateVisibility() {
+            const mobileWidthThreshold = 768;
+            const screenWidth = window.innerWidth;
+
+            if (screenWidth <= mobileWidthThreshold) {
+                if (window.orientation === 0) {
+                    message.classList.remove('d-none');
+                    div1.classList.add('d-none');
+                } else {
+                    message.classList.add('d-none');
+                    div1.classList.remove('d-none');
+                }
+            } else {
+                message.classList.add('d-none');
+                div1.classList.remove('d-none');
+            }
+        }
+
+        updateVisibility();
+
+        // Funcionalidad para limpiar el canvas
+        clearButton.addEventListener('click', function () {
+            signaturePad.clear(); // Limpia el canvas
+            base64Input.value = ""; // Resetea el input hidden
+            if (submitButton) {
+                submitButton.disabled = true; // Deshabilita el botón de enviar
+            }
+            generatedMessage.classList.add('d-none'); // Oculta el mensaje de éxito
+        });
+
+        // Funcionalidad para generar la firma
+        generateButton.addEventListener('click', function () {
+            if (signaturePad.isEmpty()) {
+                alert('Por favor, haga una firma antes de guardar.');
+                return;
+            }
+
+            generatingMessage.classList.remove('d-none');
+            generatedMessage.classList.add('d-none');
+            if (submitButton) {
+                submitButton.disabled = true; // Deshabilita el botón de enviar
+            }
+
+            setTimeout(() => {
+                const firma = signaturePad.toDataURL(); // Convierte la firma a base64
+                base64Input.value = firma; // Asigna el valor base64 al input hidden
+                generatingMessage.classList.add('d-none');
+                generatedMessage.classList.remove('d-none');
+                if (submitButton) {
+                    submitButton.disabled = false; // Habilita el botón de enviar
+                }
+                setTimeout(() => {
+                    generatedMessage.classList.add('d-none');
+                }, 2000);
+            }, 2000);
+        });
+
+        // Manejo de cambios en la orientación de la pantalla
+        window.addEventListener('orientationchange', updateVisibility);
+        window.addEventListener('resize', updateVisibility);
+    });
+</script>
+    

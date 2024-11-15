@@ -63,7 +63,7 @@ class Recibir extends Component
         // Validar los datos
         foreach ($this->admissionData as $id => $data) {
             $this->validate([
-                'admissionData.' . $id . '.peso_ems' => 'required|numeric',
+                'admissionData.' . $id . '.peso_ems' => 'nullable|numeric', // Cambiado a nullable
                 'admissionData.' . $id . '.observacion' => 'nullable|string',
             ], [], [
                 'admissionData.' . $id . '.peso_ems' => 'Peso EMS para admisión ' . $data['codigo'],
@@ -75,7 +75,7 @@ class Recibir extends Component
         foreach ($this->admissionData as $id => $data) {
             Admision::where('id', $id)
                 ->update([
-                    'peso_ems' => $data['peso_ems'],
+                    'peso_ems' => $data['peso_ems'] !== '' ? $data['peso_ems'] : null, // Guardar como null si está vacío
                     'observacion' => $data['observacion'],
                     'estado' => 3,
                 ]);
@@ -90,6 +90,8 @@ class Recibir extends Component
         session()->flash('message', 'Las admisiones seleccionadas han sido recibidas.');
         $this->render(); // Refrescar la vista
     }
+    
+    
     public function removeAdmissionFromModal($id)
 {
     // Verifica si el ID existe en el array y lo elimina

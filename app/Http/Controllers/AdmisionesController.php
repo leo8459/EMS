@@ -34,4 +34,8 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.entregarcartero');
     }
+    public function regional ()
+    {
+        return view('admisiones.recibirregional');
+    }
 }

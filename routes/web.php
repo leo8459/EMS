@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/asignarcartero', [AdmisionesController::class, 'asignar'])->name('asignarcartero');
     Route::get('/encaminocartero', [AdmisionesController::class, 'encamino']);
+    Route::get('/recibirregional', [AdmisionesController::class, 'regional']);
 
 //carteros
 Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);

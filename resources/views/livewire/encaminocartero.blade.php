@@ -102,63 +102,78 @@
 
                                             <td>
                                                 {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
-                                                    <button type="button" class="btn btn-primary" wire:click="openModal({{ $admisione->id }})">Entregar Admision</button>
+                                                <button type="button" class="btn btn-primary"
+                                                    wire:click="openModal({{ $admisione->id }})">Entregar
+                                                    Admision</button>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-         <!-- Modal para subir foto y añadir recepcionado y observacion_entrega -->
-@if($showModal)
-    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <!-- Encabezado del modal -->
-                <div class="modal-header">
-                    <h5 class="modal-title">Subir Foto para Admision {{ $selectedAdmision->codigo ?? '' }}</h5>
-                    <button type="button" class="close" wire:click="$set('showModal', false)">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <!-- Cuerpo del modal -->
-                <div class="modal-body">
-                    <form wire:submit.prevent="save">
-                        <!-- Campo de Foto -->
-                        <div class="form-group">
-                            <label for="photo">Seleccionar Foto</label>
-                            <input type="file" id="photo" wire:model="photo" class="form-control">
-                            @error('photo') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                        @if ($photo)
-                            <img src="{{ $photo->temporaryUrl() }}" width="200" class="mb-3">
-                        @endif
+                            <!-- Modal para subir foto y añadir recepcionado y observacion_entrega -->
+                            @if ($showModal)
+                                <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <!-- Encabezado del modal -->
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Subir Foto para Admision
+                                                    {{ $selectedAdmision->codigo ?? '' }}</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showModal', false)">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+                                            <!-- Cuerpo del modal -->
+                                            <div class="modal-body">
+                                                <form wire:submit.prevent="save">
+                                                    <!-- Campo de Foto -->
+                                                    <div class="form-group">
+                                                        <label for="photo">Seleccionar Foto</label>
+                                                        <input type="file" id="photo" wire:model="photo"
+                                                            class="form-control">
+                                                        @error('photo')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                    @if ($photo)
+                                                        <img src="{{ $photo->temporaryUrl() }}" width="200"
+                                                            class="mb-3">
+                                                    @endif
 
-                        <!-- Campo de Recepcionado -->
-                        <div class="form-group">
-                            <label for="recepcionado">Recepcionado Por</label>
-                            <input type="text" id="recepcionado" wire:model="recepcionado" class="form-control">
-                            @error('recepcionado') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
+                                                    <!-- Campo de Recepcionado -->
+                                                    <div class="form-group">
+                                                        <label for="recepcionado">Recepcionado Por</label>
+                                                        <input type="text" id="recepcionado"
+                                                            wire:model="recepcionado" class="form-control">
+                                                        @error('recepcionado')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
 
-                        <!-- Campo de Observación de Entrega -->
-                        <div class="form-group">
-                            <label for="observacion_entrega">Observación de Entrega</label>
-                            <textarea id="observacion_entrega" wire:model="observacion_entrega" class="form-control"></textarea>
-                            @error('observacion_entrega') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                    </form>
-                </div>
-                <!-- Pie del modal -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
-                    <button type="button" class="btn btn-primary" wire:click="save">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Backdrop del modal -->
-    <div class="modal-backdrop fade show"></div>
-@endif
+                                                    <!-- Campo de Observación de Entrega -->
+                                                    <div class="form-group">
+                                                        <label for="observacion_entrega">Observación de Entrega</label>
+                                                        <textarea id="observacion_entrega" wire:model="observacion_entrega" class="form-control"></textarea>
+                                                        @error('observacion_entrega')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <!-- Pie del modal -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    wire:click="$set('showModal', false)">Cancelar</button>
+                                                <button type="button" class="btn btn-primary"
+                                                    wire:click="save">Guardar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Backdrop del modal -->
+                                <div class="modal-backdrop fade show"></div>
+                            @endif
 
 
 
@@ -173,4 +188,3 @@
     </section>
 
 </div>
-
