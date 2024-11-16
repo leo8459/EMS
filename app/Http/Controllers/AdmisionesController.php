@@ -38,4 +38,14 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.recibirregional');
     }
+    public function entregarenvios($id)
+    {
+        // Buscar la admisión por ID
+        $admision = \App\Models\Admision::findOrFail($id); // Usa el modelo adecuado
+    
+        // Pasar la admisión a la vista
+        return view('admisiones.entregarenviosfirma', compact('admision'));
+    }
+    
+    
 }

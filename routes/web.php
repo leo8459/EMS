@@ -81,8 +81,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/emsinventario', [AdmisionesController::class, 'ems']);
 
     Route::get('/asignarcartero', [AdmisionesController::class, 'asignar'])->name('asignarcartero');
-    Route::get('/encaminocartero', [AdmisionesController::class, 'encamino']);
+    Route::get('/encaminocartero', [AdmisionesController::class, 'encamino'])->name('encaminocartero');
     Route::get('/recibirregional', [AdmisionesController::class, 'regional']);
+    Route::get('/entregarenviosfirma/{id}', [AdmisionesController::class, 'entregarenvios'])->name('entregarenviosfirma');
+    Route::post('/guardaradmision/{id}', [AdmisionesController::class, 'guardarAdmision'])->name('guardaradmision');
+    Route::get('/encaminocartero', [AdmisionesController::class, 'encamino'])->name('regresar');
 
 //carteros
 Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);

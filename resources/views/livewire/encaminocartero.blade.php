@@ -101,10 +101,9 @@
                                             <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
 
                                             <td>
-                                                {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
-                                                <button type="button" class="btn btn-primary"
-                                                    wire:click="openModal({{ $admisione->id }})">Entregar
-                                                    Admision</button>
+                                                <a href="{{ route('entregarenviosfirma', ['id' => $admisione->id]) }}" class="btn btn-primary">
+                                                    Entregar Admision
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
