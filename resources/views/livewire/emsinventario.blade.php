@@ -61,7 +61,9 @@
                                         <th>Cantidad</th>
                                         <th>Peso</th>
                                         <th>Precio (Bs)</th>
+                                        <th>Envio</th>
                                         <th>Destino</th>
+
                                         <th>Código</th>
                                         <th>Fecha</th>
                                         <th>Observación</th>
@@ -82,6 +84,7 @@
                                             <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
+                                            <td>{{ $admisione->ciudad }}</td>
                                             <td>{{ $admisione->codigo }}</td>
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion }}</td>
