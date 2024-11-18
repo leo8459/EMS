@@ -80,7 +80,7 @@
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $destino }}</div>
+                        <div style="text-align: right;">{{ $ciudad }}</div>
                     </td>
                     <td></td>
                 </tr>
