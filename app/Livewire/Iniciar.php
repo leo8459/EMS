@@ -39,7 +39,7 @@ class Iniciar extends Component
             'nombre_destinatario' => 'required|string|max:255',
             // 'telefono_destinatario' => 'required|string',
             'direccion' => 'required|string',
-            'ciudad' => 'required|string',
+            'ciudad' => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
             'pais' => 'required|string',
         ];
     }
@@ -47,24 +47,27 @@ class Iniciar extends Component
     public function mount()
     {
         $this->origen = Auth::user()->city; // Si tienes una ciudad por defecto
+        $this->ciudad = "LA PAZ"; // Cambia este valor si quieres que otra ciudad sea la predeterminada
         $this->cantidad = 1; // Establece cantidad en 1
     }
 //mostrar
-    public function render()
-    {
-        // Filtrar y paginar los registros
-        $admisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 1)
-            ->orderBy('fecha', 'desc')
-            ->paginate($this->perPage);
+public function render()
+{
+    // Filtrar y paginar los registros
+    $admisiones = Admision::where('origen', $this->origen) // Filtrar por origen
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por término de búsqueda
+        ->where('estado', 1) // Solo estado activo
+        ->orderBy('fecha', 'desc')
+        ->paginate($this->perPage);
 
-        // Almacena los IDs de la página actual
-        $this->currentPageIds = $admisiones->pluck('id')->toArray();
+    // Almacena los IDs de la página actual
+    $this->currentPageIds = $admisiones->pluck('id')->toArray();
 
-        return view('livewire.iniciar', [
-            'admisiones' => $admisiones,
-        ]);
-    }
+    return view('livewire.iniciar', [
+        'admisiones' => $admisiones,
+    ]);
+}
+
     
     
     protected $listeners = ['resetFields' => 'resetInputFields'];
@@ -516,12 +519,16 @@ public function edit($id)
 public function entregarAExpedicion()
 {
     if (!empty($this->selectedAdmisiones)) {
-        Admision::whereIn('id', $this->selectedAdmisiones)->update(['estado' => 2]);
+        Admision::whereIn('id', $this->selectedAdmisiones)
+            ->where('origen', $this->origen) // Validar que las admisiones sean de la regional del usuario
+            ->update(['estado' => 2]);
+
         session()->flash('message', 'Las admisiones seleccionadas fueron entregadas a expedición.');
         $this->selectedAdmisiones = []; // Reinicia la selección
         $this->selectAll = false; // Reinicia el checkbox de seleccionar todos
     }
 }
+
 
 public function updatedSelectAll($value)
 {

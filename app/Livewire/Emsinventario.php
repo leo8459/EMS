@@ -28,63 +28,89 @@ class Emsinventario extends Component
     public $selectAll = false;
 
     public function render()
-    {
-        // Filtrar y paginar las admisiones en estado 3
-        $admisiones = Admision::with('user')
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 3)
+{
+    // Obtener la ciudad del usuario autenticado
+    $userCity = Auth::user()->city;
+
+    // Filtrar y paginar las admisiones en estado 3
+    $admisiones = Admision::with('user')
+        ->where('origen', $userCity) // Filtrar por ciudad del usuario
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+        ->where('estado', 3) // Estado específico
+        ->orderBy('fecha', 'desc') // Ordenar por fecha
+        ->paginate($this->perPage);
+
+    return view('livewire.emsinventario', [
+        'admisiones' => $admisiones,
+    ]);
+}
+
+public function toggleSelectAll()
+{
+    $this->selectAll = !$this->selectAll;
+
+    if ($this->selectAll) {
+        // Seleccionar todas las admisiones de la página actual que pertenezcan a la ciudad del usuario
+        $this->selectedAdmisiones = Admision::where('origen', Auth::user()->city) // Filtrar por ciudad del usuario
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+            ->where('estado', 3) // Estado específico
             ->orderBy('fecha', 'desc')
-            ->paginate($this->perPage);
-    
-        return view('livewire.emsinventario', [
-            'admisiones' => $admisiones,
-        ]);
-    }
-    public function toggleSelectAll()
-    {
-        $this->selectAll = !$this->selectAll;
-
-        if ($this->selectAll) {
-            // Seleccionar todas las admisiones de la página actual
-            $this->selectedAdmisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-                ->where('estado', 3)
-                ->orderBy('fecha', 'desc')
-                ->limit($this->perPage)
-                ->pluck('id')
-                ->toArray();
-        } else {
-            // Deseleccionar todas las admisiones
-            $this->selectedAdmisiones = [];
-        }
-    }
-    public function abrirModal()
-    {
-        if (count($this->selectedAdmisiones) > 0) {
-            $this->showModal = true;
-
-            $this->destinoModal = Admision::find($this->selectedAdmisiones[0])->destino ?? null;
-            $this->ciudadModal = Admision::find($this->selectedAdmisiones[0])->ciudad ?? null;
-
-            $this->selectedAdmisionesCodes = Admision::whereIn('id', $this->selectedAdmisiones)
-                ->pluck('codigo')
-                ->toArray();
-        } else {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
-        }
-    }
-
-    public function mandarARegional()
-    {
-        Admision::whereIn('id', $this->selectedAdmisiones)->update(['estado' => 6]);
-
+            ->limit($this->perPage)
+            ->pluck('id')
+            ->toArray();
+    } else {
+        // Deseleccionar todas las admisiones
         $this->selectedAdmisiones = [];
-        $this->showModal = false;
-
-        session()->flash('message', 'Las admisiones seleccionadas se han enviado a la regional.');
     }
+}
 
-    public function generarExcel()
-    {
+public function abrirModal()
+{
+    if (count($this->selectedAdmisiones) > 0) {
+        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
+            ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+            ->get();
+
+        if ($admissions->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas seleccionadas para su regional.');
+            return;
+        }
+
+        $this->showModal = true;
+
+        $this->destinoModal = $admissions->first()->destino ?? null;
+        $this->ciudadModal = $admissions->first()->ciudad ?? null;
+
+        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
+    }
+}
+
+
+public function mandarARegional()
+{
+    Admision::whereIn('id', $this->selectedAdmisiones)
+        ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+        ->update(['estado' => 6]); // Cambiar estado a enviado a regional
+
+    $this->selectedAdmisiones = [];
+    $this->showModal = false;
+
+    session()->flash('message', 'Las admisiones seleccionadas se han enviado a la regional.');
+}
+
+
+public function generarExcel()
+{
+    $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
+        ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+        ->get();
+
+    if ($admissions->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas seleccionadas para generar el Excel.');
+        return;
+    }
         // Crear el documento
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();

@@ -63,7 +63,7 @@
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-12">
-                                        <input type="hidden" class="form-control mb-2" name="firma" id="inputbase64" wire:model="firma" readonly>
+                                        <input type="hidden" id="inputbase64" wire:model="firma">
                                     </div>
                                 </div>
                                 <div id="message" class="alert alert-warning text-center d-none">
@@ -116,32 +116,34 @@
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const canvas = document.getElementById('canvas');
-    const signaturePad = new SignaturePad(canvas);
-    const generateButton = document.getElementById('guardar');
-    const clearButton = document.getElementById('limpiar');
-    const base64Input = document.getElementById('inputbase64');
-    const base64Text = document.getElementById('base64Text');
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('canvas');
+        const signaturePad = new SignaturePad(canvas);
+        const saveButton = document.getElementById('guardar');
+        const clearButton = document.getElementById('limpiar');
+        const inputBase64 = document.getElementById('inputbase64');
 
-    // Limpiar canvas
-    clearButton.addEventListener('click', function () {
-        signaturePad.clear();
-        base64Input.value = "";
-        base64Text.value = "";
+        // Limpiar la firma
+        clearButton.addEventListener('click', function () {
+            signaturePad.clear();
+            inputBase64.value = ""; // Limpiar el campo de firma
+            inputBase64.dispatchEvent(new Event('input')); // Sincronizar con Livewire
+        });
+
+        // Guardar la firma en Base64
+        saveButton.addEventListener('click', function () {
+            if (signaturePad.isEmpty()) {
+                alert('Por favor, haga una firma antes de guardar.');
+                return;
+            }
+
+            // Convertir la firma a Base64 y asignarla al input
+            const base64Signature = signaturePad.toDataURL();
+            inputBase64.value = base64Signature;
+
+            // Forzar la sincronización del valor con Livewire
+            inputBase64.dispatchEvent(new Event('input')); // <- Esto asegura que Livewire lo detecte
+        });
     });
-
-    // Generar firma
-    generateButton.addEventListener('click', function () {
-        if (signaturePad.isEmpty()) {
-            alert('Por favor, haga una firma antes de guardar.');
-            return;
-        }
-
-        const firma = signaturePad.toDataURL();
-        base64Input.value = firma; // Esto conecta con Livewire mediante wire:model
-        base64Text.value = firma;
-    });
-});
-
 </script>
+

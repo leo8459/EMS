@@ -24,19 +24,24 @@ class Recibir extends Component
 
     public function render()
     {
+        // Obtener la ciudad del usuario autenticado
+        $userCity = Auth::user()->city;
+    
         // Filtrar y paginar los registros
-        $admisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 2)
-            ->orderBy('fecha', 'desc')
+        $admisiones = Admision::where('origen', $userCity) // Filtrar por ciudad del usuario
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por término de búsqueda
+            ->where('estado', 2) // Estado específico
+            ->orderBy('fecha', 'desc') // Ordenar por fecha
             ->paginate($this->perPage);
-
-        // Almacena los IDs de la página actual
+    
+        // Guardar los IDs de la página actual
         $this->currentPageIds = $admisiones->pluck('id')->toArray();
-
+    
         return view('livewire.recibir', [
             'admisiones' => $admisiones,
         ]);
     }
+    
     public function recibirAdmision()
     {
         if (!empty($this->selectedAdmisiones)) {

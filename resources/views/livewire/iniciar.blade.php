@@ -292,12 +292,25 @@
 
                             <div class="row">
 
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ciudad">Ciudad*</label>
-                                    <input type="text" class="form-control" id="ciudad" wire:model="ciudad">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="ciudad">Ciudad*</label>
+                                        <select class="form-control" id="ciudad" wire:model="ciudad">
+                                            <option value="">Seleccione una ciudad</option>
+                                            <option value="LA PAZ">LA PAZ</option>
+                                            <option value="POTOSI">POTOSI</option>
+                                            <option value="ORURO">ORURO</option>
+                                            <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                            <option value="CHUQUISACA">CHUQUISACA</option>
+                                            <option value="COCHABAMBA">COCHABAMBA</option>
+                                            <option value="BENI">BENI</option>
+                                            <option value="PANDO">PANDO</option>
+                                            <option value="TARIJA">TARIJA</option>
+
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+                                
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="provincia">Provincia</label>
