@@ -23,81 +23,114 @@ class Asignarcartero extends Component
 
     public function render()
     {
-        // Filtrar y paginar las admisiones en estado 3 que no están en el array de seleccionadas
-        $admisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 3)
-            ->whereNotIn('id', array_column($this->assignedAdmisiones, 'id'))
-            ->orderBy('fecha', 'desc')
+        // Obtener la ciudad del usuario autenticado
+        $userCity = Auth::user()->city;
+    
+        // Filtrar y paginar las admisiones
+        $admisiones = Admision::where(function ($query) use ($userCity) {
+                $query->where(function ($subQuery) use ($userCity) {
+                    // Condición para estado 3: Mostrar si el origen coincide y excluir si la ciudad coincide
+                    $subQuery->where('estado', 3)
+                             ->where('origen', $userCity) // Mostrar si el origen coincide
+                             ->where('ciudad', '!=', $userCity); // Excluir si la ciudad coincide
+                })
+                ->orWhere(function ($subQuery) use ($userCity) {
+                    // Condición para estado 7: Mostrar si la ciudad coincide y excluir si el origen coincide
+                    $subQuery->where('estado', 7)
+                             ->where('ciudad', $userCity) // Mostrar si la ciudad coincide
+                             ->where('origen', '!=', $userCity); // Excluir si el origen coincide
+                });
+            })
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+            ->whereNotIn('id', array_column($this->assignedAdmisiones, 'id')) // Excluir los ya asignados
+            ->orderBy('fecha', 'desc') // Ordenar por fecha
             ->paginate($this->perPage);
-
-        // Obtener todos los usuarios que serán los carteros
-        $carteros = User::all();
-
+    
+        // Filtrar los carteros para que solo muestren los que están en la misma ciudad del usuario logueado
+        $carteros = User::where('city', $userCity)->get();
+    
         // Almacena los IDs de la página actual
         $this->currentPageIds = $admisiones->pluck('id')->toArray();
-
+    
         return view('livewire.asignarcartero', [
             'admisiones' => $admisiones,
             'carteros' => $carteros,
             'assignedAdmisiones' => $this->assignedAdmisiones,
         ]);
     }
+    
 
-    public function selectAdmision($admisionId)
-    {
-        // Agregar la admisión seleccionada al array de asignadas y eliminarla de la lista de la izquierda
-        $admision = Admision::find($admisionId);
-        if ($admision && !in_array($admisionId, array_column($this->assignedAdmisiones, 'id'))) {
-            $this->assignedAdmisiones[] = [
-                'id' => $admision->id,
-                'codigo' => $admision->codigo,
-                'destino' => $admision->destino,
-                'direccion' => $admision->direccion,
-                'user_id' => $this->selectedCarteroForAll ?? null, // Asignamos el cartero seleccionado a todas las admisiones
-            ];
-            $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, [$admisionId]);
-        }
-    }
-
-    public function assignCarteroToAll()
-    {
-        // Asignar el cartero seleccionado a todas las admisiones en assignedAdmisiones
-        foreach ($this->assignedAdmisiones as &$assignment) {
-            $assignment['user_id'] = $this->selectedCarteroForAll;
-        }
-    }
-
-    public function returnToLeftList($index)
-    {
-        // Eliminar la admisión del array de asignadas y devolverla a la lista de la izquierda
-        if (isset($this->assignedAdmisiones[$index])) {
-            unset($this->assignedAdmisiones[$index]);
-            $this->assignedAdmisiones = array_values($this->assignedAdmisiones); // Reindexar el array
-        }
-    }
-
-    public function saveAssignments()
-    {
-        // Guardar las asignaciones y actualizar el estado de cada admisión a 4
-        foreach ($this->assignedAdmisiones as $assignment) {
-            $admision = Admision::find($assignment['id']);
-            if ($admision && $assignment['user_id']) {
-                $admision->user_id = $assignment['user_id'];
-                $admision->estado = 4;
-                $admision->save();
-            }
-        }
-
-        // Limpiar los arrays después de guardar
-        $this->selectedAdmisiones = [];
-        $this->assignedAdmisiones = [];
-
-        session()->flash('message', 'Admisiones asignadas exitosamente.');
-    }
-    public function searchAdmision()
+   
+public function selectAdmision($admisionId)
 {
-    $this->admisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-        ->where('estado', 3)
+    // Agregar la admisión seleccionada al array de asignadas y eliminarla de la lista de la izquierda
+    $admision = Admision::find($admisionId);
+    if ($admision && !in_array($admisionId, array_column($this->assignedAdmisiones, 'id'))) {
+        $this->assignedAdmisiones[] = [
+            'id' => $admision->id,
+            'codigo' => $admision->codigo,
+            'destino' => $admision->destino,
+            'direccion' => $admision->direccion,
+            'user_id' => $this->selectedCarteroForAll ?? null, // Asignamos el cartero seleccionado a todas las admisiones
+        ];
+        $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, [$admisionId]);
+    }
+}
+
+public function assignCarteroToAll()
+{
+    // Asignar el cartero seleccionado a todas las admisiones en assignedAdmisiones
+    foreach ($this->assignedAdmisiones as &$assignment) {
+        $assignment['user_id'] = $this->selectedCarteroForAll;
+    }
+}
+
+public function returnToLeftList($index)
+{
+    // Eliminar la admisión del array de asignadas y devolverla a la lista de la izquierda
+    if (isset($this->assignedAdmisiones[$index])) {
+        unset($this->assignedAdmisiones[$index]);
+        $this->assignedAdmisiones = array_values($this->assignedAdmisiones); // Reindexar el array
+    }
+}
+
+public function saveAssignments()
+{
+    // Guardar las asignaciones y actualizar el estado de cada admisión a 4
+    foreach ($this->assignedAdmisiones as $assignment) {
+        $admision = Admision::find($assignment['id']);
+        if ($admision && $assignment['user_id']) {
+            $admision->user_id = $assignment['user_id'];
+            $admision->estado = 4;
+            $admision->save();
+        }
+    }
+
+    // Limpiar los arrays después de guardar
+    $this->selectedAdmisiones = [];
+    $this->assignedAdmisiones = [];
+
+    session()->flash('message', 'Admisiones asignadas exitosamente.');
+}
+
+public function searchAdmision()
+{
+    // Implementar la misma lógica de filtros en la búsqueda
+    $userCity = Auth::user()->city;
+
+    $this->admisiones = Admision::where(function ($query) use ($userCity) {
+            $query->where(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 3)
+                         ->where('origen', $userCity)
+                         ->where('ciudad', '!=', $userCity);
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 7)
+                         ->where('ciudad', $userCity)
+                         ->where('origen', '!=', $userCity);
+            });
+        })
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%')
         ->orderBy('fecha', 'desc')
         ->paginate($this->perPage);
 }

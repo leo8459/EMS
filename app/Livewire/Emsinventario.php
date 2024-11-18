@@ -28,41 +28,66 @@ class Emsinventario extends Component
     public $selectAll = false;
 
     public function render()
-{
-    // Obtener la ciudad del usuario autenticado
-    $userCity = Auth::user()->city;
-
-    // Filtrar y paginar las admisiones en estado 3
-    $admisiones = Admision::with('user')
-        ->where('origen', $userCity) // Filtrar por ciudad del usuario
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-        ->where('estado', 3) // Estado específico
-        ->orderBy('fecha', 'desc') // Ordenar por fecha
-        ->paginate($this->perPage);
-
-    return view('livewire.emsinventario', [
-        'admisiones' => $admisiones,
-    ]);
-}
-
-public function toggleSelectAll()
-{
-    $this->selectAll = !$this->selectAll;
-
-    if ($this->selectAll) {
-        // Seleccionar todas las admisiones de la página actual que pertenezcan a la ciudad del usuario
-        $this->selectedAdmisiones = Admision::where('origen', Auth::user()->city) // Filtrar por ciudad del usuario
+    {
+        // Obtener la ciudad del usuario autenticado
+        $userCity = Auth::user()->city;
+    
+        // Filtrar y paginar las admisiones
+        $admisiones = Admision::with('user')
+            ->where(function ($query) use ($userCity) {
+                $query->where(function ($subQuery) use ($userCity) {
+                    // Condición para estado 3: Mostrar si el origen coincide y la ciudad NO coincide
+                    $subQuery->where('estado', 3)
+                             ->where('origen', $userCity) // Mostrar si el origen coincide
+                             ->where('ciudad', '!=', $userCity); // Excluir si la ciudad coincide
+                })
+                ->orWhere(function ($subQuery) use ($userCity) {
+                    // Condición para estado 7: Mostrar si la ciudad coincide y el origen NO coincide
+                    $subQuery->where('estado', 7)
+                             ->where('ciudad', $userCity) // Mostrar si la ciudad coincide
+                             ->where('origen', '!=', $userCity); // Excluir si el origen coincide
+                });
+            })
             ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-            ->where('estado', 3) // Estado específico
-            ->orderBy('fecha', 'desc')
-            ->limit($this->perPage)
-            ->pluck('id')
-            ->toArray();
-    } else {
-        // Deseleccionar todas las admisiones
-        $this->selectedAdmisiones = [];
+            ->orderBy('fecha', 'desc') // Ordenar por fecha
+            ->paginate($this->perPage);
+    
+        return view('livewire.emsinventario', [
+            'admisiones' => $admisiones,
+        ]);
     }
-}
+    
+    public function toggleSelectAll()
+    {
+        $this->selectAll = !$this->selectAll;
+    
+        if ($this->selectAll) {
+            // Seleccionar todas las admisiones de la página actual que cumplan las condiciones
+            $this->selectedAdmisiones = Admision::where(function ($query) {
+                    $query->where(function ($subQuery) {
+                        // Condición para estado 3: Mostrar si el origen coincide y la ciudad NO coincide
+                        $subQuery->where('estado', 3)
+                                 ->where('origen', Auth::user()->city) // Mostrar si el origen coincide
+                                 ->where('ciudad', '!=', Auth::user()->city); // Excluir si la ciudad coincide
+                    })
+                    ->orWhere(function ($subQuery) {
+                        // Condición para estado 7: Mostrar si la ciudad coincide y el origen NO coincide
+                        $subQuery->where('estado', 7)
+                                 ->where('ciudad', Auth::user()->city) // Mostrar si la ciudad coincide
+                                 ->where('origen', '!=', Auth::user()->city); // Excluir si el origen coincide
+                    });
+                })
+                ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+                ->orderBy('fecha', 'desc')
+                ->limit($this->perPage)
+                ->pluck('id')
+                ->toArray();
+        } else {
+            // Deseleccionar todas las admisiones
+            $this->selectedAdmisiones = [];
+        }
+    }
+    
 
 public function abrirModal()
 {
