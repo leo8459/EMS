@@ -40,6 +40,7 @@ return new class extends Migration
             $table->string('pais');
             $table->text('firma_entrega');
             $table->string('photo')->nullable();
+            $table->string('contenido');
 
             $table->integer('estado')->default(1);
             $table->timestamps();

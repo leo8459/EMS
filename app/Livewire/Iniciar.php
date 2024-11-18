@@ -19,7 +19,7 @@ class Iniciar extends Component
     public $searchTerm = '';
     public $perPage = 10;
     public $admisionId;
-    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia;
+    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia,$contenido;
 
     protected function rules()
     {
@@ -41,6 +41,8 @@ class Iniciar extends Component
             'direccion' => 'required|string',
             'ciudad' => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
             'pais' => 'required|string',
+            'contenido' => 'nullable|string|max:500', // Regla de validación
+
         ];
     }
     //rescatar datos 
@@ -128,6 +130,8 @@ public function store()
         'ciudad' => $this->ciudad,
         'pais' => $this->pais,
         'estado' => 1,
+        'contenido' => $this->contenido,
+
     ]);
     
     // Preparar los datos para el PDF usando el registro recién creado
@@ -221,6 +225,8 @@ public function edit($id)
                 'provincia' => $this->provincia,
                 'ciudad' => $this->ciudad,
                 'pais' => $this->pais,
+                'contenido' => $this->contenido,
+
             ]);
 
             session()->flash('message', 'Registro actualizado exitosamente el ' . now()->format('d/m/Y H:i'));

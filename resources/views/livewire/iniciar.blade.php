@@ -175,6 +175,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="contenido">Contenido</label>
+                            <textarea class="form-control" id="contenido" wire:model="contenido"></textarea>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
