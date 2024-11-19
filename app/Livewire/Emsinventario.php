@@ -171,7 +171,8 @@ public function generarExcel()
         $worksheet->getColumnDimension('E')->setWidth(25); // CLIENTE
         $worksheet->getColumnDimension('F')->setWidth(20); // ENDAS
         $worksheet->getColumnDimension('G')->setWidth(30); // OBSERVACION
-    
+        $worksheet->getColumnDimension('H')->setWidth(30); // OBSERVACION
+
         // Fila 1: Título
         $worksheet->mergeCells('A1:C2');
         $worksheet->setCellValue('A1', 'Postal designated operator');
@@ -260,9 +261,10 @@ public function generarExcel()
         $worksheet->setCellValue('D11', 'EMS');
         $worksheet->setCellValue('E11', 'CLIENTE');
         $worksheet->setCellValue('F11', 'ENDAS');
-        $worksheet->setCellValue('G11', 'OBSERVACION');
-    
-        $worksheet->getStyle('A11:G11')->applyFromArray($headerStyle);
+        $worksheet->setCellValue('H11', 'OBSERVACION');
+        $worksheet->setCellValue('G11', 'OFICIAL'); // Nueva columna
+
+        $worksheet->getStyle('A11:H11')->applyFromArray($headerStyle);
     
         // Agregar los datos de admisiones seleccionadas
         $currentRow = 12;
@@ -277,8 +279,9 @@ public function generarExcel()
             $worksheet->setCellValue("B$currentRow", 1); // Cantidad fija (1)
             $worksheet->setCellValue("D$currentRow", $peso); // Mostrar el peso (peso_ems o peso)
             $worksheet->setCellValue("E$currentRow", $admision->nombre_remitente);
-            $worksheet->setCellValue("G$currentRow", $admision->observacion);
-            $worksheet->getStyle("A$currentRow:G$currentRow")->applyFromArray($headerStyle);
+            $worksheet->setCellValue("H$currentRow", $admision->observacion);
+            $worksheet->setCellValue("G$currentRow", ''); // Campo vacío para "OFICIAL"
+            $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
     
             // Acumular cantidad y peso
             $totalCantidad += 1;
@@ -292,7 +295,39 @@ public function generarExcel()
         $worksheet->setCellValue("C$currentRow", $totalCantidad); // Total de cantidad
         $worksheet->setCellValue("D$currentRow", $totalPeso); // Total de peso
         $worksheet->getStyle("A$currentRow:G$currentRow")->applyFromArray($headerStyle);
-    
+    // Agregar información adicional al lado izquierdo en el mismo orden que en la imagen
+$currentRow += 2; // Dejar espacio después de la tabla
+// Usuario logueado en lugar de "MIRANDA"
+$loggedInUserCity = Auth::user()->name;
+// Primera línea: Dispatching office of exchange y la ciudad del usuario
+$worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
+$currentRow++;
+$worksheet->setCellValue("A$currentRow", $loggedInUserCity); // Ciudad del usuario logueado (reemplaza "MIRANDA")
+$currentRow++;
+$worksheet->setCellValue("A$currentRow", 'Signature');
+$currentRow++;
+$worksheet->setCellValue("A$currentRow", '______________________'); // Espacio para la firma
+$currentRow++;
+
+// Segunda línea: Salidas internacionales
+$worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
+$currentRow += 2; // Dejar espacio
+
+// Datos a la derecha, colocados al mismo nivel que en la imagen
+$worksheet->setCellValue("D" . ($currentRow - 6), 'The official of the carrier of airport');
+$worksheet->setCellValue("D" . ($currentRow - 5), 'Date and signature');
+$currentRow++;
+
+$worksheet->setCellValue("F" . ($currentRow - 6), 'Office of exchange of destination');
+$worksheet->setCellValue("F" . ($currentRow - 5), 'Date and signature');
+
+// Aplicar estilos para mantener consistencia
+$worksheet->getStyle("A" . ($currentRow - 10) . ":F$currentRow")->applyFromArray([
+    'font' => ['bold' => true],
+    'alignment' => ['vertical' => 'center', 'horizontal' => 'left'],
+]);
+
+
         // Guardar el archivo en el servidor temporalmente y luego enviarlo como descarga
         $fileName = 'designado_operador_postal.xlsx';
         $filePath = storage_path("app/public/$fileName");
