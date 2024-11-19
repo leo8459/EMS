@@ -21,7 +21,11 @@
                                     Nuevo Admision
                                 </button>
                                 <button type="button" class="btn btn-warning mt-2" wire:click="entregarAExpedicion">Entregar a Expedición</button>
-
+                                <button type="button" class="btn btn-primary mt-2" wire:click="abrirModalEntregarHoy">
+                                    Entregar a Expedición Generado Hoy
+                                </button>
+                                
+                                
                             </div>
                         </div>
 
@@ -345,6 +349,31 @@
     
     
 
+    <div wire:ignore.self class="modal fade" id="modalExpedicionHoy" tabindex="-1" role="dialog" aria-labelledby="modalExpedicionHoyLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalExpedicionHoyLabel">Confirmar Entrega a Expedición</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de que desea enviar los siguientes registros a expedición?</p>
+                    <ul>
+                        @foreach ($codigosHoy as $codigo)
+                            <li>{{ $codigo }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="confirmarEntregarHoy">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
 
     <!-- Modal para Editar -->
@@ -712,5 +741,13 @@
             });
         });
     });
+    document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('mostrar-modal-expedicion-hoy', function () {
+            $('#modalExpedicionHoy').modal('show'); // Usa Bootstrap para mostrar el modal
+        });
 
+        window.addEventListener('ocultar-modal-expedicion-hoy', function () {
+            $('#modalExpedicionHoy').modal('hide'); // Usa Bootstrap para ocultar el modal
+        });
+    });
 </script>

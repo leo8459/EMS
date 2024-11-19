@@ -94,28 +94,49 @@ class Emsinventario extends Component
     }
     
 
-public function abrirModal()
-{
-    if (count($this->selectedAdmisiones) > 0) {
-        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
-            ->where('origen', Auth::user()->city) // Validar ciudad del usuario
-            ->get();
-
-        if ($admissions->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas seleccionadas para su regional.');
-            return;
+    public function abrirModal()
+    {
+        if (count($this->selectedAdmisiones) > 0) {
+            $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
+                ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+                ->get();
+    
+            if ($admissions->isEmpty()) {
+                session()->flash('error', 'No hay admisiones válidas seleccionadas para su regional.');
+                return;
+            }
+    
+            // Obtener las ciudades únicas de las admisiones seleccionadas
+            $cities = $admissions->pluck('ciudad')->unique();
+    
+            if ($cities->count() > 1) {
+                // Hay admisiones con ciudades diferentes
+                // Encontrar las admisiones que tienen una ciudad diferente a la primera
+                $firstCity = $cities->first();
+                $differentAdmissions = $admissions->filter(function ($admission) use ($firstCity) {
+                    return $admission->ciudad != $firstCity;
+                });
+    
+                // Obtener los códigos y ciudades de las admisiones diferentes
+                $differentAdmissionsInfo = $differentAdmissions->map(function ($admission) {
+                    return "Código: {$admission->codigo}, Ciudad: {$admission->ciudad}";
+                })->implode('; ');
+    
+                session()->flash('error', 'Hay admisiones que no coinciden en ciudad con las demás: ' . $differentAdmissionsInfo);
+                return;
+            }
+    
+            $this->showModal = true;
+    
+            $this->destinoModal = $admissions->first()->destino ?? null;
+            $this->ciudadModal = $admissions->first()->ciudad ?? null;
+    
+            $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
+        } else {
+            session()->flash('error', 'Debe seleccionar al menos una admisión.');
         }
-
-        $this->showModal = true;
-
-        $this->destinoModal = $admissions->first()->destino ?? null;
-        $this->ciudadModal = $admissions->first()->ciudad ?? null;
-
-        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
-    } else {
-        session()->flash('error', 'Debe seleccionar al menos una admisión.');
     }
-}
+    
 
 
 public function mandarARegional()

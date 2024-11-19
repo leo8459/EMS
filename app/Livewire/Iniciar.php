@@ -20,7 +20,9 @@ class Iniciar extends Component
     public $perPage = 10;
     public $admisionId;
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia,$contenido;
-
+    public $codigosHoy = []; // Almacena los códigos de los registros generados hoy
+    public $showModalExpedicionHoy = false; // Controla la visibilidad del modal
+    
     protected function rules()
     {
         return [
@@ -541,5 +543,49 @@ public function updatedSelectAll($value)
     // Si selectAll está activado, selecciona todos los IDs de la página actual
     $this->selectedAdmisiones = $value ? $this->currentPageIds : [];
 }
+public function entregarAExpedicionHoy()
+{
+    $today = Carbon::today(); // Obtiene la fecha actual sin la hora
+
+    // Actualiza todos los registros creados hoy y que coincidan con el origen del usuario
+    Admision::where('origen', $this->origen)
+        ->whereDate('fecha', $today) // Filtrar solo los registros de hoy
+        ->update(['estado' => 2]); // Cambiar estado a 2 (Expedición)
+
+    // Mostrar un mensaje de éxito
+    session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
+}
+public function abrirModalEntregarHoy()
+{
+    $today = Carbon::today(); // Obtiene la fecha actual sin hora
+    $this->codigosHoy = Admision::where('origen', $this->origen)
+        ->whereDate('fecha', $today)
+        ->pluck('codigo') // Obtiene solo los códigos
+        ->toArray();
+
+    if (count($this->codigosHoy) > 0) {
+        $this->dispatch('mostrar-modal-expedicion-hoy'); // Dispara evento para mostrar el modal
+    } else {
+        session()->flash('error', 'No hay registros generados hoy para enviar a expedición.');
+    }
+}
+
+
+public function confirmarEntregarHoy()
+{
+    $today = Carbon::today();
+
+    // Actualizar estado de los registros generados hoy
+    Admision::where('origen', $this->origen)
+        ->whereDate('fecha', $today)
+        ->update(['estado' => 2]);
+
+    // Disparar evento para ocultar el modal
+    $this->dispatch('ocultar-modal-expedicion-hoy');
+
+    session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
+    $this->codigosHoy = []; // Limpia la lista de códigos
+}
+
 
 }
