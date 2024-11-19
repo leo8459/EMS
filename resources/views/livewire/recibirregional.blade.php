@@ -16,7 +16,9 @@
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" wire:model="selectAll"></th>
+                            <th>
+                                <input type="checkbox" wire:model="selectAll">
+                            </th>                            
                             <th>#</th>
                             <th>Origen</th>
                             <th>Envio</th>
@@ -24,12 +26,15 @@
                             <th>Código</th>
                             <th>Peso (EMS)</th>
                             <th>Observación</th>
+                            <th>Reencaminado</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($admisiones as $admision)
                             <tr>
-                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admision->id }}"></td>
+                                <td>
+                                    <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admision->id }}">
+                                </td>                                
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $admision->origen }}</td>
                                 <td>{{ $admision->destino }}</td>
@@ -37,6 +42,7 @@
                                 <td>{{ $admision->codigo }}</td>
                                 <td>{{ $admision->peso_ems }}</td>
                                 <td>{{ $admision->observacion }}</td>
+                                <td>{{ $admision->reencaminamiento }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -78,7 +84,7 @@
                             <div class="form-group">
                                 <label for="pesoEms-{{ $index }}">Peso EMS (opcional)</label>
                                 <input type="number" step="0.01" class="form-control" id="pesoEms-{{ $index }}" 
-                                       wire:model="selectedAdmisionesData.{{ $index }}.peso_ems">
+                                       wire:model="selectedAdmisionesData.{{ $index }}.peso_ems"disabled>
                             </div>
                             <div class="form-group">
                                 <label for="pesoRegional-{{ $index }}">Peso Regional (opcional)</label>

@@ -37,6 +37,7 @@ class Admision extends Model
         'recepcionado',
         'estado',
         'contenido',
+        'reencaminamiento',
 
 
     ];

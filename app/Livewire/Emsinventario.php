@@ -26,6 +26,10 @@ class Emsinventario extends Component
     public $ciudadModal;
     public $selectedAdmisionesCodes = [];
     public $selectAll = false;
+    public $showReencaminamientoModal = false;
+    public $selectedDepartment = null; // Almacena el departamento seleccionado en el modal
+
+    
 
     public function render()
     {
@@ -51,7 +55,8 @@ class Emsinventario extends Component
             ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
             ->orderBy('fecha', 'desc') // Ordenar por fecha
             ->paginate($this->perPage);
-    
+            $this->currentPageIds = $admisiones->pluck('id')->toArray();
+
         return view('livewire.emsinventario', [
             'admisiones' => $admisiones,
         ]);
@@ -297,6 +302,38 @@ public function generarExcel()
     
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
-    
+    public function abrirReencaminamientoModal()
+{
+    if (count($this->selectedAdmisiones) > 0) {
+        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        if ($admissions->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas seleccionadas.');
+            return;
+        }
+        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
+        $this->showReencaminamientoModal = true;
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
+    }
+}
+
+public function reencaminar()
+{
+    if ($this->selectedDepartment) {
+        Admision::whereIn('id', $this->selectedAdmisiones)
+            ->update([
+                'reencaminamiento' => $this->selectedDepartment,
+                'estado' => 8
+            ]);
+        
+        $this->selectedAdmisiones = [];
+        $this->showReencaminamientoModal = false;
+        $this->selectedDepartment = null;
+        
+        session()->flash('message', 'Las admisiones seleccionadas han sido reencaminadas.');
+    } else {
+        session()->flash('error', 'Debe seleccionar un departamento.');
+    }
+}
     
 }

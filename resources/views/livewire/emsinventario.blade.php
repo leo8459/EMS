@@ -37,6 +37,8 @@
                                         </a>
                                     </div>
                                 </div>
+                                <button class="btn btn-info mt-3" wire:click="abrirReencaminamientoModal">Reencaminamiento</button>
+
                             </div>
                         </div>
                         @if (session()->has('message'))
@@ -53,7 +55,7 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" wire:click="toggleSelectAll" /></th>
+                                        <th><input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" /></th>
                                         <th>#</th>
                                         <th>Origen</th>
                                         <th>Servicio</th>
@@ -126,7 +128,45 @@
                             </div>
                         </div>
                     @endif
-                    
+                    @if ($showReencaminamientoModal)
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Encabezado -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Reencaminamiento</h5>
+                    <button type="button" class="close" wire:click="$set('showReencaminamientoModal', false)">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <!-- Cuerpo -->
+                <div class="modal-body">
+                    <p>Seleccione el departamento al que desea reencaminar las admisiones seleccionadas:</p>
+                    <div class="form-group">
+                        <label for="selectedDepartment">Departamento:</label>
+                        <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
+                            <option value="">Seleccione un departamento</option>
+                            <option value="LA PAZ">LA PAZ</option>
+                            <option value="ORURO">ORURO</option>
+                            <option value="BENI">BENI</option>
+                        </select>
+                    </div>
+                    <!-- Mostrar los códigos de las admisiones seleccionadas -->
+                    <ul>
+                        @foreach ($selectedAdmisionesCodes as $codigo)
+                            <li>Código: {{ $codigo }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <!-- Pie -->
+                <div class="modal-footer">
+                    <button class="btn btn-primary" wire:click="reencaminar">Confirmar</button>
+                    <button class="btn btn-secondary" wire:click="$set('showReencaminamientoModal', false)">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
                                             
                         <div class="card-footer">
                             {{ $admisiones->links() }}
