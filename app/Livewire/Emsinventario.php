@@ -12,6 +12,9 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+
+
 
 class Emsinventario extends Component
 {
@@ -179,29 +182,53 @@ public function toggleSelectAll()
     
 
 
-public function mandarARegional()
-{
-    Admision::whereIn('id', $this->selectedAdmisiones)
-        ->where('origen', Auth::user()->city) // Validar ciudad del usuario
-        ->update(['estado' => 6]); // Cambiar estado a enviado a regional
-
-    $this->selectedAdmisiones = [];
-    $this->showModal = false;
-
-    session()->flash('message', 'Las admisiones seleccionadas se han enviado a la regional.');
-}
-
-
-public function generarExcel()
-{
-    $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
-        ->where('origen', Auth::user()->city) // Validar ciudad del usuario
-        ->get();
-
-    if ($admissions->isEmpty()) {
-        session()->flash('error', 'No hay admisiones válidas seleccionadas para generar el Excel.');
-        return;
+    public function mandarARegional()
+    {
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
+            ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+            ->get();
+    
+        foreach ($admisiones as $admision) {
+            // Cambiar estado a enviado a regional
+            $admision->estado = 6;
+            $admision->save();
+    
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Mandar a regional',
+                'descripcion' => 'La admisión fue enviada a la regional.',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
+    
+        $this->selectedAdmisiones = [];
+        $this->showModal = false;
+    
+        session()->flash('message', 'Las admisiones seleccionadas se han enviado a la regional.');
     }
+    
+
+    public function generarExcel()
+    {
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
+            ->where('origen', Auth::user()->city) // Validar ciudad del usuario
+            ->get();
+    
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas seleccionadas para generar el Excel.');
+            return;
+        }
+    
+        // Registrar eventos por cada admisión
+        foreach ($admisiones as $admision) {
+            Eventos::create([
+                'accion' => 'Generar Excel',
+                'descripcion' => 'La admisión fue incluida en un archivo Excel.',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
         // Crear el documento
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
@@ -418,20 +445,33 @@ $worksheet->getStyle("A" . ($currentRow - 10) . ":F$currentRow")->applyFromArray
 public function reencaminar()
 {
     if ($this->selectedDepartment) {
-        Admision::whereIn('id', $this->selectedAdmisiones)
-            ->update([
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+
+        foreach ($admisiones as $admision) {
+            // Actualizar el reencaminamiento y el estado de la admisión
+            $admision->update([
                 'reencaminamiento' => $this->selectedDepartment,
-                'estado' => 8
+                'estado' => 8,
             ]);
-        
+
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Reencaminamiento',
+                'descripcion' => "La admisión fue reencaminada al departamento: {$this->selectedDepartment}.",
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
+
         $this->selectedAdmisiones = [];
         $this->showReencaminamientoModal = false;
         $this->selectedDepartment = null;
-        
+
         session()->flash('message', 'Las admisiones seleccionadas han sido reencaminadas.');
     } else {
         session()->flash('error', 'Debe seleccionar un departamento.');
     }
 }
+
     
 }

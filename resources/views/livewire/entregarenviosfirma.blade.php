@@ -78,25 +78,22 @@
                                     <div class="position-relative">
                                         <!-- Canvas para la firma -->
                                         <div class="text-center">
-                                            <canvas id="canvas" class="border border-secondary rounded bg-white" width="600"
-                                                height="250"></canvas>
+                                            <canvas id="canvas" class="border border-secondary rounded bg-white" width="600" height="250"></canvas>
                                         </div>
                                     </div>
-
-                                    <!-- Campo de texto para mostrar Base64 -->
-                                    <div class="form-group mt-3">
-                                        <label for="base64Text">Contenido en Base64 de la firma:</label>
-                                        <textarea id="base64Text" class="form-control" rows="5" readonly></textarea>
+                                
+                                    <!-- Mensaje dinámico de éxito -->
+                                    <div id="successMessage" class="alert alert-success text-center mt-3 d-none">
+                                        <i class="fas fa-check-circle"></i> Firma guardada exitosamente.
                                     </div>
-
+                                
                                     <!-- Botones -->
                                     <div class="mb-3 text-center">
-                                        <button type="button" id="guardar" class="btn btn-primary me-2"><i class="fas fa-save"></i>
-                                            Guardar</button>
-                                        <button type="button" id="limpiar" class="btn btn-secondary"><i class="fas fa-trash"></i>
-                                            Limpiar</button>
+                                        <button type="button" id="guardar" class="btn btn-primary me-2"><i class="fas fa-save"></i> Guardar Firma</button>
+                                        <button type="button" id="limpiar" class="btn btn-secondary"><i class="fas fa-trash"></i> Limpiar</button>
                                     </div>
                                 </div>
+                                
                                 <div class="row mt-3">
                                     <div class="col-12 text-right">
                                         <button type="submit" id="submitButton" class="btn btn-primary">Guardar</button>
@@ -116,34 +113,42 @@
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const canvas = document.getElementById('canvas');
-        const signaturePad = new SignaturePad(canvas);
-        const saveButton = document.getElementById('guardar');
-        const clearButton = document.getElementById('limpiar');
-        const inputBase64 = document.getElementById('inputbase64');
+   document.addEventListener('DOMContentLoaded', function () {
+    const canvas = document.getElementById('canvas');
+    const signaturePad = new SignaturePad(canvas);
+    const saveButton = document.getElementById('guardar');
+    const clearButton = document.getElementById('limpiar');
+    const inputBase64 = document.getElementById('inputbase64');
+    const successMessage = document.getElementById('successMessage');
 
-        // Limpiar la firma
-        clearButton.addEventListener('click', function () {
-            signaturePad.clear();
-            inputBase64.value = ""; // Limpiar el campo de firma
-            inputBase64.dispatchEvent(new Event('input')); // Sincronizar con Livewire
-        });
-
-        // Guardar la firma en Base64
-        saveButton.addEventListener('click', function () {
-            if (signaturePad.isEmpty()) {
-                alert('Por favor, haga una firma antes de guardar.');
-                return;
-            }
-
-            // Convertir la firma a Base64 y asignarla al input
-            const base64Signature = signaturePad.toDataURL();
-            inputBase64.value = base64Signature;
-
-            // Forzar la sincronización del valor con Livewire
-            inputBase64.dispatchEvent(new Event('input')); // <- Esto asegura que Livewire lo detecte
-        });
+    // Limpiar la firma
+    clearButton.addEventListener('click', function () {
+        signaturePad.clear();
+        inputBase64.value = ""; // Limpiar el campo de firma
+        inputBase64.dispatchEvent(new Event('input')); // Sincronizar con Livewire
     });
+
+    // Guardar la firma en Base64
+    saveButton.addEventListener('click', function () {
+        if (signaturePad.isEmpty()) {
+            alert('Por favor, haga una firma antes de guardar.');
+            return;
+        }
+
+        // Convertir la firma a Base64 y asignarla al input
+        const base64Signature = signaturePad.toDataURL();
+        inputBase64.value = base64Signature;
+
+        // Forzar la sincronización del valor con Livewire
+        inputBase64.dispatchEvent(new Event('input')); // <- Esto asegura que Livewire lo detecte
+
+        // Mostrar mensaje de éxito y ocultarlo después de 3 segundos
+        successMessage.classList.remove('d-none');
+        setTimeout(() => {
+            successMessage.classList.add('d-none');
+        }, 3000);
+    });
+});
+
 </script>
 

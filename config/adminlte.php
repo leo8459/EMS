@@ -421,20 +421,8 @@ return [
         ],
         [
             'text' => 'Eventos',
-            'icon' => 'fas fa-users',
-            // 'can'  => 'users.index',
-            'submenu' => [
-                [
-                    'text' => 'Eventos',
-                    'url' => 'eventosregistro',
-                    'icon' => 'fas fa-user',
-                ],
-                // [
-                //     'text' => 'Inventario Admision',
-                //     'url' => 'inventario',
-                //     'icon' => 'fas fa-user',
-                // ],
-            ],
+            'url' => 'eventosregistro',
+            'icon' => 'fas fa-user',
         ],
         [
             'text' => 'Rendimiento',

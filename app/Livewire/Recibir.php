@@ -8,6 +8,9 @@ use App\Models\Admision;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+
+
 
 class Recibir extends Component
 {
@@ -45,7 +48,7 @@ class Recibir extends Component
     public function recibirAdmision()
     {
         if (!empty($this->selectedAdmisiones)) {
-            // Cargar las admisiones seleccionadas en admissionData
+            // Cargar las admisiones seleccionadas
             $admissions = Admision::whereIn('id', $this->selectedAdmisiones)->get();
     
             foreach ($admissions as $admission) {
@@ -54,15 +57,25 @@ class Recibir extends Component
                     'observacion' => $admission->observacion ?? '',
                     'codigo' => $admission->codigo,
                 ];
+    
+                // Registrar evento por cada admisión recibida
+                Eventos::create([
+                    'accion' => 'Recibir',
+                    'descripcion' => 'La admisión fue recibida.',
+                    'codigo' => $admission->codigo,
+                    'user_id' => Auth::id(),
+                ]);
             }
     
             // Mostrar el modal
             $this->showModal = true;
     
+            session()->flash('message', 'Las admisiones seleccionadas fueron recibidas exitosamente.');
         } else {
             session()->flash('error', 'Seleccione al menos una admisión.');
         }
     }
+    
     public function saveAdmissionData()
     {
         // Validar los datos

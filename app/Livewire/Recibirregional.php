@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 
 class Recibirregional extends Component
 {
@@ -81,26 +82,36 @@ public function openModal()
     }
 
     public function recibirEnvios()
-    {
-        foreach ($this->selectedAdmisionesData as $data) {
-            $admision = Admision::find($data['id']);
-            if ($admision) {
-                $admision->update([
-                    'peso_ems' => $data['peso_ems'] ?? null,
-                    'peso_regional' => $data['peso_regional'] ?? null,
-                    'observacion' => $data['observacion'] ?? null,
-                    'estado' => 7, // Cambiar a estado recibido
-                ]);
-            }
+{
+    foreach ($this->selectedAdmisionesData as $data) {
+        $admision = Admision::find($data['id']);
+        if ($admision) {
+            // Actualizar la admisión con los datos proporcionados
+            $admision->update([
+                'peso_ems' => $data['peso_ems'] ?? null,
+                'peso_regional' => $data['peso_regional'] ?? null,
+                'observacion' => $data['observacion'] ?? null,
+                'estado' => 7, // Cambiar a estado recibido
+            ]);
+
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Recibir Regional',
+                'descripcion' => 'Recepción de admisión desde la regional.',
+                'codigo' => $admision->codigo,
+                'user_id' => auth()->id(),
+            ]);
         }
-
-        // Reiniciar datos y cerrar modal
-        $this->reset(['selectedAdmisiones', 'selectedAdmisionesData']);
-        $this->closeModal();
-
-        // Mensaje de confirmación
-        session()->flash('message', 'Los envíos seleccionados fueron recibidos correctamente.');
     }
+
+    // Reiniciar datos y cerrar modal
+    $this->reset(['selectedAdmisiones', 'selectedAdmisionesData']);
+    $this->closeModal();
+
+    // Mensaje de confirmación
+    session()->flash('message', 'Los envíos seleccionados fueron recibidos correctamente.');
+}
+
     public function updatedSelectAll($value)
     {
         if ($value) {

@@ -6,6 +6,10 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Livewire\WithFileUploads;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+
+
+
 
 class Entregarenviosfirma extends Component
 {
@@ -33,8 +37,6 @@ class Entregarenviosfirma extends Component
      */
     public function guardarAdmision()
     {
-       
-    
         // Validar datos
         $this->validate([
             'photo' => 'nullable|image|max:10240',
@@ -59,12 +61,21 @@ class Entregarenviosfirma extends Component
         ]);
     
         if ($resultado) {
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Entregar Envío',
+                'descripcion' => 'La admisión fue entregada correctamente.',
+                'codigo' => $this->admision->codigo,
+                'user_id' => auth()->id(),
+            ]);
+    
             session()->flash('message', 'Admisión entregada correctamente.');
             return redirect()->route('regresar');
         } else {
             session()->flash('message', 'Error al guardar la admisión.');
         }
     }
+    
     
     
 

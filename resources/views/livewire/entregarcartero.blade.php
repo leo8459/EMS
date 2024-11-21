@@ -44,85 +44,87 @@
                             </div>
                         @endif
                         <div class="card-body">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" wire:model="selectAll" /></th>
-                                        <th>#</th>
-                                        <th>Origen</th>
-                                        <th>Servicio</th>
-                                        <th>Tipo Correspondencia</th>
-                                        <th class="d-none d-lg-table-cell">Cantidad</th>
-                                        <th>Peso</th>
-                                        <th>Precio (Bs)</th>
-                                        <th>Destino</th>
-                                        <th>Código</th>
-                                        <th class="d-none d-lg-table-cell">Dirección</th>
-                                        <th class="d-none d-lg-table-cell">Provincia</th>
-                                        <th class="d-none d-lg-table-cell">Ciudad</th>
-                                        <th class="d-none d-lg-table-cell">País</th>
-                                        <th>Entregado</th>
-                                        <th>Observacion</th>
-                                        <th>Cartero</th>
-                                        <th>Foto</th>
-                                        <th>Firma</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($admisiones as $admisione)
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
                                         <tr>
-                                            <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" /></td>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $admisione->origen }}</td>
-                                            <td>{{ $admisione->servicio }}</td>
-                                            <td>{{ $admisione->tipo_correspondencia }}</td>
-                                            <td>{{ $admisione->cantidad }}</td>
-                                            <td>{{ $admisione->peso_ems }}</td>
-                                            <td>{{ $admisione->precio }}</td>
-                                            <td>{{ $admisione->destino }}</td>
-                                            <td>{{ $admisione->codigo }}</td>
-                                            <td>{{ $admisione->direccion }}</td>
-                                            <td>{{ $admisione->provincia }}</td>
-                                            <td>{{ $admisione->ciudad }}</td>
-                                            <td>{{ $admisione->pais }}</td>
-                                            <td>{{ $admisione->updated_at }}</td>
-                                            <td>{{ $admisione->observacion }}</td>
-                                            <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
-                                            <td>
-                                                @php
-                                                    $extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                                                    $photoPath = null;
-                                                    foreach ($extensions as $ext) {
-                                                        $path = 'fotos/' . $admisione->codigo . '.' . $ext;
-                                                        if (file_exists(public_path($path))) {
-                                                            $photoPath = $path;
-                                                            break;
-                                                        }
-                                                    }
-                                                @endphp
-
-                                                @if ($photoPath)
-                                                    <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                        <img src="{{ asset($photoPath) }}" alt="Foto de admisión" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;" class="mb-2">
-                                                    </div>
-                                                    <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
-                                                @else
-                                                    <span>Sin foto</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($admisione->firma_entrega)
-                                                    <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                        <img src="{{ $admisione->firma_entrega }}" alt="Firma de entrega" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;" class="mb-2">
-                                                    </div>
-                                                @else
-                                                    <span>Sin firma</span>
-                                                @endif
-                                            </td>
+                                            <th><input type="checkbox" wire:model="selectAll" /></th>
+                                            <th>#</th>
+                                            <th>Origen</th>
+                                            <th>Servicio</th>
+                                            <th>Tipo Correspondencia</th>
+                                            <th class="d-none d-lg-table-cell">Cantidad</th>
+                                            <th>Peso</th>
+                                            <th>Precio (Bs)</th>
+                                            <th>Destino</th>
+                                            <th>Código</th>
+                                            <th class="d-none d-lg-table-cell">Dirección</th>
+                                            <th class="d-none d-lg-table-cell">Provincia</th>
+                                            <th class="d-none d-lg-table-cell">Ciudad</th>
+                                            <th class="d-none d-lg-table-cell">País</th>
+                                            <th>Entregado</th>
+                                            <th>Observacion</th>
+                                            <th>Cartero</th>
+                                            <th>Foto</th>
+                                            <th>Firma</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($admisiones as $admisione)
+                                            <tr>
+                                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" /></td>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $admisione->origen }}</td>
+                                                <td>{{ $admisione->servicio }}</td>
+                                                <td>{{ $admisione->tipo_correspondencia }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admisione->cantidad }}</td>
+                                                <td>{{ $admisione->peso_ems }}</td>
+                                                <td>{{ $admisione->precio }}</td>
+                                                <td>{{ $admisione->destino }}</td>
+                                                <td>{{ $admisione->codigo }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admisione->direccion }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admisione->provincia }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admisione->ciudad }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admisione->pais }}</td>
+                                                <td>{{ $admisione->updated_at }}</td>
+                                                <td>{{ $admisione->observacion }}</td>
+                                                <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
+                                                <td>
+                                                    @php
+                                                        $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                        $photoPath = null;
+                                                        foreach ($extensions as $ext) {
+                                                            $path = 'fotos/' . $admisione->codigo . '.' . $ext;
+                                                            if (file_exists(public_path($path))) {
+                                                                $photoPath = $path;
+                                                                break;
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @if ($photoPath)
+                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                            <img src="{{ asset($photoPath) }}" alt="Foto de admisión" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;" class="mb-2">
+                                                        </div>
+                                                        <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
+                                                    @else
+                                                        <span>Sin foto</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($admisione->firma_entrega)
+                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                            <img src="{{ $admisione->firma_entrega }}" alt="Firma de entrega" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;" class="mb-2">
+                                                        </div>
+                                                    @else
+                                                        <span>Sin firma</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="card-footer">
                             {{ $admisiones->links() }}

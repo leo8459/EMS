@@ -9,6 +9,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+
+
+
 
 class Asignarcartero extends Component
 {
@@ -103,6 +107,14 @@ public function saveAssignments()
             $admision->user_id = $assignment['user_id'];
             $admision->estado = 4;
             $admision->save();
+
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Asignar Cartero',
+                'descripcion' => "La admisión fue asignada al cartero con ID: {$assignment['user_id']}.",
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
         }
     }
 
@@ -112,6 +124,7 @@ public function saveAssignments()
 
     session()->flash('message', 'Admisiones asignadas exitosamente.');
 }
+
 
 public function searchAdmision()
 {
