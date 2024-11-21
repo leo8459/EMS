@@ -8,6 +8,7 @@ use App\Models\Admision;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 
 class Iniciar extends Component
 {
@@ -161,7 +162,14 @@ public function store()
         'ciudad' => $admision->ciudad,
         'pais' => $admision->pais,
     ];
-
+ // Crear un registro en la tabla 'eventos'
+ Eventos::create([
+    'accion' => 'Recibir',
+    'descripcion' => 'Creación de admisión',
+    'codigo' => $admision->codigo,
+    'user_id' => Auth::id(),
+    'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
+]);
     // Renderizar la vista y generar el PDF
     $pdf = Pdf::loadView('pdfs.admision', $data);
     
@@ -242,7 +250,7 @@ public function edit($id)
     }
 
 
-
+   
 
 
     public function delete($id)
