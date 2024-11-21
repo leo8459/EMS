@@ -20,10 +20,10 @@ class Iniciar extends Component
     public $searchTerm = '';
     public $perPage = 10;
     public $admisionId;
-    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia,$contenido;
+    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
     public $codigosHoy = []; // Almacena los códigos de los registros generados hoy
     public $showModalExpedicionHoy = false; // Controla la visibilidad del modal
-    
+
     protected function rules()
     {
         return [
@@ -55,209 +55,237 @@ class Iniciar extends Component
         $this->ciudad = "LA PAZ"; // Cambia este valor si quieres que otra ciudad sea la predeterminada
         $this->cantidad = 1; // Establece cantidad en 1
     }
-//mostrar
-public function render()
-{
-    // Filtrar y paginar los registros
-    $admisiones = Admision::where('origen', $this->origen) // Filtrar por origen
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por término de búsqueda
-        ->where('estado', 1) // Solo estado activo
-        ->orderBy('fecha', 'desc')
-        ->paginate($this->perPage);
+    //mostrar
+    public function render()
+    {
+        // Filtrar y paginar los registros
+        $admisiones = Admision::where('origen', $this->origen) // Filtrar por origen
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por término de búsqueda
+            ->where('estado', 1) // Solo estado activo
+            ->orderBy('fecha', 'desc')
+            ->paginate($this->perPage);
 
-    // Almacena los IDs de la página actual
-    $this->currentPageIds = $admisiones->pluck('id')->toArray();
+        // Almacena los IDs de la página actual
+        $this->currentPageIds = $admisiones->pluck('id')->toArray();
 
-    return view('livewire.iniciar', [
-        'admisiones' => $admisiones,
-    ]);
-}
+        return view('livewire.iniciar', [
+            'admisiones' => $admisiones,
+        ]);
+    }
 
-    
-    
+
+
     protected $listeners = ['resetFields' => 'resetInputFields'];
 
     public function resetInputFields()
-{
-    $this->origen = '';
-    $this->fecha = '';
-    $this->servicio = '';
-    $this->tipo_correspondencia = '';
-    $this->cantidad = 1; // Restablece cantidad a 1
-    $this->peso = '';
-    $this->destino = '';
-    $this->codigo = '';
-    $this->precio = '';
-    $this->numero_factura = '';
-    $this->nombre_remitente = '';
-    $this->nombre_envia = '';
-    $this->carnet = '';
-    $this->telefono_remitente = '';
-    $this->nombre_destinatario = '';
-    $this->telefono_destinatario = '';
-    $this->direccion = '';
-    $this->ciudad = '';
-    $this->provincia = '';
-    $this->pais = '';
-}
-
-public function store()
-{
-    
-    // Validar los datos
-    $this->validate();
-    
-    // Establecer la fecha actual
-    $this->fecha = now();
-    
-    // Calcular el precio basado en el peso y el destino
-    $this->updatePrice();
-    
-    // Crear el registro en la base de datos
-    $admision = Admision::create([
-        'origen' => $this->origen,
-        'fecha' => $this->fecha,
-        'servicio' => $this->servicio,
-        'tipo_correspondencia' => $this->tipo_correspondencia,
-        'cantidad' => $this->cantidad,
-        'peso' => $this->peso,
-        'destino' => $this->destino,
-        'codigo' => $this->codigo,
-        'precio' => $this->precio,
-        'numero_factura' => $this->numero_factura,
-        'nombre_remitente' => $this->nombre_remitente,
-        'nombre_envia' => $this->nombre_envia,
-        'carnet' => $this->carnet,
-        'telefono_remitente' => $this->telefono_remitente,
-        'nombre_destinatario' => $this->nombre_destinatario,
-        'telefono_destinatario' => $this->telefono_destinatario,
-        'direccion' => $this->direccion,
-        'provincia' => $this->provincia,
-        'ciudad' => $this->ciudad,
-        'pais' => $this->pais,
-        'contenido' => $this->contenido,
-        'estado' => 1,
-        'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
-    ]);
-
-    // Preparar los datos para el PDF usando el registro recién creado
-    $data = [
-        'origen' => $admision->origen,
-        'fecha' => $admision->fecha,
-        'servicio' => $admision->servicio,
-        'tipo_correspondencia' => $admision->tipo_correspondencia,
-        'cantidad' => $admision->cantidad,
-        'peso' => $admision->peso,
-        'destino' => $admision->destino,
-        'codigo' => $admision->codigo,
-        'precio' => $admision->precio,
-        'numero_factura' => $admision->numero_factura,
-        'nombre_remitente' => $admision->nombre_remitente,
-        'nombre_envia' => $admision->nombre_envia,
-        'carnet' => $admision->carnet,
-        'telefono_remitente' => $admision->telefono_remitente,
-        'nombre_destinatario' => $admision->nombre_destinatario,
-        'telefono_destinatario' => $admision->telefono_destinatario,
-        'direccion' => $admision->direccion,
-        'ciudad' => $admision->ciudad,
-        'pais' => $admision->pais,
-    ];
- // Crear un registro en la tabla 'eventos'
- Eventos::create([
-    'accion' => 'Recibir',
-    'descripcion' => 'Creación de admisión',
-    'codigo' => $admision->codigo,
-    'user_id' => Auth::id(),
-    'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
-]);
-    // Renderizar la vista y generar el PDF
-    $pdf = Pdf::loadView('pdfs.admision', $data);
-    
-    // Enviar evento al navegador para recargar la página después de descargar el PDF
-    $this->dispatch('pdf-downloaded');
-
-    // Descargar el PDF automáticamente
-    return response()->streamDownload(
-        fn () => print($pdf->stream('admision.pdf')),
-        'admision.pdf'
-    );
-}
-
-    
-public function edit($id)
     {
-        $admision = Admision::findOrFail($id);
-        $this->admisionId = $admision->id;
-
-        $this->origen = $admision->origen;
-        $this->servicio = $admision->servicio;
-        $this->tipo_correspondencia = $admision->tipo_correspondencia;
-        $this->cantidad = $admision->cantidad;
-        $this->peso = $admision->peso;
-        $this->destino = $admision->destino;
-        $this->codigo = $admision->codigo;
-        $this->precio = $admision->precio;
-        $this->numero_factura = $admision->numero_factura;
-        $this->nombre_remitente = $admision->nombre_remitente;
-        $this->nombre_envia = $admision->nombre_envia;
-        $this->carnet = $admision->carnet;
-        $this->telefono_remitente = $admision->telefono_remitente;
-        $this->nombre_destinatario = $admision->nombre_destinatario;
-        $this->telefono_destinatario = $admision->telefono_destinatario;
-        $this->direccion = $admision->direccion;
-        $this->provincia = $admision->provincia;
-        $this->ciudad = $admision->ciudad;
-        $this->pais = $admision->pais;
-
-        $this->dispatch('open-edit-modal');
+        $this->origen = '';
+        $this->fecha = '';
+        $this->servicio = '';
+        $this->tipo_correspondencia = '';
+        $this->cantidad = 1; // Restablece cantidad a 1
+        $this->peso = '';
+        $this->destino = '';
+        $this->codigo = '';
+        $this->precio = '';
+        $this->numero_factura = '';
+        $this->nombre_remitente = '';
+        $this->nombre_envia = '';
+        $this->carnet = '';
+        $this->telefono_remitente = '';
+        $this->nombre_destinatario = '';
+        $this->telefono_destinatario = '';
+        $this->direccion = '';
+        $this->ciudad = '';
+        $this->provincia = '';
+        $this->pais = '';
     }
 
-
-    public function update()
+    public function store()
     {
+
+        // Validar los datos
         $this->validate();
 
-        if ($this->admisionId) {
-            $admision = Admision::findOrFail($this->admisionId);
-            $admision->update([
-                'origen' => $this->origen,
-                'servicio' => $this->servicio,
-                'tipo_correspondencia' => $this->tipo_correspondencia,
-                'cantidad' => $this->cantidad,
-                'peso' => $this->peso,
-                'destino' => $this->destino,
-                'codigo' => $this->codigo,
-                'precio' => $this->precio,
-                'numero_factura' => $this->numero_factura,
-                'nombre_remitente' => $this->nombre_remitente,
-                'nombre_envia' => $this->nombre_envia,
-                'carnet' => $this->carnet,
-                'telefono_remitente' => $this->telefono_remitente,
-                'nombre_destinatario' => $this->nombre_destinatario,
-                'telefono_destinatario' => $this->telefono_destinatario,
-                'direccion' => $this->direccion,
-                'provincia' => $this->provincia,
-                'ciudad' => $this->ciudad,
-                'pais' => $this->pais,
-                'contenido' => $this->contenido,
+        // Establecer la fecha actual
+        $this->fecha = now();
 
-            ]);
+        // Calcular el precio basado en el peso y el destino
+        $this->updatePrice();
 
-            session()->flash('message', 'Registro actualizado exitosamente el ' . now()->format('d/m/Y H:i'));
-            $this->resetInputFields();
-            $this->dispatch('close-edit-modal');
-        }
+        // Crear el registro en la base de datos
+        $admision = Admision::create([
+            'origen' => $this->origen,
+            'fecha' => $this->fecha,
+            'servicio' => $this->servicio,
+            'tipo_correspondencia' => $this->tipo_correspondencia,
+            'cantidad' => $this->cantidad,
+            'peso' => $this->peso,
+            'destino' => $this->destino,
+            'codigo' => $this->codigo,
+            'precio' => $this->precio,
+            'numero_factura' => $this->numero_factura,
+            'nombre_remitente' => $this->nombre_remitente,
+            'nombre_envia' => $this->nombre_envia,
+            'carnet' => $this->carnet,
+            'telefono_remitente' => $this->telefono_remitente,
+            'nombre_destinatario' => $this->nombre_destinatario,
+            'telefono_destinatario' => $this->telefono_destinatario,
+            'direccion' => $this->direccion,
+            'provincia' => $this->provincia,
+            'ciudad' => $this->ciudad,
+            'pais' => $this->pais,
+            'contenido' => $this->contenido,
+            'estado' => 1,
+            'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
+        ]);
+
+        // Preparar los datos para el PDF usando el registro recién creado
+        $data = [
+            'origen' => $admision->origen,
+            'fecha' => $admision->fecha,
+            'servicio' => $admision->servicio,
+            'tipo_correspondencia' => $admision->tipo_correspondencia,
+            'cantidad' => $admision->cantidad,
+            'peso' => $admision->peso,
+            'destino' => $admision->destino,
+            'codigo' => $admision->codigo,
+            'precio' => $admision->precio,
+            'numero_factura' => $admision->numero_factura,
+            'nombre_remitente' => $admision->nombre_remitente,
+            'nombre_envia' => $admision->nombre_envia,
+            'carnet' => $admision->carnet,
+            'telefono_remitente' => $admision->telefono_remitente,
+            'nombre_destinatario' => $admision->nombre_destinatario,
+            'telefono_destinatario' => $admision->telefono_destinatario,
+            'direccion' => $admision->direccion,
+            'ciudad' => $admision->ciudad,
+            'pais' => $admision->pais,
+        ];
+        // Crear un registro en la tabla 'eventos'
+        Eventos::create([
+            'accion' => 'Recibir',
+            'descripcion' => 'Creación de admisión',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+            'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
+        ]);
+        // Renderizar la vista y generar el PDF
+        $pdf = Pdf::loadView('pdfs.admision', $data);
+
+        // Enviar evento al navegador para recargar la página después de descargar el PDF
+        $this->dispatch('pdf-downloaded');
+
+        // Descargar el PDF automáticamente
+        return response()->streamDownload(
+            fn() => print($pdf->stream('admision.pdf')),
+            'admision.pdf'
+        );
     }
 
 
-   
+    public function edit($id)
+{
+    $admision = Admision::findOrFail($id);
+    $this->admisionId = $admision->id;
+
+    // Llenar las propiedades con los datos de la admisión
+    $this->origen = $admision->origen;
+    $this->servicio = $admision->servicio;
+    $this->tipo_correspondencia = $admision->tipo_correspondencia;
+    $this->cantidad = $admision->cantidad;
+    $this->peso = $admision->peso;
+    $this->destino = $admision->destino;
+    $this->codigo = $admision->codigo;
+    $this->precio = $admision->precio;
+    $this->numero_factura = $admision->numero_factura;
+    $this->nombre_remitente = $admision->nombre_remitente;
+    $this->nombre_envia = $admision->nombre_envia;
+    $this->carnet = $admision->carnet;
+    $this->telefono_remitente = $admision->telefono_remitente;
+    $this->nombre_destinatario = $admision->nombre_destinatario;
+    $this->telefono_destinatario = $admision->telefono_destinatario;
+    $this->direccion = $admision->direccion;
+    $this->provincia = $admision->provincia;
+    $this->ciudad = $admision->ciudad;
+    $this->pais = $admision->pais;
+
+    // Abrir el modal de edición
+    $this->dispatch('open-edit-modal');
+}
+
+
+
+public function update()
+{
+    $this->validate();
+
+    if ($this->admisionId) {
+        $admision = Admision::findOrFail($this->admisionId);
+
+        // Actualizar la admisión
+        $admision->update([
+            'origen' => $this->origen,
+            'servicio' => $this->servicio,
+            'tipo_correspondencia' => $this->tipo_correspondencia,
+            'cantidad' => $this->cantidad,
+            'peso' => $this->peso,
+            'destino' => $this->destino,
+            'codigo' => $this->codigo,
+            'precio' => $this->precio,
+            'numero_factura' => $this->numero_factura,
+            'nombre_remitente' => $this->nombre_remitente,
+            'nombre_envia' => $this->nombre_envia,
+            'carnet' => $this->carnet,
+            'telefono_remitente' => $this->telefono_remitente,
+            'nombre_destinatario' => $this->nombre_destinatario,
+            'telefono_destinatario' => $this->telefono_destinatario,
+            'direccion' => $this->direccion,
+            'provincia' => $this->provincia,
+            'ciudad' => $this->ciudad,
+            'pais' => $this->pais,
+            'contenido' => $this->contenido,
+        ]);
+
+        // Registrar el evento de edición
+        Eventos::create([
+            'accion' => 'Editar',
+            'descripcion' => 'Edición de admisión',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+
+        // Mensaje de éxito y cerrar modal
+        session()->flash('message', 'Registro actualizado exitosamente.');
+        $this->dispatch('close-edit-modal');
+    }
+}
+
+
+
+
+
 
 
     public function delete($id)
-    {
-        Admision::findOrFail($id)->delete();
-        session()->flash('message', 'Admision eliminado exitosamente.');
-    }
+{
+    $admision = Admision::findOrFail($id);
+
+    // Cambiar el estado a 0 (inactivo)
+    $admision->update(['estado' => 0]);
+
+    // Registrar el evento de cambio de estado
+    Eventos::create([
+        'accion' => 'Eliminar',
+        'descripcion' => 'Cambio de estado de admisión a Eliminada',
+        'codigo' => $admision->codigo,
+        'user_id' => Auth::id(),
+    ]);
+
+    session()->flash('message', 'La admisión ha sido eliminada exitosamente.');
+}
+
+
 
     public function getPriceByWeightAndDestination($peso, $destino)
     {
@@ -475,10 +503,10 @@ public function edit($id)
         $this->peso = $value;
         $this->updatePrice();
     }
-    
-    
-    
-    
+
+
+
+
 
     public function updatedDestino()
     {
@@ -489,7 +517,7 @@ public function edit($id)
         $peso = str_replace(',', '.', $this->peso);
         if (is_numeric($peso) && (float)$peso > 0 && !empty($this->destino)) {
             $this->precio = $this->getPriceByWeightAndDestination((float)$peso, $this->destino);
-    
+
             // Si hay algún valor en telefono_destinatario, incrementa el precio en 2
             if (!empty($this->telefono_destinatario)) {
                 $this->precio += 2;
@@ -498,99 +526,145 @@ public function edit($id)
             $this->precio = null;
         }
     }
-    
-    
+
+
     public function reimprimir($id)
-{
-    $admision = Admision::findOrFail($id);
-
-    $data = [
-        'origen' => $admision->origen,
-        'fecha' => $admision->fecha,
-        'servicio' => $admision->servicio,
-        'tipo_correspondencia' => $admision->tipo_correspondencia,
-        'cantidad' => $admision->cantidad,
-        'peso' => $admision->peso,
-        'destino' => $admision->destino,
-        'codigo' => $admision->codigo,
-        'precio' => $admision->precio,
-        'numero_factura' => $admision->numero_factura,
-        'nombre_remitente' => $admision->nombre_remitente,
-        'nombre_envia' => $admision->nombre_envia,
-        'carnet' => $admision->carnet,
-        'telefono_remitente' => $admision->telefono_remitente,
-        'nombre_destinatario' => $admision->nombre_destinatario,
-        'telefono_destinatario' => $admision->telefono_destinatario,
-        'direccion' => $admision->direccion,
-        'provincia' => $admision->provincia,
-        'ciudad' => $admision->ciudad,
-        'pais' => $admision->pais,
-    ];
-
-    $pdf = Pdf::loadView('pdfs.admision', $data);
+    {
+        $admision = Admision::findOrFail($id);
     
-    return response()->streamDownload(
-        fn () => print($pdf->stream('admision.pdf')),
-        'admision.pdf'
-    );
-}
+        $data = [
+            'origen' => $admision->origen,
+            'fecha' => $admision->fecha,
+            'servicio' => $admision->servicio,
+            'tipo_correspondencia' => $admision->tipo_correspondencia,
+            'cantidad' => $admision->cantidad,
+            'peso' => $admision->peso,
+            'destino' => $admision->destino,
+            'codigo' => $admision->codigo,
+            'precio' => $admision->precio,
+            'numero_factura' => $admision->numero_factura,
+            'nombre_remitente' => $admision->nombre_remitente,
+            'nombre_envia' => $admision->nombre_envia,
+            'carnet' => $admision->carnet,
+            'telefono_remitente' => $admision->telefono_remitente,
+            'nombre_destinatario' => $admision->nombre_destinatario,
+            'telefono_destinatario' => $admision->telefono_destinatario,
+            'direccion' => $admision->direccion,
+            'provincia' => $admision->provincia,
+            'ciudad' => $admision->ciudad,
+            'pais' => $admision->pais,
+        ];
+    
+        // Registrar el evento con la hora actual
+        Eventos::create([
+            'accion' => 'Reimprimir',
+            'descripcion' => 'Reimpresión de admisión',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+    
+        // Generar el PDF
+        $pdf = Pdf::loadView('pdfs.admision', $data);
+    
+        // Retornar el PDF para descarga
+        return response()->streamDownload(
+            fn() => print($pdf->stream('admision.pdf')),
+            'admision.pdf'
+        );
+    }
+    
 
 
-public function entregarAExpedicion()
+    public function entregarAExpedicion()
 {
     if (!empty($this->selectedAdmisiones)) {
-        Admision::whereIn('id', $this->selectedAdmisiones)
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
             ->where('origen', $this->origen) // Validar que las admisiones sean de la regional del usuario
-            ->update(['estado' => 2]);
+            ->get();
+
+        foreach ($admisiones as $admision) {
+            // Cambiar estado de la admisión
+            $admision->update(['estado' => 2]);
+
+            // Registrar el evento con la hora actual
+            Eventos::create([
+                'accion' => 'Entregar a Expedición',
+                'descripcion' => 'Entrega a expedición de admisión',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
 
         session()->flash('message', 'Las admisiones seleccionadas fueron entregadas a expedición.');
         $this->selectedAdmisiones = []; // Reinicia la selección
         $this->selectAll = false; // Reinicia el checkbox de seleccionar todos
-    }
-}
-
-
-public function updatedSelectAll($value)
-{
-    // Si selectAll está activado, selecciona todos los IDs de la página actual
-    $this->selectedAdmisiones = $value ? $this->currentPageIds : [];
-}
-public function entregarAExpedicionHoy()
-{
-    $today = Carbon::today(); // Obtiene la fecha actual sin la hora
-
-    // Actualiza todos los registros creados hoy y que coincidan con el origen del usuario
-    Admision::where('origen', $this->origen)
-        ->whereDate('fecha', $today) // Filtrar solo los registros de hoy
-        ->update(['estado' => 2]); // Cambiar estado a 2 (Expedición)
-
-    // Mostrar un mensaje de éxito
-    session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
-}
-public function abrirModalEntregarHoy()
-{
-    $today = Carbon::today(); // Obtiene la fecha actual sin hora
-    $this->codigosHoy = Admision::where('origen', $this->origen)
-        ->whereDate('fecha', $today)
-        ->pluck('codigo') // Obtiene solo los códigos
-        ->toArray();
-
-    if (count($this->codigosHoy) > 0) {
-        $this->dispatch('mostrar-modal-expedicion-hoy'); // Dispara evento para mostrar el modal
     } else {
-        session()->flash('error', 'No hay registros generados hoy para enviar a expedición.');
+        session()->flash('error', 'No se seleccionaron admisiones para entregar a expedición.');
     }
 }
 
 
-public function confirmarEntregarHoy()
+
+    public function updatedSelectAll($value)
+    {
+        // Si selectAll está activado, selecciona todos los IDs de la página actual
+        $this->selectedAdmisiones = $value ? $this->currentPageIds : [];
+    }
+    public function entregarAExpedicionHoy()
+    {
+        $today = Carbon::today(); // Obtiene la fecha actual sin la hora
+
+        // Actualiza todos los registros creados hoy y que coincidan con el origen del usuario
+        Admision::where('origen', $this->origen)
+            ->whereDate('fecha', $today) // Filtrar solo los registros de hoy
+            ->update(['estado' => 2]); // Cambiar estado a 2 (Expedición)
+
+        // Mostrar un mensaje de éxito
+        session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
+    }
+    public function abrirModalEntregarHoy()
+    {
+        $today = Carbon::today(); // Obtiene la fecha actual sin hora
+        $this->codigosHoy = Admision::where('origen', $this->origen)
+            ->whereDate('fecha', $today)
+            ->pluck('codigo') // Obtiene solo los códigos
+            ->toArray();
+
+        if (count($this->codigosHoy) > 0) {
+            $this->dispatch('mostrar-modal-expedicion-hoy'); // Dispara evento para mostrar el modal
+        } else {
+            session()->flash('error', 'No hay registros generados hoy para enviar a expedición.');
+        }
+    }
+
+
+    public function confirmarEntregarHoy()
 {
     $today = Carbon::today();
 
-    // Actualizar estado de los registros generados hoy
-    Admision::where('origen', $this->origen)
+    // Obtener las admisiones creadas hoy
+    $admisiones = Admision::where('origen', $this->origen)
         ->whereDate('fecha', $today)
-        ->update(['estado' => 2]);
+        ->where('estado', 1) // Solo procesar admisiones activas
+        ->get();
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No hay registros generados hoy para entregar a expedición.');
+        return;
+    }
+
+    foreach ($admisiones as $admision) {
+        // Actualizar estado de la admisión
+        $admision->update(['estado' => 2]);
+
+        // Crear un evento para la admisión
+        Eventos::create([
+            'accion' => 'Entregar a Expedición',
+            'descripcion' => 'Entrega a expedición de admisión generada hoy',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+    }
 
     // Disparar evento para ocultar el modal
     $this->dispatch('ocultar-modal-expedicion-hoy');
@@ -598,6 +672,5 @@ public function confirmarEntregarHoy()
     session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
     $this->codigosHoy = []; // Limpia la lista de códigos
 }
-
 
 }

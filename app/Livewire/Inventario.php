@@ -8,6 +8,7 @@ use App\Models\Admision;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 
 class Inventario extends Component
 {
@@ -38,14 +39,26 @@ class Inventario extends Component
     }
     
     public function devolverAdmision($id)
-{
-    $admision = Admision::find($id);
-    if ($admision) {
-        $admision->estado = 1;
-        $admision->save();
-        session()->flash('message', 'La admisión ha sido devuelta exitosamente.');
-    } else {
-        session()->flash('error', 'La admisión no pudo ser encontrada.');
+    {
+        $admision = Admision::find($id);
+    
+        if ($admision) {
+            // Cambiar el estado de la admisión
+            $admision->estado = 1;
+            $admision->save();
+    
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Devolver',
+                'descripcion' => 'La admisión fue devuelta a Ventanilla.',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+    
+            session()->flash('message', 'La admisión ha sido devuelta exitosamente.');
+        } else {
+            session()->flash('error', 'La admisión no pudo ser encontrada.');
+        }
     }
-}
+    
 }

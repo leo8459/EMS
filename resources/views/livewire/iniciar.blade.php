@@ -568,8 +568,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" wire:click.prevent="update" class="btn btn-primary"
-                        onclick="closeUpdateModal()">Actualizar</button>
+                    <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
+
                 </div>
             </div>
         </div>
