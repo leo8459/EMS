@@ -24,8 +24,8 @@
                             <div class="d-flex align-items-center">
 
                                 <div class="float-left d-flex align-items-center">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                        class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 </div>

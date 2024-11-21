@@ -28,6 +28,7 @@ class Emsinventario extends Component
     public $selectAll = false;
     public $showReencaminamientoModal = false;
     public $selectedDepartment = null; // Almacena el departamento seleccionado en el modal
+    public $lastSearchTerm = ''; // Almacena el término de la última búsqueda
 
     
 
@@ -36,62 +37,101 @@ class Emsinventario extends Component
         // Obtener la ciudad del usuario autenticado
         $userCity = Auth::user()->city;
     
-        // Filtrar y paginar las admisiones
+        // Si el campo de búsqueda está vacío, mostrar todos los registros
+        if (empty($this->searchTerm) && empty($this->lastSearchTerm)) {
+            $admisiones = Admision::with('user')
+                ->where(function ($query) use ($userCity) {
+                    $query->where(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 3)
+                                 ->where('origen', $userCity)
+                                 ->where('ciudad', '!=', $userCity);
+                    })
+                    ->orWhere(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 7)
+                                 ->where('ciudad', $userCity)
+                                 ->where('origen', '!=', $userCity);
+                    });
+                })
+                ->orderBy('fecha', 'desc')
+                ->paginate($this->perPage);
+    
+            return view('livewire.emsinventario', [
+                'admisiones' => $admisiones,
+            ]);
+        }
+    
+        // Si hay un término de búsqueda, procesarlo
+        if (!empty($this->searchTerm)) {
+            $this->lastSearchTerm = $this->searchTerm;
+            $this->searchTerm = ''; // Limpia el campo de búsqueda
+        }
+    
+        // Filtrar las admisiones según el término buscado
         $admisiones = Admision::with('user')
             ->where(function ($query) use ($userCity) {
                 $query->where(function ($subQuery) use ($userCity) {
-                    // Condición para estado 3: Mostrar si el origen coincide y la ciudad NO coincide
                     $subQuery->where('estado', 3)
-                             ->where('origen', $userCity) // Mostrar si el origen coincide
-                             ->where('ciudad', '!=', $userCity); // Excluir si la ciudad coincide
+                             ->where('origen', $userCity)
+                             ->where('ciudad', '!=', $userCity);
                 })
                 ->orWhere(function ($subQuery) use ($userCity) {
-                    // Condición para estado 7: Mostrar si la ciudad coincide y el origen NO coincide
                     $subQuery->where('estado', 7)
-                             ->where('ciudad', $userCity) // Mostrar si la ciudad coincide
-                             ->where('origen', '!=', $userCity); // Excluir si el origen coincide
+                             ->where('ciudad', $userCity)
+                             ->where('origen', '!=', $userCity);
                 });
             })
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-            ->orderBy('fecha', 'desc') // Ordenar por fecha
+            ->where('codigo', 'like', '%' . $this->lastSearchTerm . '%') // Usa $lastSearchTerm aquí
+            ->orderBy('fecha', 'desc')
             ->paginate($this->perPage);
-            $this->currentPageIds = $admisiones->pluck('id')->toArray();
-
+    
+        $this->currentPageIds = $admisiones->pluck('id')->toArray();
+    
+        // Agregar automáticamente a los seleccionados si hay un término de búsqueda
+        if (!empty($this->lastSearchTerm)) {
+            $newSelections = $admisiones->pluck('id')->toArray();
+            $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
+        }
+    
         return view('livewire.emsinventario', [
             'admisiones' => $admisiones,
         ]);
     }
     
-    public function toggleSelectAll()
-    {
-        $this->selectAll = !$this->selectAll;
     
-        if ($this->selectAll) {
-            // Seleccionar todas las admisiones de la página actual que cumplan las condiciones
-            $this->selectedAdmisiones = Admision::where(function ($query) {
-                    $query->where(function ($subQuery) {
-                        // Condición para estado 3: Mostrar si el origen coincide y la ciudad NO coincide
-                        $subQuery->where('estado', 3)
-                                 ->where('origen', Auth::user()->city) // Mostrar si el origen coincide
-                                 ->where('ciudad', '!=', Auth::user()->city); // Excluir si la ciudad coincide
-                    })
-                    ->orWhere(function ($subQuery) {
-                        // Condición para estado 7: Mostrar si la ciudad coincide y el origen NO coincide
-                        $subQuery->where('estado', 7)
-                                 ->where('ciudad', Auth::user()->city) // Mostrar si la ciudad coincide
-                                 ->where('origen', '!=', Auth::user()->city); // Excluir si el origen coincide
-                    });
+    
+
+    
+public function toggleSelectAll()
+{
+    $this->selectAll = !$this->selectAll;
+
+    if ($this->selectAll) {
+        $newSelections = Admision::where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->where('estado', 3)
+                             ->where('origen', Auth::user()->city)
+                             ->where('ciudad', '!=', Auth::user()->city);
                 })
-                ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-                ->orderBy('fecha', 'desc')
-                ->limit($this->perPage)
-                ->pluck('id')
-                ->toArray();
-        } else {
-            // Deseleccionar todas las admisiones
-            $this->selectedAdmisiones = [];
-        }
+                ->orWhere(function ($subQuery) {
+                    $subQuery->where('estado', 7)
+                             ->where('ciudad', Auth::user()->city)
+                             ->where('origen', '!=', Auth::user()->city);
+                });
+            })
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+            ->orderBy('fecha', 'desc')
+            ->limit($this->perPage)
+            ->pluck('id')
+            ->toArray();
+
+        // Agregar nuevas selecciones sin sobrescribir las existentes
+        $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
+    } else {
+        // Deseleccionar todos
+        $this->selectedAdmisiones = [];
     }
+}
+
     
 
     public function abrirModal()
@@ -311,11 +351,13 @@ public function generarExcel()
             $currentRow++;
         }
     
-        // Fila de totales
-        $worksheet->setCellValue("B$currentRow", 'TOTAL');
-        $worksheet->setCellValue("C$currentRow", $totalCantidad); // Total de cantidad
-        $worksheet->setCellValue("D$currentRow", $totalPeso); // Total de peso
-        $worksheet->getStyle("A$currentRow:G$currentRow")->applyFromArray($headerStyle);
+      // Fila de totales
+$totalRow = $currentRow; // Guardar la fila donde están los totales
+$worksheet->setCellValue("A$totalRow", 'TOTAL');
+$worksheet->setCellValue("B$totalRow", '=SUM(B12:B' . ($currentRow - 1) . ')'); // Fórmula para sumar la columna B
+$worksheet->setCellValue("D$totalRow", '=SUM(D12:D' . ($currentRow - 1) . ')'); // Fórmula para sumar la columna D
+$worksheet->getStyle("A$totalRow:G$totalRow")->applyFromArray($headerStyle);
+
     // Agregar información adicional al lado izquierdo en el mismo orden que en la imagen
 $currentRow += 2; // Dejar espacio después de la tabla
 // Usuario logueado en lugar de "MIRANDA"

@@ -102,13 +102,16 @@ public function render()
 
 public function store()
 {
+    
     // Validar los datos
     $this->validate();
     
     // Establecer la fecha actual
     $this->fecha = now();
-       // Calcular el precio basado en el peso y el destino
-       $this->updatePrice();
+    
+    // Calcular el precio basado en el peso y el destino
+    $this->updatePrice();
+    
     // Crear el registro en la base de datos
     $admision = Admision::create([
         'origen' => $this->origen,
@@ -131,11 +134,11 @@ public function store()
         'provincia' => $this->provincia,
         'ciudad' => $this->ciudad,
         'pais' => $this->pais,
-        'estado' => 1,
         'contenido' => $this->contenido,
-
+        'estado' => 1,
+        'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
     ]);
-    
+
     // Preparar los datos para el PDF usando el registro recién creado
     $data = [
         'origen' => $admision->origen,
@@ -171,6 +174,7 @@ public function store()
         'admision.pdf'
     );
 }
+
     
 public function edit($id)
     {

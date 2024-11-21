@@ -38,6 +38,7 @@ class Admision extends Model
         'estado',
         'contenido',
         'reencaminamiento',
+        'user_id',
 
 
     ];
