@@ -37,68 +37,37 @@ class Emsinventario extends Component
 
     public function render()
     {
-        // Obtener la ciudad del usuario autenticado
         $userCity = Auth::user()->city;
     
-        // Si el campo de búsqueda está vacío, mostrar todos los registros
-        if (empty($this->searchTerm) && empty($this->lastSearchTerm)) {
-            $admisiones = Admision::with('user')
-                ->where(function ($query) use ($userCity) {
-                    $query->where(function ($subQuery) use ($userCity) {
-                        $subQuery->where('estado', 3)
-                                 ->where('origen', $userCity)
-                                 ->where('ciudad', '!=', $userCity);
-                    })
-                    ->orWhere(function ($subQuery) use ($userCity) {
-                        $subQuery->where('estado', 7)
-                                 ->where('ciudad', $userCity)
-                                 ->where('origen', '!=', $userCity);
-                    });
-                })
-                ->orderBy('fecha', 'desc')
-                ->paginate($this->perPage);
-    
-            return view('livewire.emsinventario', [
-                'admisiones' => $admisiones,
-            ]);
-        }
-    
-        // Si hay un término de búsqueda, procesarlo
-        if (!empty($this->searchTerm)) {
-            $this->lastSearchTerm = $this->searchTerm;
-            $this->searchTerm = ''; // Limpia el campo de búsqueda
-        }
-    
-        // Filtrar las admisiones según el término buscado
-        $admisiones = Admision::with('user')
+        // Filtrar las admisiones según las condiciones
+        $admisiones = Admision::query()
             ->where(function ($query) use ($userCity) {
+                // Condición para estado 7
                 $query->where(function ($subQuery) use ($userCity) {
-                    $subQuery->where('estado', 3)
-                             ->where('origen', $userCity)
-                             ->where('ciudad', '!=', $userCity);
+                    $subQuery->where('estado', 7)
+                             ->where(function ($innerQuery) use ($userCity) {
+                                 $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                            ->orWhere(function ($orQuery) use ($userCity) {
+                                                $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                       ->where('ciudad', $userCity);    // Usar ciudad
+                                            });
+                             });
                 })
                 ->orWhere(function ($subQuery) use ($userCity) {
-                    $subQuery->where('estado', 7)
-                             ->where('ciudad', $userCity)
-                             ->where('origen', '!=', $userCity);
+                    // Condición para estado 3
+                    $subQuery->where('estado', 3)
+                             ->where('origen', $userCity); // Usar origen
                 });
             })
-            ->where('codigo', 'like', '%' . $this->lastSearchTerm . '%') // Usa $lastSearchTerm aquí
-            ->orderBy('fecha', 'desc')
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+            ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
             ->paginate($this->perPage);
-    
-        $this->currentPageIds = $admisiones->pluck('id')->toArray();
-    
-        // Agregar automáticamente a los seleccionados si hay un término de búsqueda
-        if (!empty($this->lastSearchTerm)) {
-            $newSelections = $admisiones->pluck('id')->toArray();
-            $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
-        }
     
         return view('livewire.emsinventario', [
             'admisiones' => $admisiones,
         ]);
     }
+    
     
     
     

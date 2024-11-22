@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
 
 //carteros
 Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
+Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero']);
 
 //eventos
 Route::get('/eventosregistro', [EventosController::class, 'eventos']);

@@ -44,15 +44,16 @@ class RoleHasPermissionController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        request()->validate(RoleHasPermission::$rules);
+ public function store(Request $request)
+{
+    $role = Role::findOrFail($request->role_id);
+    $permission = Permission::findOrFail($request->permission_id);
 
-        $roleHasPermission = RoleHasPermission::create($request->all());
+    $role->permissions()->attach($permission);
 
-        return redirect()->route('role-has-permissions.index')
-            ->with('success', 'RoleHasPermission created successfully.');
-    }
+    return redirect()->route('role-has-permissions.index')
+        ->with('success', 'Permission assigned to role successfully.');
+}
 
     /**
      * Display the specified resource.

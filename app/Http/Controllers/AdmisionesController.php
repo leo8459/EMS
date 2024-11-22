@@ -38,6 +38,13 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.recibirregional');
     }
+    public function encaminocartero ()
+    {
+        return view('admisiones.encaminocarteroentrega');
+    }
+
+
+
     public function entregarenvios($id)
     {
         // Buscar la admisión por ID

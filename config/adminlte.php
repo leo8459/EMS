@@ -319,7 +319,7 @@ return [
         [
             'text' => 'Gestion Usuarios',
             'icon' => 'fas fa-users',
-            // 'can'  => 'users.index',
+            'can'  => 'ver.usuarios',
             'submenu' => [
                 [
                     'text' => 'Personal AGBC',
@@ -346,16 +346,18 @@ return [
         [
             'text' => 'Admision',
             'icon' => 'fas fa-users',
-            // 'can'  => 'users.index',
+            'can'  => 'generar.admision',
             'submenu' => [
                 [
                     'text' => 'Crear Admision',
                     'url' => 'iniciar',
+                    'can'  => 'generar.admision',
                     'icon' => 'fas fa-user',
                 ],
                 [
                     'text' => 'Inventario Admision',
                     'url' => 'inventario',
+                    'can'  => 'generar.admision',
                     'icon' => 'fas fa-user',
                 ],
             ],
@@ -363,7 +365,7 @@ return [
         [
             'text' => 'EMS',
             'icon' => 'fas fa-users',
-            // 'can'  => 'users.index',
+            'can'  => 'ver.ems',
             'submenu' => [
                 [
                     'text' => 'Recibir Admision',
@@ -400,18 +402,20 @@ return [
         [
             'text' => 'Carteros',
             'icon' => 'fas fa-users',
-            // 'can'  => 'users.index',
+            'can'  => 'ver.carteros',
             'submenu' => [
                 [
                     'text' => 'Envios Entregados',
                     'url' => 'entregarcartero',
+                    'can'  => 'ver.porentregar',
                     'icon' => 'fas fa-user',
                 ],
-                // [
-                //     'text' => 'Inventario EMS',
-                //     'url' => 'emsinventario',
-                //     'icon' => 'fas fa-user',
-                // ],
+                [
+                    'text' => 'En camino',
+                    'url' => 'encaminocarteroentrega',
+                    'can'  => 'ver.encaminocarteros',
+                    'icon' => 'fas fa-user',
+                ],
                 // [
                 //     'text' => 'Envios Encamino',
                 //     'url' => 'encaminocartero',
@@ -427,12 +431,14 @@ return [
         [
             'text' => 'Rendimiento',
             'url' => '/pulse',
+            'can'  => 'ver.usuarios',
 
             'icon' => 'fas fa-user',
         ],
         [
             'text' => 'Logs',
             'url' => '/log-viewer',
+            'can'  => 'ver.usuarios',
 
             'icon' => 'fas fa-user',
         ],

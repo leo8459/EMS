@@ -38,6 +38,7 @@
                                     </div>
                                 </div>
                                 <button class="btn btn-info mt-3" wire:click="abrirReencaminamientoModal">Reencaminamiento</button>
+                                <button class="btn btn-warning mt-3" wire:click="abrirModal">Mandar a Regional</button>
 
                             </div>
                         </div>
@@ -97,7 +98,6 @@
                             </table>
                         
                             <!-- Botón para abrir el modal -->
-                            <button class="btn btn-warning mt-3" wire:click="abrirModal">Mandar a Regional</button>
                         </div>
                         @if ($showModal)
                         <div class="modal fade show d-block" tabindex="-1" role="dialog">
@@ -149,6 +149,8 @@
                             <option value="LA PAZ">LA PAZ</option>
                             <option value="ORURO">ORURO</option>
                             <option value="BENI">BENI</option>
+                            <option value="COCHABAMBA">COCHABAMBA</option>
+
                         </select>
                     </div>
                     <!-- Mostrar los códigos de las admisiones seleccionadas -->

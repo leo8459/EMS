@@ -3,16 +3,15 @@
 namespace App\Livewire;
 
 
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\WithFileUploads; // Añade esto
+use Livewire\Component;
 
-
-class Encaminocartero extends Component
+class Encaminocarteroentrega extends Component
 {
     use WithPagination, WithFileUploads; // Añade WithFileUploads
     public $currentPageIds = [];
@@ -29,30 +28,18 @@ class Encaminocartero extends Component
 
     public function render()
 {
-    // Obtener la ciudad del usuario autenticado
-    $userCity = Auth::user()->city;
-
-    // Filtrar y paginar las admisiones con las condiciones solicitadas
+    // Filtrar y paginar las admisiones en estado 4 y relacionadas con el usuario autenticado
     $admisiones = Admision::with('user') // Aseguramos que la relación user esté cargada
-        ->where(function ($query) use ($userCity) {
-            $query->where('reencaminamiento', $userCity) // Primera condición: Reencaminamiento coincide
-                  ->orWhere(function ($subQuery) use ($userCity) {
-                      $subQuery->whereNull('reencaminamiento') // Si el reencaminamiento es nulo
-                               ->where('ciudad', $userCity);  // Comparar con ciudad
-                  });
-        })
-        ->where('estado', 4) // Filtrar por estado
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+        ->where('estado', 4)
+        ->where('user_id', Auth::id()) // Filtra por el usuario logueado
         ->orderBy('fecha', 'desc')
         ->paginate($this->perPage);
 
-    return view('livewire.encaminocartero', [
+    return view('livewire.encaminocarteroentrega', [
         'admisiones' => $admisiones,
     ]);
 }
-
-
-    
 
     public function openModal($id)
     {
@@ -96,3 +83,4 @@ class Encaminocartero extends Component
     
 
 }
+

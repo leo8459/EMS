@@ -60,8 +60,10 @@
                                         <th class="d-none d-lg-table-cell">Ciudad</th>
                                         <th class="d-none d-lg-table-cell">País</th>
                                         <th>Fecha</th>
-
+                                        @hasrole('ADMINISTRADOR')
                                         <th>Acciones</th>
+                                        @endhasrole
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -88,8 +90,10 @@
 
                                             <td>
                                                 {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
-                                                <button type="button" class="btn btn-warning" wire:click="devolverAdmision({{ $admisione->id }})">Devolver a admisión</button>
+ @hasrole('ADMINISTRADOR')
+ <button type="button" class="btn btn-warning" wire:click="devolverAdmision({{ $admisione->id }})">Devolver a admisión</button>
 
+                                                    @endhasrole
                                             </td>
                                         </tr>
                                     @endforeach

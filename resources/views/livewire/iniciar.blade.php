@@ -100,9 +100,23 @@
 
                                                 <td>
                                                     {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
+                                                    {{-- @hasrole('SuperAdmin|Administrador')
+
+                                                    @endhasrole --}}
+
+                                                    @hasrole('ADMINISTRADOR')
                                                     <button type="button" class="btn btn-danger" wire:click="delete({{ $admisione->id }})">Eliminar</button>
-                                                    <button type="button" class="btn btn-secondary" wire:click="reimprimir({{ $admisione->id }})">Reimprimir</button>
-                                                    <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
+                                                    
+                                                    @endhasrole
+                                                      @hasrole('ADMINISTRADOR|ADMISION')
+                                                      <button type="button" class="btn btn-secondary" wire:click="reimprimir({{ $admisione->id }})">Reimprimir</button>
+
+                                                    @endhasrole
+                                                    
+                                                           @hasrole('ADMINISTRADOR|ADMISION')
+                                                           <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
+
+                                                    @endhasrole
 
                                                 </td>
                                             </tr>
@@ -315,10 +329,10 @@
                                             <option value="BENI">BENI</option>
                                             <option value="PANDO">PANDO</option>
                                             <option value="TARIJA">TARIJA</option>
-
                                         </select>
                                     </div>
                                 </div>
+                                
                                 
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -544,12 +558,24 @@
 
                             <div class="row">
 
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ciudad">Ciudad*</label>
-                                    <input type="text" class="form-control" id="ciudad" wire:model="ciudad">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="ciudad">Ciudad*</label>
+                                        <select class="form-control" id="ciudad" wire:model="ciudad">
+                                            <option value="">Seleccione una ciudad</option>
+                                            <option value="LA PAZ">LA PAZ</option>
+                                            <option value="POTOSI">POTOSI</option>
+                                            <option value="ORURO">ORURO</option>
+                                            <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                            <option value="CHUQUISACA">CHUQUISACA</option>
+                                            <option value="COCHABAMBA">COCHABAMBA</option>
+                                            <option value="BENI">BENI</option>
+                                            <option value="PANDO">PANDO</option>
+                                            <option value="TARIJA">TARIJA</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+                                
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="provincia">Provincia</label>
@@ -568,7 +594,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
+                    {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button> --}}
 
                 </div>
             </div>
@@ -677,19 +703,20 @@
         document.getElementById('direccion').value = send.direccion;
         document.getElementById('provincia').value = send.provincia;
         document.getElementById('ciudad').value = send.ciudad;
+        document.getElementById('ciudad').dispatchEvent(new Event('change', { bubbles: true }));
+
         document.getElementById('pais').value = send.pais;
 
         // Disparar eventos de entrada para que Livewire detecte los cambios en otros campos
         let fields = [
-            'peso', 'codigo', 'numero_factura', 'nombre_remitente',
-            'nombre_envia', 'carnet', 'telefono_remitente', 'nombre_destinatario',
-            'telefono_destinatario', 'direccion','provincia', 'ciudad', 'pais'
-        ];
+    'peso', 'codigo', 'numero_factura', 'nombre_remitente',
+    'nombre_envia', 'carnet', 'telefono_remitente', 'nombre_destinatario',
+    'telefono_destinatario', 'direccion', 'provincia', 'pais' // 'ciudad' removido
+];
 
-        fields.forEach(function(field) {
-            triggerInputEvent(field);
-        });
-
+fields.forEach(function(field) {
+    triggerInputEvent(field);
+});
         // Limpiar las sugerencias
         document.getElementById('suggestions').innerHTML = '';
 
@@ -698,16 +725,16 @@
     }
 
     function triggerInputEvent(elementId) {
-        var element = document.getElementById(elementId);
-        var event = new Event('input', { bubbles: true });
-        element.dispatchEvent(event);
+    var element = document.getElementById(elementId);
+    if (element.tagName === 'SELECT') {
+        // Disparar evento 'change' para selects
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        // Disparar evento 'input' para inputs
+        element.dispatchEvent(new Event('input', { bubbles: true }));
     }
+}
 
-    function triggerInputEvent(elementId) {
-        var element = document.getElementById(elementId);
-        var event = new Event('input', { bubbles: true });
-        element.dispatchEvent(event);
-    }
 
     // Ocultar sugerencias cuando se hace clic fuera
     document.addEventListener('livewire:load', function () {

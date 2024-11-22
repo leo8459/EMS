@@ -52,7 +52,7 @@ class Iniciar extends Component
     public function mount()
     {
         $this->origen = Auth::user()->city; // Si tienes una ciudad por defecto
-        $this->ciudad = "LA PAZ"; // Cambia este valor si quieres que otra ciudad sea la predeterminada
+        $this->ciudad = ""; // Cambia este valor si quieres que otra ciudad sea la predeterminada
         $this->cantidad = 1; // Establece cantidad en 1
     }
     //mostrar

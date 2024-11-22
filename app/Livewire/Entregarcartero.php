@@ -19,15 +19,17 @@ class Entregarcartero extends Component
 
     public function render()
     {
-        // Filtrar y paginar las admisiones en estado 3
+        // Obtener las admisiones del usuario autenticado en estado 5
         $admisiones = Admision::with('user') // Aseguramos que la relación user esté cargada
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 5)
-            ->orderBy('fecha', 'desc')
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+            ->where('estado', 5) // Filtro por estado 5
+            ->where('user_id', Auth::id()) // Filtro por usuario autenticado
+            ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
             ->paginate($this->perPage);
     
         return view('livewire.entregarcartero', [
             'admisiones' => $admisiones,
         ]);
     }
+    
 }

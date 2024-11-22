@@ -27,34 +27,38 @@ class Asignarcartero extends Component
 
     public function render()
     {
-        // Obtener la ciudad del usuario autenticado
         $userCity = Auth::user()->city;
     
-        // Filtrar y paginar las admisiones
-        $admisiones = Admision::where(function ($query) use ($userCity) {
+        // Obtener los IDs de las admisiones ya asignadas
+        $assignedIds = array_column($this->assignedAdmisiones, 'id');
+    
+        // Filtrar y paginar las admisiones según las condiciones
+        $admisiones = Admision::query()
+            ->where(function ($query) use ($userCity) {
+                // Condición para estado 7
                 $query->where(function ($subQuery) use ($userCity) {
-                    // Condición para estado 3: Mostrar si el origen coincide y excluir si la ciudad coincide
-                    $subQuery->where('estado', 3)
-                             ->where('origen', $userCity) // Mostrar si el origen coincide
-                             ->where('ciudad', '!=', $userCity); // Excluir si la ciudad coincide
+                    $subQuery->where('estado', 7)
+                             ->where(function ($innerQuery) use ($userCity) {
+                                 $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                            ->orWhere(function ($orQuery) use ($userCity) {
+                                                $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                       ->where('ciudad', $userCity);    // Usar ciudad
+                                            });
+                             });
                 })
                 ->orWhere(function ($subQuery) use ($userCity) {
-                    // Condición para estado 7: Mostrar si la ciudad coincide y excluir si el origen coincide
-                    $subQuery->where('estado', 7)
-                             ->where('ciudad', $userCity) // Mostrar si la ciudad coincide
-                             ->where('origen', '!=', $userCity); // Excluir si el origen coincide
+                    // Condición para estado 3
+                    $subQuery->where('estado', 3)
+                             ->where('origen', $userCity); // Usar origen
                 });
             })
+            ->whereNotIn('id', $assignedIds) // Excluir las admisiones ya asignadas
             ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-            ->whereNotIn('id', array_column($this->assignedAdmisiones, 'id')) // Excluir los ya asignados
-            ->orderBy('fecha', 'desc') // Ordenar por fecha
+            ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
             ->paginate($this->perPage);
     
-        // Filtrar los carteros para que solo muestren los que están en la misma ciudad del usuario logueado
+        // Obtener los carteros que están en la misma ciudad del usuario autenticado
         $carteros = User::where('city', $userCity)->get();
-    
-        // Almacena los IDs de la página actual
-        $this->currentPageIds = $admisiones->pluck('id')->toArray();
     
         return view('livewire.asignarcartero', [
             'admisiones' => $admisiones,
@@ -64,22 +68,34 @@ class Asignarcartero extends Component
     }
     
 
+    
+
+    
+
    
-public function selectAdmision($admisionId)
+    public function selectAdmision($admisionId)
 {
-    // Agregar la admisión seleccionada al array de asignadas y eliminarla de la lista de la izquierda
+    // Buscar la admisión seleccionada
     $admision = Admision::find($admisionId);
-    if ($admision && !in_array($admisionId, array_column($this->assignedAdmisiones, 'id'))) {
-        $this->assignedAdmisiones[] = [
-            'id' => $admision->id,
-            'codigo' => $admision->codigo,
-            'destino' => $admision->destino,
-            'direccion' => $admision->direccion,
-            'user_id' => $this->selectedCarteroForAll ?? null, // Asignamos el cartero seleccionado a todas las admisiones
-        ];
-        $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, [$admisionId]);
+
+    if ($admision) {
+        // Agregar la admisión al array de asignadas si no está ya agregada
+        if (!in_array($admisionId, array_column($this->assignedAdmisiones, 'id'))) {
+            $this->assignedAdmisiones[] = [
+                'id' => $admision->id,
+                'codigo' => $admision->codigo,
+                'destino' => $admision->destino,
+                'direccion' => $admision->direccion,
+                'user_id' => $this->selectedCarteroForAll ?? null, // Asignar el cartero seleccionado a todas las admisiones
+            ];
+        }
+
+        // Actualizar la lista principal eliminando la admisión seleccionada
+        $this->currentPageIds = array_diff($this->currentPageIds, [$admisionId]);
     }
 }
+
+    
 
 public function assignCarteroToAll()
 {
@@ -108,10 +124,13 @@ public function saveAssignments()
             $admision->estado = 4;
             $admision->save();
 
+            // Obtener el nombre del cartero asignado
+            $cartero = \App\Models\User::find($assignment['user_id']);
+
             // Registrar el evento
-            Eventos::create([
+            \App\Models\Eventos::create([
                 'accion' => 'Asignar Cartero',
-                'descripcion' => "La admisión fue asignada al cartero con ID: {$assignment['user_id']}.",
+                'descripcion' => "Envio con" . ($cartero ? $cartero->name : 'Desconocido'),
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
             ]);
@@ -124,6 +143,7 @@ public function saveAssignments()
 
     session()->flash('message', 'Admisiones asignadas exitosamente.');
 }
+
 
 
 public function searchAdmision()
