@@ -77,37 +77,50 @@ class Recibir extends Component
     }
     
     public function saveAdmissionData()
-    {
-        // Validar los datos
-        foreach ($this->admissionData as $id => $data) {
-            $this->validate([
-                'admissionData.' . $id . '.peso_ems' => 'nullable|numeric', // Cambiado a nullable
-                'admissionData.' . $id . '.observacion' => 'nullable|string',
-            ], [], [
-                'admissionData.' . $id . '.peso_ems' => 'Peso EMS para admisión ' . $data['codigo'],
-                'admissionData.' . $id . '.observacion' => 'Observación para admisión ' . $data['codigo'],
-            ]);
-        }
-    
-        // Actualizar las admisiones
-        foreach ($this->admissionData as $id => $data) {
-            Admision::where('id', $id)
-                ->update([
-                    'peso_ems' => $data['peso_ems'] !== '' ? $data['peso_ems'] : null, // Guardar como null si está vacío
-                    'observacion' => $data['observacion'],
-                    'estado' => 3,
-                ]);
-        }
-    
-        // Restablecer variables
-        $this->selectedAdmisiones = [];
-        $this->admissionData = [];
-        $this->showModal = false;
-        $this->selectAll = false;
-    
-        session()->flash('message', 'Las admisiones seleccionadas han sido recibidas.');
-        $this->render(); // Refrescar la vista
+{
+    // Validar los datos
+    foreach ($this->admissionData as $id => $data) {
+        $this->validate([
+            'admissionData.' . $id . '.peso_ems' => 'nullable|numeric',
+            'admissionData.' . $id . '.observacion' => 'nullable|string',
+        ], [], [
+            'admissionData.' . $id . '.peso_ems' => 'Peso EMS para admisión ' . $data['codigo'],
+            'admissionData.' . $id . '.observacion' => 'Observación para admisión ' . $data['codigo'],
+        ]);
     }
+
+    // Actualizar las admisiones
+    foreach ($this->admissionData as $id => $data) {
+        Admision::where('id', $id)
+            ->update([
+                'peso_ems' => $data['peso_ems'] !== '' ? $data['peso_ems'] : null,
+                'observacion' => $data['observacion'],
+                'estado' => 3,
+                'updated_at' => now(), // Actualiza la fecha de última modificación
+            ]);
+    }
+
+    // Obtener las admisiones actualizadas
+    $admisiones = Admision::whereIn('id', array_keys($this->admissionData))->get();
+
+    // Generar el PDF
+    $pdf = \PDF::loadView('pdfs.recibir', compact('admisiones'));
+
+    // Descargar PDF
+    return response()->streamDownload(function () use ($pdf) {
+        echo $pdf->stream();
+    }, 'reporte_admisiones_recibidas.pdf');
+
+    // Reiniciar variables y cerrar modal
+    $this->selectedAdmisiones = [];
+    $this->admissionData = [];
+    $this->showModal = false;
+    $this->selectAll = false;
+
+    session()->flash('message', 'Las admisiones seleccionadas han sido recibidas.');
+    $this->render(); // Refrescar la vista
+}
+
     
     
     public function removeAdmissionFromModal($id)
