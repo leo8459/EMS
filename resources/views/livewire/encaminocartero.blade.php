@@ -38,6 +38,58 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                                                                <!--REPORTES -->
+
+                            <div class="container-fluid">
+                                <div class="row mb-3">
+                                    <!-- Dropdown para seleccionar el servicio -->
+                                    <div class="col-md-4">
+                                        <label for="servicioSeleccionado">Seleccionar Servicio:</label>
+                                        <select id="servicioSeleccionado" wire:model="servicioSeleccionado" class="form-control">
+                                            <option value="">-- Seleccionar --</option>
+                                            <option value="EMS">EMS</option>
+                                            <option value="CERTIFICADA">CERTIFICADA</option>
+                                            <option value="ORDINARIA">ORDINARIA</option>
+                                            <option value="ECA/PLIEGOS">ECA/PLIEGOS</option>
+                                            <option value="SUPEREXPRESS">SUPEREXPRESS</option>
+                                            <option value="EXPRESO">EXPRESO</option>
+                                            <option value="AVISO DE RECIBO">AVISO DE RECIBO</option>
+                                        </select>
+                                    </div>
+                            
+                                    <!-- Campo para la fecha de inicio -->
+                                    <div class="col-md-4">
+                                        <label for="fechaInicio">Fecha Inicio:</label>
+                                        <input type="date" id="fechaInicio" wire:model="fechaInicio" class="form-control">
+                                    </div>
+                            
+                                    <!-- Campo para la fecha de fin -->
+                                    <div class="col-md-4">
+                                        <label for="fechaFin">Fecha Fin:</label>
+                                        <input type="date" id="fechaFin" wire:model="fechaFin" class="form-control">
+                                    </div>
+                                </div>
+                            
+                                <!-- Botón para generar el reporte -->
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button wire:click="generarReporteDesdeTabla" class="btn btn-info">
+                                        Generar Reporte de lo Filtrado
+                                    </button>
+                                </div>
+                                
+                                <!-- Mensajes de éxito o error -->
+                                @if (session()->has('error'))
+                                    <div class="alert alert-danger mt-3">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            
+                            
+                            
                         </div>
                         @if (session()->has('message'))
                             <div class="alert alert-success">

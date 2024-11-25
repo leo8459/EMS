@@ -43,6 +43,10 @@ class AdmisionesController extends Controller
         return view('admisiones.encaminocarteroentrega');
     }
 
+    public function entregadosems ()
+    {
+        return view('admisiones.entregadosemsjota');
+    }
 
 
     public function entregarenvios($id)

@@ -24,7 +24,9 @@ class Encaminocartero extends Component
     public $photo; // Propiedad para la foto
     public $recepcionado;
     public $observacion_entrega;
-    
+    public $servicioSeleccionado = ''; // Para almacenar el servicio seleccionado
+    public $fechaInicio; // Fecha inicial del rango
+    public $fechaFin; // Fecha final del rango
 
 
     public function render()
@@ -94,5 +96,41 @@ class Encaminocartero extends Component
 
 
     
+public function generarReporteDesdeTabla()
+{
+    // Obtener la ciudad del usuario autenticado
+    $userCity = Auth::user()->city;
+
+    // Reutilizar la consulta del método render() para filtrar las admisiones
+    $admisiones = Admision::with('user')
+        ->where(function ($query) use ($userCity) {
+            $query->where('reencaminamiento', $userCity)
+                  ->orWhere(function ($subQuery) use ($userCity) {
+                      $subQuery->whereNull('reencaminamiento')
+                               ->where('ciudad', $userCity);
+                  });
+        })
+        ->where('estado', 4)
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No hay datos disponibles para generar el reporte.');
+        return;
+    }
+
+    // Generar el PDF utilizando la vista existente
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdfs.envios_servicio', [
+        'datos' => ['Filtrados' => $admisiones],
+        'servicios' => ['Filtrados'], // Etiqueta genérica para el servicio
+    ]);
+
+    // Descargar el PDF
+    return response()->streamDownload(
+        fn () => print($pdf->output()),
+        'reporte_filtrado_' . now()->format('Y-m-d') . '.pdf'
+    );
+}
 
 }

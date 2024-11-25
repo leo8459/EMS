@@ -387,6 +387,11 @@ return [
                     'url' => 'recibirregional',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Entregados',
+                    'url' => 'entregadosemsjota',
+                    'icon' => 'fas fa-user',
+                ],
                 // [
                 //     'text' => 'Envios Encamino a Regional',
                 //     'url' => 'recibirregional',
