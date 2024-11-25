@@ -25,7 +25,7 @@
         <thead>
             <tr>
                 <th>Origen</th>
-                <th>Reencaminamiento / Ciudad</th>
+                <th>Destino</th>
                 <th>Código</th>
                 <th>Peso</th>
                 <th>Última Actualización</th>

@@ -21,27 +21,37 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <div class="d-flex align-items-center">
-
-                                <div class="float-left d-flex align-items-center">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-
-
-                                    <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                                </div>
-                                <!-- Botón para redirigir a la ruta asignarcartero -->
-                                <div class="container-fluid">
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success">
-                                            Asignar Carteros
-                                        </a>
-                                    </div>
-                                </div>
-                                <button class="btn btn-info mt-3" wire:click="abrirReencaminamientoModal">Reencaminamiento</button>
-                                <button class="btn btn-warning mt-3" wire:click="abrirModal">Mandar a Regional</button>
-
+                            <div class="float-left d-flex align-items-center">
+                                <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                            
+                                <select wire:model="selectedCity" class="form-control" style="margin-right: 10px;">
+                                    <option value="">Seleccione una ciudad</option>
+                                    <option value="LA PAZ">LA PAZ</option>
+                                    <option value="POTOSI">POTOSI</option>
+                                    <option value="ORURO">ORURO</option>
+                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                    <option value="BENI">BENI</option>
+                                    <option value="PANDO">PANDO</option>
+                                    <option value="TARIJA">TARIJA</option>
+                                </select>
+                            
+                                <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                             </div>
-                        </div>
+                            
+                            <div class="d-flex justify-content-end align-items-center mt-3">
+                                <a href="{{ route('asignarcartero') }}" class="btn btn-success" style="margin-right: 10px;">
+                                    Asignar Carteros
+                                </a>
+                                <button class="btn btn-info" wire:click="abrirReencaminamientoModal" style="margin-right: 10px;">
+                                    Reencaminamiento
+                                </button>
+                                <button class="btn btn-warning" wire:click="abrirModal">
+                                    Mandar a Regional
+                                </button>
+                            </div>
+                            
                         @if (session()->has('message'))
                             <div class="alert alert-success">
                                 {{ session('message') }}

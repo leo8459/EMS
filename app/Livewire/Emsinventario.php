@@ -32,41 +32,65 @@ class Emsinventario extends Component
     public $showReencaminamientoModal = false;
     public $selectedDepartment = null; // Almacena el departamento seleccionado en el modal
     public $lastSearchTerm = ''; // Almacena el término de la última búsqueda
+    public $selectedCity = null;
+    public $cityJustUpdated = false;
 
     
-
-    public function render()
+    public function updatedSelectedCity()
     {
-        $userCity = Auth::user()->city;
-    
-        // Filtrar las admisiones según las condiciones
-        $admisiones = Admision::query()
-            ->where(function ($query) use ($userCity) {
-                // Condición para estado 7
-                $query->where(function ($subQuery) use ($userCity) {
-                    $subQuery->where('estado', 7)
-                             ->where(function ($innerQuery) use ($userCity) {
-                                 $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
-                                            ->orWhere(function ($orQuery) use ($userCity) {
-                                                $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                                       ->where('ciudad', $userCity);    // Usar ciudad
-                                            });
-                             });
-                })
-                ->orWhere(function ($subQuery) use ($userCity) {
-                    // Condición para estado 3
-                    $subQuery->where('estado', 3)
-                             ->where('origen', $userCity); // Usar origen
-                });
-            })
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-            ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
-            ->paginate($this->perPage);
-    
-        return view('livewire.emsinventario', [
-            'admisiones' => $admisiones,
-        ]);
+        $this->resetPage(); // Reseteamos la paginación a la página 1
+        $this->cityJustUpdated = true; // Indicamos que la ciudad ha sido actualizada
     }
+    
+    public function render()
+{
+    $userCity = Auth::user()->city;
+
+    // Filtrar las admisiones según las condiciones
+    $admisiones = Admision::query()
+        ->where(function ($query) use ($userCity) {
+            // Condición para estado 7
+            $query->where(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 7)
+                         ->where(function ($innerQuery) use ($userCity) {
+                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                        ->orWhere(function ($orQuery) use ($userCity) {
+                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                   ->where('ciudad', $userCity);    // Usar ciudad
+                                        });
+                         });
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                // Condición para estado 3
+                $subQuery->where('estado', 3)
+                         ->where('origen', $userCity); // Usar origen
+            });
+        })
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%'); // Filtro por código
+
+    // **Filtrar por ciudad seleccionada**
+    if ($this->selectedCity) {
+        $admisiones = $admisiones->where(function ($query) {
+            $query->where('ciudad', $this->selectedCity)
+                  ->orWhere('reencaminamiento', $this->selectedCity);
+        });
+    }
+
+    $admisiones = $admisiones->orderBy('fecha', 'desc') // Ordenar por fecha descendente
+        ->paginate($this->perPage);
+
+    // **Marcar automáticamente los checkboxes de las admisiones mostradas**
+    if ($this->cityJustUpdated) {
+        $currentPageIds = $admisiones->pluck('id')->toArray();
+        $this->selectedAdmisiones = $currentPageIds;
+        $this->cityJustUpdated = false;
+    }
+
+    return view('livewire.emsinventario', [
+        'admisiones' => $admisiones,
+    ]);
+}
+
     
     
     
