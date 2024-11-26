@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
     //admisiones
     Route::get('/iniciar', [AdmisionesController::class, 'getAdmisiones']);
     Route::get('/inventario', [AdmisionesController::class, 'inventarioadmision']);
+    Route::get('/admisionesgeneradas', [AdmisionesController::class, 'admisiones']);
 
 
 

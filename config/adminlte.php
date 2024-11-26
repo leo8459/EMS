@@ -355,8 +355,14 @@ return [
                     'icon' => 'fas fa-user',
                 ],
                 [
-                    'text' => 'Inventario Admision',
+                    'text' => 'Enviados Expedicion',
                     'url' => 'inventario',
+                    'can'  => 'generar.admision',
+                    'icon' => 'fas fa-user',
+                ],
+                [
+                    'text' => 'Inventario Admision',
+                    'url' => 'admisionesgeneradas',
                     'can'  => 'generar.admision',
                     'icon' => 'fas fa-user',
                 ],
