@@ -34,7 +34,7 @@ class Iniciar extends Component
             'cantidad' => 'required|integer',
             'peso' => ['required', 'regex:/^[0-9]*[.,]?[0-9]+$/', 'min:0', 'max:100'],
             'destino' => 'required|string|max:255',
-            'codigo' => 'required|string|unique:admisions,codigo' . ($this->admisionId ? ',' . $this->admisionId : ''),
+            // 'codigo' => 'string|unique:admisions,codigo' . ($this->admisionId ? ',' . $this->admisionId : ''),
             'numero_factura' => 'nullable|string',
             'nombre_remitente' => 'required|string|max:255',
             // 'nombre_envia' => 'required|string|max:255',
@@ -698,6 +698,39 @@ public function update()
     
     
 
-
+    public function updatedServicio()
+    {
+        // Mapeo de servicios a prefijos
+        $prefixes = [
+            'EMS' => 'EN',
+            'ENCOMIENDA' => 'CN',
+            // Agrega otros servicios y prefijos según sea necesario
+        ];
+    
+        // Obtener el prefijo basado en el servicio seleccionado
+        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX'; // Prefijo por defecto 'XX' si no se encuentra
+    
+        // Sufijo es 'BO'
+        $suffix = 'BO';
+    
+        // Obtener el número máximo utilizado para este servicio
+        $lastNumber = Admision::where('codigo', 'like', $prefix . '%')
+            ->selectRaw("MAX(CAST(SUBSTRING(codigo FROM 3 FOR 9) AS INTEGER)) as max_number")
+            ->value('max_number');
+    
+        if ($lastNumber) {
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+    
+        // Completar con ceros a la izquierda hasta 9 dígitos
+        $numberPart = str_pad($newNumber, 9, '0', STR_PAD_LEFT);
+    
+        // Generar el nuevo código
+        $this->codigo = $prefix . $numberPart . $suffix;
+    }
+    
+    
 
 }

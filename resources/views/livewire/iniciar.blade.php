@@ -161,9 +161,11 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="servicio">Tipo de Servicio*</label>
-                                    <select class="form-control" id="servicio" wire:model="servicio" wire:ignore>
+                                    <select class="form-control" id="servicio" wire:model="servicio">
                                         <option value="">Seleccione el servicio</option>
                                         <option value="EMS">EMS</option>
+                                        <option value="ENCOMIENDA">ENCOMIENDA</option>
+                                        <option value="TRADICIONAL">TRADICIONAL</option>
                                         <option value="CERTIFICADA">CERTIFICADA</option>
                                         <option value="ORDINARIA">ORDINARIA</option>
                                         <option value="ECA/PLIEGOS">ECA/PLIEGOS</option>
@@ -226,7 +228,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="codigo">Código*</label>
-                                    <input type="text" class="form-control" id="codigo" wire:model="codigo">
+                                    <input type="text" class="form-control" id="codigo" wire:model="codigo"disabled>
                                 </div>
                             </div>
                         </div>
@@ -631,7 +633,7 @@
             tipo_correspondencia: document.getElementById('tipo_correspondencia').value,
             peso: document.getElementById('peso').value,
             destino: document.getElementById('destino').value,
-            codigo: document.getElementById('codigo').value,
+            // codigo: document.getElementById('codigo').value,
             numero_factura: document.getElementById('numero_factura').value,
 
             // REMITENTE
@@ -686,7 +688,7 @@
         document.getElementById('tipo_correspondencia').value = send.tipo_correspondencia; // Combo "Correspondencia"
         document.getElementById('peso').value = send.peso;
         document.getElementById('destino').value = send.destino; // Combo "Destino"
-        document.getElementById('codigo').value = send.codigo;
+        // document.getElementById('codigo').value = send.codigo;
         document.getElementById('numero_factura').value = send.numero_factura;
 
         // Disparar eventos de cambio para que Livewire detecte los cambios en los combos
