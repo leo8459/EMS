@@ -74,6 +74,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/iniciar', [AdmisionesController::class, 'getAdmisiones']);
     Route::get('/inventario', [AdmisionesController::class, 'inventarioadmision']);
     Route::get('/admisionesgeneradas', [AdmisionesController::class, 'admisiones']);
+    Route::get('/download/pdf/{file}', function ($file) {
+        $path = storage_path('app/temp/' . $file);
+        if (file_exists($path)) {
+            return response()->download($path)->deleteFileAfterSend();
+        }
+        abort(404);
+    })->name('download.pdf');
 
 
 
@@ -93,12 +100,12 @@ Route::middleware('auth')->group(function () {
     Route::get('encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero'])->name('reporte.servicio');
     Route::match(['GET', 'POST'], '/recibirregional', [AdmisionesController::class, 'regional'])->name('admisiones.pdf');
 
-//carteros
-Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
-Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero']);
+    //carteros
+    Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
+    Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero']);
 
-//eventos
-Route::get('/eventosregistro', [EventosController::class, 'eventos']);
+    //eventos
+    Route::get('/eventosregistro', [EventosController::class, 'eventos']);
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

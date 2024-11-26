@@ -144,6 +144,7 @@ class Iniciar extends Component
         // Preparar los datos para el PDF usando el registro recién creado
         $data = [
             'origen' => $admision->origen,
+            'servicio' => $admision->servicio,
             'fecha' => $admision->fecha,
             'servicio' => $admision->servicio,
             'tipo_correspondencia' => $admision->tipo_correspondencia,

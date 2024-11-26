@@ -65,16 +65,26 @@
             </colgroup>
             <thead>
                 <tr>
-                    <td colspan="3"><img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"></td>
-                    <td colspan="3" rowspan="2">
-                        <div style="text-align: center; font-size: 14px;">
-                            {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}<br>{{ $codigo }}
+                    <td colspan="3">
+                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                    </td>
+                    <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div style="margin-bottom: 5px;">
+                                {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}
+                            </div>
+                            <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
+                    
+                    
+                    
                     <td rowspan="8" style="text-align: center; font-size: 7px;">
                         {{-- Datos de ubicación --}}
                     </td>
                 </tr>
+                
                 <tr>
                     <td>OF. ORIGEN: <br>
                         <div style="text-align: right;">{{ $origen }}</div>
@@ -127,7 +137,7 @@
     </div>
 
     <!-- Añadimos un margen grande entre las tablas repetidas -->
-    <div style="height: 40px;"></div>
+    <div style="height: 10px;"></div>
 
     <div class="page-break">
         <table style="width: 700px;">
@@ -143,12 +153,21 @@
             </colgroup>
             <thead>
                 <tr>
-                    <td colspan="3"><img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"></td>
-                    <td colspan="3" rowspan="2">
-                        <div style="text-align: center; font-size: 14px;">
-                            {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}<br>{{ $codigo }}
+                    <td colspan="3">
+                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                    </td>
+                    <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div style="margin-bottom: 5px;">
+                                {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}
+                            </div>
+                            <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
+                    
+                    
+                    
                     <td rowspan="8" style="text-align: center; font-size: 7px;">
                         {{-- Datos de ubicación --}}
                     </td>
@@ -218,17 +237,25 @@
             </colgroup>
             <thead>
                 <tr>
-                    <td colspan="3"><img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"></td>
-                    <td colspan="3" rowspan="2">
-                        <div style="text-align: center; font-size: 14px;">
-                            {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}<br>{{ $codigo }}
+                    <td colspan="3">
+                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                    </td>
+                    <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div style="margin-bottom: 5px;">
+                                {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}
+                            </div>
+                            <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
+                    
+                    
+                    
                     <td rowspan="8" style="text-align: center; font-size: 7px;">
                         {{-- Datos de ubicación --}}
                     </td>
                 </tr>
-                <tr>
                     <td>OF. ORIGEN: <br>
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
@@ -293,13 +320,22 @@
             </colgroup>
             <thead>
                 <tr>
-                    <td colspan="3"><img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"></td>
-                    <td colspan="3" rowspan="2">
-                        <div style="text-align: center; font-size: 14px;">
-                            {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}<br>{{ $codigo }}
+                    <td colspan="3">
+                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                    </td>
+                    <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div style="margin-bottom: 5px;">
+                                {!! DNS1D::getBarcodeHTML($codigo, 'C128', 1.0, 40) !!}
+                            </div>
+                            <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
-                    <td rowspan="8" style="text-align: center; font-size: 8px;">
+                    
+                    
+                    
+                    <td rowspan="8" style="text-align: center; font-size: 7px;">
                         {{-- Datos de ubicación --}}
                     </td>
                 </tr>
