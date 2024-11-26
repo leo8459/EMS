@@ -23,45 +23,48 @@ class Entregadosemsjota extends Component
     public $endDate = null;   // Fecha de fin
 
     public function render()
-    {
-        // Obtener la ciudad del usuario autenticado
-        $userCity = Auth::user()->city;
+{
+    // Obtener la ciudad del usuario autenticado
+    $userCity = Auth::user()->city;
     
-        // Recuperar solo los carteros que pertenecen a la misma ciudad que el usuario autenticado
-        $carteros = User::role('CARTERO') // Filtra usuarios con el rol "CARTERO"
-            ->where('city', $userCity) // Filtra por ciudad
-            ->get();
+    // Recuperar solo los carteros que pertenecen a la misma ciudad que el usuario autenticado
+    $carteros = User::role('CARTERO') // Filtra usuarios con el rol "CARTERO"
+        ->where('city', $userCity) // Filtra por ciudad
+        ->get();
     
-        $userDepartment = Auth::user()->department;
+    $userDepartment = Auth::user()->department;
     
-        // Consulta de admisiones con filtros
-        $admisiones = Admision::with('user')
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->where('estado', 5)
-            ->when($this->selectedCartero, function ($query) {
-                $query->where('user_id', $this->selectedCartero);
-            })
-            ->when($this->startDate && $this->endDate, function ($query) {
-                $query->whereBetween('updated_at', [$this->startDate, $this->endDate]);
-            })
-            ->where(function ($query) use ($userCity, $userDepartment) {
-                $query->where('reencaminamiento', $userCity)
-                    ->orWhere(function ($q) use ($userCity, $userDepartment) {
-                        $q->whereNull('reencaminamiento')
-                            ->where(function ($q2) use ($userCity, $userDepartment) {
-                                $q2->where('ciudad', $userCity)
-                                    ->orWhere('destino', $userDepartment);
-                            });
-                    });
-            })
-            ->orderBy('fecha', 'desc')
-            ->paginate($this->perPage);
+    // Consulta de admisiones con filtros
+    $admisiones = Admision::with('user')
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+        ->where('estado', 5)
+        ->when($this->selectedCartero, function ($query) {
+            $query->where('user_id', $this->selectedCartero);
+        })
+        ->when($this->startDate && $this->endDate, function ($query) {
+            $start = Carbon::parse($this->startDate)->startOfDay(); // Inicio del día
+            $end = Carbon::parse($this->endDate)->endOfDay();       // Fin del día
+            $query->whereBetween('updated_at', [$start, $end]);
+        })
+        ->where(function ($query) use ($userCity, $userDepartment) {
+            $query->where('reencaminamiento', $userCity)
+                ->orWhere(function ($q) use ($userCity, $userDepartment) {
+                    $q->whereNull('reencaminamiento')
+                        ->where(function ($q2) use ($userCity, $userDepartment) {
+                            $q2->where('ciudad', $userCity)
+                                ->orWhere('destino', $userDepartment);
+                        });
+                });
+        })
+        ->orderBy('fecha', 'desc')
+        ->paginate($this->perPage);
     
-        return view('livewire.entregadosemsjota', [
-            'admisiones' => $admisiones,
-            'carteros' => $carteros,
-        ]);
-    }
+    return view('livewire.entregadosemsjota', [
+        'admisiones' => $admisiones,
+        'carteros' => $carteros,
+    ]);
+}
+
     
 
     public function exportToPDF()
@@ -76,8 +79,11 @@ class Entregadosemsjota extends Component
                 $query->where('user_id', $this->selectedCartero);
             })
             ->when($this->startDate && $this->endDate, function ($query) {
-                $query->whereBetween('updated_at', [$this->startDate, $this->endDate]);
+                $start = Carbon::parse($this->startDate)->startOfDay(); // Inicio del día
+                $end = Carbon::parse($this->endDate)->endOfDay();       // Fin del día
+                $query->whereBetween('updated_at', [$start, $end]);
             })
+            
             ->where(function ($query) use ($userCity, $userDepartment) {
                 $query->where('reencaminamiento', $userCity)
                     ->orWhere(function ($q) use ($userCity, $userDepartment) {
