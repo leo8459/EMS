@@ -23,6 +23,7 @@ class Iniciar extends Component
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
     public $codigosHoy = []; // Almacena los códigos de los registros generados hoy
     public $showModalExpedicionHoy = false; // Controla la visibilidad del modal
+    public $admisionesParaExpedicion = []; // Variable para almacenar admisiones seleccionadas
 
     protected function rules()
     {
@@ -576,32 +577,40 @@ public function update()
 
 
     public function entregarAExpedicion()
-{
-    if (!empty($this->selectedAdmisiones)) {
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
-            ->where('origen', $this->origen) // Validar que las admisiones sean de la regional del usuario
-            ->get();
+    {
+        if (!empty($this->selectedAdmisiones)) {
+            // Obtener las admisiones seleccionadas
+            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
+                ->where('origen', $this->origen)
+                ->get();
+    
+            foreach ($admisiones as $admision) {
+                // Cambiar el estado de la admisión a "Entregado a Expedición"
+                $admision->update(['estado' => 2]);
+    
+                // Registrar el evento
+                Eventos::create([
+                    'accion' => 'Entregar a Expedición',
+                    'descripcion' => 'Entrega a expedición de admisión seleccionada',
+                    'codigo' => $admision->codigo,
+                    'user_id' => Auth::id(),
+                ]);
+            }
+            // return $this->generarReporte($admisiones);
 
-        foreach ($admisiones as $admision) {
-            // Cambiar estado de la admisión
-            $admision->update(['estado' => 2]);
+            // Mostrar mensaje de éxito
+            session()->flash('message', 'Las admisiones seleccionadas fueron entregadas a expedición correctamente.');
+    
+            // Limpiar selección
+            $this->selectedAdmisiones = [];
+            $this->selectAll = false;
+            return $this->generarReporte($admisiones);
 
-            // Registrar el evento con la hora actual
-            Eventos::create([
-                'accion' => 'Entregar a Expedición',
-                'descripcion' => 'Entrega a expedición de admisión',
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
+        } else {
+            session()->flash('error', 'No se seleccionaron admisiones para entregar a expedición.');
         }
-
-        session()->flash('message', 'Las admisiones seleccionadas fueron entregadas a expedición.');
-        $this->selectedAdmisiones = []; // Reinicia la selección
-        $this->selectAll = false; // Reinicia el checkbox de seleccionar todos
-    } else {
-        session()->flash('error', 'No se seleccionaron admisiones para entregar a expedición.');
     }
-}
+    
 
 
 
@@ -610,67 +619,85 @@ public function update()
         // Si selectAll está activado, selecciona todos los IDs de la página actual
         $this->selectedAdmisiones = $value ? $this->currentPageIds : [];
     }
-    public function entregarAExpedicionHoy()
-    {
-        $today = Carbon::today(); // Obtiene la fecha actual sin la hora
-
-        // Actualiza todos los registros creados hoy y que coincidan con el origen del usuario
-        Admision::where('origen', $this->origen)
-            ->whereDate('fecha', $today) // Filtrar solo los registros de hoy
-            ->update(['estado' => 2]); // Cambiar estado a 2 (Expedición)
-
-        // Mostrar un mensaje de éxito
-        session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
-    }
     public function abrirModalEntregarHoy()
     {
-        $today = Carbon::today(); // Obtiene la fecha actual sin hora
-        $this->codigosHoy = Admision::where('origen', $this->origen)
+        $today = Carbon::today(); // Fecha actual sin hora
+    
+        // Obtener las admisiones generadas hoy
+        $this->admisionesParaExpedicion = Admision::where('origen', $this->origen)
             ->whereDate('fecha', $today)
-            ->pluck('codigo') // Obtiene solo los códigos
-            ->toArray();
-
-        if (count($this->codigosHoy) > 0) {
-            $this->dispatch('mostrar-modal-expedicion-hoy'); // Dispara evento para mostrar el modal
-        } else {
+            ->where('estado', 1) // Solo admisiones activas
+            ->get()
+            ->toArray(); // Convertir a array para usar en la vista
+    
+        if (empty($this->admisionesParaExpedicion)) {
             session()->flash('error', 'No hay registros generados hoy para enviar a expedición.');
+            return;
         }
+    
+        // Mostrar el modal
+        $this->dispatch('mostrar-modal-expedicion-hoy');
     }
-
-
+    
+    // Método para confirmar y procesar la entrega
     public function confirmarEntregarHoy()
-{
-    $today = Carbon::today();
-
-    // Obtener las admisiones creadas hoy
-    $admisiones = Admision::where('origen', $this->origen)
-        ->whereDate('fecha', $today)
-        ->where('estado', 1) // Solo procesar admisiones activas
-        ->get();
-
-    if ($admisiones->isEmpty()) {
-        session()->flash('error', 'No hay registros generados hoy para entregar a expedición.');
-        return;
+    {
+        $today = Carbon::today();
+    
+        // Obtener las admisiones generadas hoy
+        $admisiones = Admision::where('origen', $this->origen)
+            ->whereDate('fecha', $today)
+            ->where('estado', 1) // Solo procesar admisiones activas
+            ->get();
+    
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No hay registros generados hoy para entregar a expedición.');
+            return;
+        }
+    
+        foreach ($admisiones as $admision) {
+            // Actualizar estado de la admisión
+            $admision->update(['estado' => 2]);
+    
+            // Registrar evento
+            Eventos::create([
+                'accion' => 'Entregar a Expedición',
+                'descripcion' => 'Entrega a expedición de admisión generada hoy',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
+    
+        // Generar y descargar el PDF
+        return $this->generarReporte($admisiones);
     }
+    
 
-    foreach ($admisiones as $admision) {
-        // Actualizar estado de la admisión
-        $admision->update(['estado' => 2]);
-
-        // Crear un evento para la admisión
-        Eventos::create([
-            'accion' => 'Entregar a Expedición',
-            'descripcion' => 'Entrega a expedición de admisión generada hoy',
-            'codigo' => $admision->codigo,
-            'user_id' => Auth::id(),
-        ]);
+    
+    public function generarReporte($admisiones)
+    {
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No hay registros para generar el reporte.');
+            return;
+        }
+    
+        // Preparar los datos para la vista
+        $data = [
+            'admisiones' => $admisiones,
+        ];
+    
+        // Generar el PDF
+        $pdf = Pdf::loadView('pdfs.reporte_admisiones', $data);
+    
+        // Descargar automáticamente el PDF
+        return response()->streamDownload(
+            fn() => print($pdf->stream('reporte_admisiones.pdf')),
+            'reporte_admisiones.pdf'
+        );
     }
+    
+    
 
-    // Disparar evento para ocultar el modal
-    $this->dispatch('ocultar-modal-expedicion-hoy');
 
-    session()->flash('message', 'Todos los registros generados hoy han sido entregados a expedición.');
-    $this->codigosHoy = []; // Limpia la lista de códigos
-}
 
 }
