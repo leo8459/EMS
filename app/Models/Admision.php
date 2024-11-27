@@ -28,7 +28,7 @@ class Admision extends Model
         'telefono_destinatario',
         'direccion',
         'provincia',
-        'ciudad',
+        'ciudad', // Incluye 'ciudad' como fillable
         'pais',
         'observacion_entrega',
         'peso_ems',

@@ -26,8 +26,10 @@
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
+
                                 </div>
-                               
+                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Descargar Excel</button>
+
                             </div>
                         </div>
                         @if (session()->has('message'))
