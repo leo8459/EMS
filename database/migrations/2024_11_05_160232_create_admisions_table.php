@@ -42,6 +42,8 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->string('contenido');
             $table->string('reencaminamiento');
+            
+            $table->string('creacionadmision');
 
             $table->integer('estado')->default(1);
             $table->timestamps();

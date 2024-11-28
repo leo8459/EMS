@@ -54,10 +54,11 @@ class Entregarenviosfirma extends Component
     
         // Guardar en la base de datos
         $resultado = $this->admision->update([
-            'estado' => 5,
+            'estado' => 5, // Estado entregado
             'recepcionado' => $this->recepcionado,
             'observacion_entrega' => $this->observacion_entrega,
             'firma_entrega' => $this->firma,
+            'user_id' => auth()->id(), // Guardar el ID del usuario logueado
         ]);
     
         if ($resultado) {
@@ -78,6 +79,7 @@ class Entregarenviosfirma extends Component
     
     
     
+    
 
     /**
      * Renderizar la vista Livewire.
@@ -90,23 +92,25 @@ class Entregarenviosfirma extends Component
     }
 
     public function noEntregado()
-{
-    // Guardar sin cambiar el estado
-    $this->admision->update([
-        'observacion_entrega' => $this->observacion_entrega,
-    ]);
-
-    // Registrar el evento
-    Eventos::create([
-        'accion' => 'No Entregado',
-        'descripcion' => 'La admisión permanece en el estado actual.',
-        'codigo' => $this->admision->codigo,
-        'user_id' => auth()->id(),
-    ]);
-
-    session()->flash('message', 'La admisión se mantiene sin cambios.');
-    return redirect()->route('regresar');
-}
+    {
+        // Guardar sin cambiar el estado
+        $this->admision->update([
+            'observacion_entrega' => $this->observacion_entrega,
+            'user_id' => auth()->id(), // Guardar el ID del usuario logueado
+        ]);
+    
+        // Registrar el evento
+        Eventos::create([
+            'accion' => 'No Entregado',
+            'descripcion' => 'La admisión permanece en el estado actual.',
+            'codigo' => $this->admision->codigo,
+            'user_id' => auth()->id(),
+        ]);
+    
+        session()->flash('message', 'La admisión se mantiene sin cambios.');
+        return redirect()->route('regresar');
+    }
+        
 
 public function return()
 {

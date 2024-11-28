@@ -103,87 +103,90 @@ class Iniciar extends Component
     }
 
     public function store()
-    {
+{
+    // Validar los datos
+    $this->validate();
 
-        // Validar los datos
-        $this->validate();
+    // Establecer la fecha actual
+    $this->fecha = now();
 
-        // Establecer la fecha actual
-        $this->fecha = now();
+    // Calcular el precio basado en el peso y el destino
+    $this->updatePrice();
 
-        // Calcular el precio basado en el peso y el destino
-        $this->updatePrice();
+    // Crear el registro en la base de datos
+    $admision = Admision::create([
+        'origen' => $this->origen,
+        'fecha' => $this->fecha,
+        'servicio' => $this->servicio,
+        'tipo_correspondencia' => $this->tipo_correspondencia,
+        'cantidad' => $this->cantidad,
+        'peso' => $this->peso,
+        'destino' => $this->destino,
+        'codigo' => $this->codigo,
+        'precio' => $this->precio,
+        'numero_factura' => $this->numero_factura,
+        'nombre_remitente' => $this->nombre_remitente,
+        'nombre_envia' => $this->nombre_envia,
+        'carnet' => $this->carnet,
+        'telefono_remitente' => $this->telefono_remitente,
+        'nombre_destinatario' => $this->nombre_destinatario,
+        'telefono_destinatario' => $this->telefono_destinatario,
+        'direccion' => $this->direccion,
+        'provincia' => $this->provincia,
+        'ciudad' => $this->ciudad,
+        'pais' => $this->pais,
+        'contenido' => $this->contenido,
+        'estado' => 1,
+        'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
+        'creacionadmision' => Auth::user()->name, // Guardar el nombre del usuario autenticado
+    ]);
 
-        // Crear el registro en la base de datos
-        $admision = Admision::create([
-            'origen' => $this->origen,
-            'fecha' => $this->fecha,
-            'servicio' => $this->servicio,
-            'tipo_correspondencia' => $this->tipo_correspondencia,
-            'cantidad' => $this->cantidad,
-            'peso' => $this->peso,
-            'destino' => $this->destino,
-            'codigo' => $this->codigo,
-            'precio' => $this->precio,
-            'numero_factura' => $this->numero_factura,
-            'nombre_remitente' => $this->nombre_remitente,
-            'nombre_envia' => $this->nombre_envia,
-            'carnet' => $this->carnet,
-            'telefono_remitente' => $this->telefono_remitente,
-            'nombre_destinatario' => $this->nombre_destinatario,
-            'telefono_destinatario' => $this->telefono_destinatario,
-            'direccion' => $this->direccion,
-            'provincia' => $this->provincia,
-            'ciudad' => $this->ciudad,
-            'pais' => $this->pais,
-            'contenido' => $this->contenido,
-            'estado' => 1,
-            'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
-        ]);
+    // Crear un registro en la tabla 'eventos'
+    Eventos::create([
+        'accion' => 'Recibir',
+        'descripcion' => 'Creación de admisión',
+        'codigo' => $admision->codigo,
+        'user_id' => Auth::id(),
+        'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
+    ]);
 
-        // Preparar los datos para el PDF usando el registro recién creado
-        $data = [
-            'origen' => $admision->origen,
-            'servicio' => $admision->servicio,
-            'fecha' => $admision->fecha,
-            'servicio' => $admision->servicio,
-            'tipo_correspondencia' => $admision->tipo_correspondencia,
-            'cantidad' => $admision->cantidad,
-            'peso' => $admision->peso,
-            'destino' => $admision->destino,
-            'codigo' => $admision->codigo,
-            'precio' => $admision->precio,
-            'numero_factura' => $admision->numero_factura,
-            'nombre_remitente' => $admision->nombre_remitente,
-            'nombre_envia' => $admision->nombre_envia,
-            'carnet' => $admision->carnet,
-            'telefono_remitente' => $admision->telefono_remitente,
-            'nombre_destinatario' => $admision->nombre_destinatario,
-            'telefono_destinatario' => $admision->telefono_destinatario,
-            'direccion' => $admision->direccion,
-            'ciudad' => $admision->ciudad,
-            'pais' => $admision->pais,
-        ];
-        // Crear un registro en la tabla 'eventos'
-        Eventos::create([
-            'accion' => 'Recibir',
-            'descripcion' => 'Creación de admisión',
-            'codigo' => $admision->codigo,
-            'user_id' => Auth::id(),
-            'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
-        ]);
-        // Renderizar la vista y generar el PDF
-        $pdf = Pdf::loadView('pdfs.admision', $data);
+    // Preparar los datos para el PDF usando el registro recién creado
+    $data = [
+        'origen' => $admision->origen,
+        'servicio' => $admision->servicio,
+        'fecha' => $admision->fecha,
+        'servicio' => $admision->servicio,
+        'tipo_correspondencia' => $admision->tipo_correspondencia,
+        'cantidad' => $admision->cantidad,
+        'peso' => $admision->peso,
+        'destino' => $admision->destino,
+        'codigo' => $admision->codigo,
+        'precio' => $admision->precio,
+        'numero_factura' => $admision->numero_factura,
+        'nombre_remitente' => $admision->nombre_remitente,
+        'nombre_envia' => $admision->nombre_envia,
+        'carnet' => $admision->carnet,
+        'telefono_remitente' => $admision->telefono_remitente,
+        'nombre_destinatario' => $admision->nombre_destinatario,
+        'telefono_destinatario' => $admision->telefono_destinatario,
+        'direccion' => $admision->direccion,
+        'ciudad' => $admision->ciudad,
+        'pais' => $admision->pais,
+    ];
 
-        // Enviar evento al navegador para recargar la página después de descargar el PDF
-        $this->dispatch('pdf-downloaded');
+    // Renderizar la vista y generar el PDF
+    $pdf = Pdf::loadView('pdfs.admision', $data);
 
-        // Descargar el PDF automáticamente
-        return response()->streamDownload(
-            fn() => print($pdf->stream('admision.pdf')),
-            'admision.pdf'
-        );
-    }
+    // Enviar evento al navegador para recargar la página después de descargar el PDF
+    $this->dispatch('pdf-downloaded');
+
+    // Descargar el PDF automáticamente
+    return response()->streamDownload(
+        fn() => print($pdf->stream('admision.pdf')),
+        'admision.pdf'
+    );
+}
+
 
 
     public function edit($id)

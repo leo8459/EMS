@@ -45,11 +45,9 @@
     <a href="{{ route('asignarcartero') }}" class="btn btn-success" style="margin-right: 10px;">
         Asignar Carteros
     </a>
-    <button class="btn btn-info" wire:click="abrirReencaminamientoModal" style="margin-right: 10px;">
-        Reencaminamiento
-    </button>
-    <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
-        Mandar a Regional
+    
+   <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
+        Mandar a Regional / Reencaminar
     </button>
     <button class="btn btn-secondary" wire:click="mandarAVentanilla">
         Mandar a Ventanilla
@@ -80,8 +78,8 @@
                                             <th>Cantidad</th>
                                             <th>Peso</th>
                                             <th>Precio (Bs)</th>
-                                            <th>Envio</th>
                                             <th>Destino</th>
+                                            <th>Envio</th>
 
                                             <th>Código</th>
                                             <th>Fecha</th>
@@ -106,8 +104,10 @@
                                                 <td>{{ $admisione->cantidad }}</td>
                                                 <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
                                                 <td>{{ $admisione->precio }}</td>
+                                                <td>
+                                                    {{ $admisione->reencaminamiento ?? $admisione->ciudad }}
+                                                </td>
                                                 <td>{{ $admisione->destino }}</td>
-                                                <td>{{ $admisione->ciudad }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
                                                 <td>
@@ -118,54 +118,71 @@
                                                     @else
                                                         -
                                                     @endif
-                                                </td> <!-- Nueva columna con lógica de estado -->
+                                                </td>
                                                 <td>{{ $admisione->observacion_entrega ? $admisione->observacion_entrega : '' }}</td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
                                                 @endhasrole
-                                                {{-- @hasrole('SuperAdmin|Administrador')
-
-                                                    @endhasrole --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
+                                    
                                 </table>
 
                                 <!-- Botón para abrir el modal -->
                             </div>
                             @if ($showModal)
-                                <div class="modal fade show d-block" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Confirmar Envío a Regional</h5>
-                                                <button type="button" class="close"
-                                                    wire:click="$set('showModal', false)">
-                                                    <span>&times;</span>
-                                                </button>
+                            <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <!-- Encabezado -->
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar Envío</h5>
+                                            <button type="button" class="close" wire:click="$set('showModal', false)">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <!-- Cuerpo -->
+                                        <div class="modal-body">
+                                            <p>Puede enviar las admisiones seleccionadas a la regional o reencaminarlas a otro departamento.</p>
+                                            <!-- Combo box para seleccionar el departamento de reencaminamiento -->
+                                            <div class="form-group">
+                                                <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
+                                                <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
+                                                    <option value="">Seleccione un departamento</option>
+                                                    <option value="LA PAZ">LA PAZ</option>
+                                                    <option value="ORURO">ORURO</option>
+                                                    <option value="BENI">BENI</option>
+                                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                    <option value="POTOSI">POTOSI</option>
+                                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                                    <option value="PANDO">PANDO</option>
+                                                    <option value="TARIJA">TARIJA</option>
+                                                </select>
+                                                @if (!$selectedDepartment)
+                                                    <small class="text-danger">Debe seleccionar un departamento.</small>
+                                                @endif
                                             </div>
-                                            <div class="modal-body">
-                                                <p>¿Está seguro de que desea enviar las admisiones seleccionadas a la
-                                                    regional?</p>
-                                                <p><strong>Ciudad:</strong> {{ $ciudadModal }}</p>
-                                                <p><strong>Destino:</strong> {{ $destinoModal }}</p>
-                                                <ul>
-                                                    @foreach ($selectedAdmisionesCodes as $codigo)
-                                                        <li>Código: {{ $codigo }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-primary"
-                                                    wire:click="mandarARegional">Confirmar</button>
-                                                <button class="btn btn-success" wire:click="generarExcel">Generar
-                                                    Excel</button>
-
-                                            </div>
+                                            
+                                            <!-- Mostrar los códigos de las admisiones seleccionadas -->
+                                            <ul>
+                                                @foreach ($selectedAdmisionesCodes as $codigo)
+                                                    <li>Código: {{ $codigo }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <!-- Pie -->
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary" wire:click="mandarARegional">Guardar y Generar Excel</button>
+                                            <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
                                         </div>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
+                        @endif
+                        
+                        
                             @if ($showReencaminamientoModal)
                                 <div class="modal fade show d-block" tabindex="-1" role="dialog"
                                     style="background-color: rgba(0,0,0,0.5);">

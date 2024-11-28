@@ -38,8 +38,9 @@ class Admision extends Model
         'estado',
         'contenido',
         'reencaminamiento',
+        'creacionadmision',
         'user_id',
-
+        
 
     ];
     public function user()

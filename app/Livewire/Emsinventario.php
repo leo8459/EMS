@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use Livewire\WithFileDownloads; // Importar el trait
 
 
 
@@ -142,111 +143,106 @@ public function toggleSelectAll()
 
     
 
-    public function abrirModal()
-    {
-        if (count($this->selectedAdmisiones) > 0) {
-            $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
-                ->where('origen', Auth::user()->city) // Validar ciudad del usuario
-                ->get();
-    
-            if ($admissions->isEmpty()) {
-                session()->flash('error', 'No hay admisiones válidas seleccionadas para su regional.');
-                return;
-            }
-    
-            // Obtener las ciudades únicas de las admisiones seleccionadas
-            $cities = $admissions->pluck('ciudad')->unique();
-    
-            if ($cities->count() > 1) {
-                // Hay admisiones con ciudades diferentes
-                // Encontrar las admisiones que tienen una ciudad diferente a la primera
-                $firstCity = $cities->first();
-                $differentAdmissions = $admissions->filter(function ($admission) use ($firstCity) {
-                    return $admission->ciudad != $firstCity;
-                });
-    
-                // Obtener los códigos y ciudades de las admisiones diferentes
-                $differentAdmissionsInfo = $differentAdmissions->map(function ($admission) {
-                    return "Código: {$admission->codigo}, Ciudad: {$admission->ciudad}";
-                })->implode('; ');
-    
-                session()->flash('error', 'Hay admisiones que no coinciden en ciudad con las demás: ' . $differentAdmissionsInfo);
-                return;
-            }
-    
-            $this->showModal = true;
-    
-            $this->destinoModal = $admissions->first()->destino ?? null;
-            $this->ciudadModal = $admissions->first()->ciudad ?? null;
-    
-            $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
-        } else {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
-        }
-    }
-    
-
-
-    public function mandarARegional()
-    {
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
+public function abrirModal()
+{
+    if (count($this->selectedAdmisiones) > 0) {
+        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)
             ->where('origen', Auth::user()->city) // Validar ciudad del usuario
             ->get();
-    
-        foreach ($admisiones as $admision) {
-            // Cambiar estado a enviado a regional
-            $admision->estado = 6;
-            $admision->save();
-    
-            // Registrar el evento
-            Eventos::create([
-                'accion' => 'Mandar a regional',
-                'descripcion' => 'La admisión fue enviada a la regional.',
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
+
+        if ($admissions->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas seleccionadas para su regional.');
+            return;
         }
-    
-        $this->selectedAdmisiones = [];
-        $this->showModal = false;
-    
-        session()->flash('message', 'Las admisiones seleccionadas se han enviado a la regional.');
+
+        $this->showModal = true;
+
+        $this->destinoModal = null; // Ya no se utiliza
+        $this->ciudadModal = null; // Ya no se utiliza
+
+        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
+
+        // Inicializar el campo de reencaminamiento en null
+        $this->selectedDepartment = null;
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
     }
+}
+
+
+    
+
+
+public function mandarARegional()
+{
+    if (empty($this->selectedAdmisiones)) {
+        session()->flash('error', 'No hay admisiones seleccionadas.');
+        return;
+    }
+
+    if (empty($this->selectedDepartment)) {
+        session()->flash('error', 'Debe seleccionar un departamento antes de enviar a la regional.');
+        return;
+    }
+
+    $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
+        ->where('origen', Auth::user()->city)
+        ->get();
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas seleccionadas para procesar.');
+        return;
+    }
+
+    foreach ($admisiones as $admision) {
+        $admision->estado = 6; // Mandar a regional
+        $admision->reencaminamiento = $this->selectedDepartment; // Asignar el departamento seleccionado
+        $admision->save();
+
+        Eventos::create([
+            'accion' => 'Mandar a regional',
+            'descripcion' => 'La admisión fue enviada a la regional.',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+    }
+
+    // Generar el Excel y retornar la descarga
+    return $this->generarExcel();
+}
+
+
+
+
+
+
     
 
     public function generarExcel()
     {
         $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
-            ->where('origen', Auth::user()->city) // Validar ciudad del usuario
-            ->get();
-    
+        ->where('origen', Auth::user()->city)
+        ->get();
+
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No hay admisiones válidas seleccionadas para generar el Excel.');
             return;
         }
-    
-        // Registrar eventos por cada admisión
-        foreach ($admisiones as $admision) {
-            Eventos::create([
-                'accion' => 'Generar Excel',
-                'descripcion' => 'La admisión fue incluida en un archivo Excel.',
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
-        }
+
         // Crear el documento
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
         $worksheet->setTitle('Designado Operador Postal');
-    
+
         // Fecha y hora actual
         $currentDate = now()->format('d/m/Y');
         $currentTime = now()->format('H:i');
-        $firstPackage = Admision::find($this->selectedAdmisiones[0]);
-    
+        $firstPackage = $admisiones->first();
+
         // Nombre del usuario logueado
         $loggedInUserName = Auth::user()->name;
-    
+        $loggedInUserCity = Auth::user()->city;
+
         // Estilo para encabezado
         $headerStyle = [
             'font' => ['bold' => true],
@@ -255,30 +251,30 @@ public function toggleSelectAll()
                 'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
             ],
         ];
-    
-        // Configurar el ancho de las columnas, omitiendo "ORIG" y "CIUDAD"
+
+        // Configurar el ancho de las columnas
         $worksheet->getColumnDimension('A')->setWidth(20); // ENVIO
         $worksheet->getColumnDimension('B')->setWidth(10); // CAN
         $worksheet->getColumnDimension('C')->setWidth(10); // COR
         $worksheet->getColumnDimension('D')->setWidth(15); // EMS
         $worksheet->getColumnDimension('E')->setWidth(25); // CLIENTE
         $worksheet->getColumnDimension('F')->setWidth(20); // ENDAS
-        $worksheet->getColumnDimension('G')->setWidth(30); // OBSERVACION
+        $worksheet->getColumnDimension('G')->setWidth(30); // OFICIAL
         $worksheet->getColumnDimension('H')->setWidth(30); // OBSERVACION
 
         // Fila 1: Título
         $worksheet->mergeCells('A1:C2');
         $worksheet->setCellValue('A1', 'Postal designated operator');
         $worksheet->getStyle('A1')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('D1:G7');
         $worksheet->setCellValue('D1', 'EMS');
         $worksheet->getStyle('D1')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H1:M2');
         $worksheet->setCellValue('H1', 'LISTA CN-33');
         $worksheet->getStyle('H1')->applyFromArray($headerStyle);
-    
+
         // Añadir la imagen ocupando el rango H5:M7
         $drawing = new Drawing();
         $drawing->setName('EMS Image');
@@ -286,197 +282,186 @@ public function toggleSelectAll()
         $drawing->setPath(public_path('images/EMS.png')); // Ruta de la imagen
         $drawing->setCoordinates('H5'); // Celda de inicio
         $drawing->setHeight(50);
-        $drawing->setWidth(200);
         $drawing->setWorksheet($worksheet);
-    
+
         // Fila 3: BO-BOLIVIA y Airmails
         $worksheet->mergeCells('A3:C3');
         $worksheet->setCellValue('A3', 'BO-BOLIVIA');
         $worksheet->getStyle('A3')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H3:M3');
         $worksheet->setCellValue('H3', 'Airmails');
         $worksheet->getStyle('H3')->applyFromArray($headerStyle);
-    
-        // Fila 4: Office of origin
+
+        // Fila 4: Office of origin y DIA
         $worksheet->mergeCells('A4:C4');
         $worksheet->setCellValue('A4', 'Office of origin');
         $worksheet->getStyle('A4')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H4:M4');
         $worksheet->setCellValue('H4', 'DIA');
         $worksheet->getStyle('H4')->applyFromArray($headerStyle);
-    
+
         // Fila 5: Origen y Fecha actual
         $worksheet->mergeCells('A5:C5');
-        $worksheet->setCellValue('A5', $firstPackage->origen ?? '');
+        $worksheet->setCellValue('A5', $loggedInUserCity);
         $worksheet->getStyle('A5')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H5:M5');
         $worksheet->setCellValue('H5', $currentDate);
         $worksheet->getStyle('H5')->applyFromArray($headerStyle);
-    
-        // Fila 6 y 7: Office of destination y ciudad
+
+        // Fila 6: Office of destination y HORA
         $worksheet->mergeCells('A6:C6');
-        $worksheet->setCellValue('A6', 'office of destination');
+        $worksheet->setCellValue('A6', 'Office of destination');
         $worksheet->getStyle('A6')->applyFromArray($headerStyle);
-    
+
+        $worksheet->mergeCells('H6:M6');
+        $worksheet->setCellValue('H6', 'HORA');
+        $worksheet->getStyle('H6')->applyFromArray($headerStyle);
+
+        // Fila 7: Destino y Hora actual
+        // Usar el departamento seleccionado o el reencaminamiento si está disponible, o la ciudad de la admisión
+        $destinationCity = $this->selectedDepartment ?? $firstPackage->reencaminamiento ?? $firstPackage->ciudad ?? '';
+
         $worksheet->mergeCells('A7:C7');
-        $worksheet->setCellValue('A7', $firstPackage->ciudad ?? '');
+        $worksheet->setCellValue('A7', $destinationCity);
         $worksheet->getStyle('A7')->applyFromArray($headerStyle);
-    
+
+        $worksheet->mergeCells('H7:M7');
+        $worksheet->setCellValue('H7', $currentTime);
+        $worksheet->getStyle('H7')->applyFromArray($headerStyle);
+
         // Fila 8: Despacho y Prioritario
         $worksheet->mergeCells('A8:G8');
         $worksheet->setCellValue('A8', 'DESPACHO -001');
         $worksheet->getStyle('A8')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H8:M8');
         $worksheet->setCellValue('H8', 'X PRIORITARIO                  X POR AEREO');
         $worksheet->getStyle('H8')->applyFromArray($headerStyle);
-    
+
         // Fila 9: Número de vuelo y día de despacho
         $worksheet->mergeCells('A9:G10');
         $worksheet->setCellValue('A9', 'NUMERO DE VUELO LPB-OB-680');
         $worksheet->getStyle('A9')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H9:M9');
         $worksheet->setCellValue('H9', "DIA DE DESPACHO $currentDate");
         $worksheet->getStyle('H9')->applyFromArray($headerStyle);
-    
+
         $worksheet->mergeCells('H10:M10');
         $worksheet->setCellValue('H10', "HORA $currentTime");
         $worksheet->getStyle('H10')->applyFromArray($headerStyle);
-    
-        // Fila 11: Encabezado de columnas, excluyendo ORIG y CIUDAD
+
+        // Fila 11: Encabezado de columnas
         $worksheet->setCellValue('A11', 'ENVIO');
         $worksheet->setCellValue('B11', 'CAN');
         $worksheet->setCellValue('C11', 'COR');
         $worksheet->setCellValue('D11', 'EMS');
         $worksheet->setCellValue('E11', 'CLIENTE');
         $worksheet->setCellValue('F11', 'ENDAS');
+        $worksheet->setCellValue('G11', 'OFICIAL');
         $worksheet->setCellValue('H11', 'OBSERVACION');
-        $worksheet->setCellValue('G11', 'OFICIAL'); // Nueva columna
 
         $worksheet->getStyle('A11:H11')->applyFromArray($headerStyle);
-    
+
         // Agregar los datos de admisiones seleccionadas
         $currentRow = 12;
         $totalCantidad = 0;
         $totalPeso = 0;
-    
-        foreach ($this->selectedAdmisiones as $admisionId) {
-            $admision = Admision::find($admisionId);
+
+        foreach ($admisiones as $admision) {
             $peso = $admision->peso_ems ?: $admision->peso; // Usa peso_ems o peso si está vacío
-    
+
             $worksheet->setCellValue("A$currentRow", $admision->codigo);
             $worksheet->setCellValue("B$currentRow", 1); // Cantidad fija (1)
-            $worksheet->setCellValue("D$currentRow", $peso); // Mostrar el peso (peso_ems o peso)
+            $worksheet->setCellValue("C$currentRow", ''); // Campo vacío para COR
+            $worksheet->setCellValue("D$currentRow", $peso); // Mostrar el peso
             $worksheet->setCellValue("E$currentRow", $admision->nombre_remitente);
+            $worksheet->setCellValue("F$currentRow", ''); // Campo vacío para ENDAS
+            $worksheet->setCellValue("G$currentRow", ''); // Campo vacío para OFICIAL
             $worksheet->setCellValue("H$currentRow", $admision->observacion);
-            $worksheet->setCellValue("G$currentRow", ''); // Campo vacío para "OFICIAL"
             $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
-    
+
             // Acumular cantidad y peso
             $totalCantidad += 1;
             $totalPeso += $peso;
-    
+
             $currentRow++;
         }
-    
-      // Fila de totales
-$totalRow = $currentRow; // Guardar la fila donde están los totales
-$worksheet->setCellValue("A$totalRow", 'TOTAL');
-$worksheet->setCellValue("B$totalRow", '=SUM(B12:B' . ($currentRow - 1) . ')'); // Fórmula para sumar la columna B
-$worksheet->setCellValue("D$totalRow", '=SUM(D12:D' . ($currentRow - 1) . ')'); // Fórmula para sumar la columna D
-$worksheet->getStyle("A$totalRow:G$totalRow")->applyFromArray($headerStyle);
 
-    // Agregar información adicional al lado izquierdo en el mismo orden que en la imagen
-$currentRow += 2; // Dejar espacio después de la tabla
-// Usuario logueado en lugar de "MIRANDA"
-$loggedInUserCity = Auth::user()->name;
-// Primera línea: Dispatching office of exchange y la ciudad del usuario
-$worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
-$currentRow++;
-$worksheet->setCellValue("A$currentRow", $loggedInUserCity); // Ciudad del usuario logueado (reemplaza "MIRANDA")
-$currentRow++;
-$worksheet->setCellValue("A$currentRow", 'Signature');
-$currentRow++;
-$worksheet->setCellValue("A$currentRow", '______________________'); // Espacio para la firma
-$currentRow++;
+        // Fila de totales
+        $worksheet->setCellValue("A$currentRow", 'TOTAL');
+        $worksheet->setCellValue("B$currentRow", $totalCantidad);
+        $worksheet->setCellValue("C$currentRow", ''); // Campo vacío para COR
+        $worksheet->setCellValue("D$currentRow", $totalPeso);
+        $worksheet->setCellValue("E$currentRow", ''); // Campo vacío para CLIENTE
+        $worksheet->setCellValue("F$currentRow", ''); // Campo vacío para ENDAS
+        $worksheet->setCellValue("G$currentRow", ''); // Campo vacío para OFICIAL
+        $worksheet->setCellValue("H$currentRow", ''); // Campo vacío para OBSERVACION
+        $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
 
-// Segunda línea: Salidas internacionales
-$worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
-$currentRow += 2; // Dejar espacio
+        // Información adicional al final del documento
+        $currentRow += 2; // Dejar espacio después de la tabla
 
-// Datos a la derecha, colocados al mismo nivel que en la imagen
-$worksheet->setCellValue("D" . ($currentRow - 6), 'The official of the carrier of airport');
-$worksheet->setCellValue("D" . ($currentRow - 5), 'Date and signature');
-$currentRow++;
+        // Primera sección: Dispatching office of exchange
+        $worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
 
-$worksheet->setCellValue("F" . ($currentRow - 6), 'Office of exchange of destination');
-$worksheet->setCellValue("F" . ($currentRow - 5), 'Date and signature');
+        $worksheet->setCellValue("A$currentRow", $loggedInUserCity); // Ciudad del usuario logueado
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
 
-// Aplicar estilos para mantener consistencia
-$worksheet->getStyle("A" . ($currentRow - 10) . ":F$currentRow")->applyFromArray([
-    'font' => ['bold' => true],
-    'alignment' => ['vertical' => 'center', 'horizontal' => 'left'],
-]);
+        $worksheet->setCellValue("A$currentRow", 'Signature');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
 
+        $worksheet->setCellValue("A$currentRow", '______________________'); // Espacio para la firma
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
 
-        // Guardar el archivo en el servidor temporalmente y luego enviarlo como descarga
+        // Segunda sección: Salidas internacionales
+        $worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow += 2; // Dejar espacio
+
+        // Sección derecha: The official of the carrier of airport
+        $carrierRow = $currentRow - 6;
+        $worksheet->setCellValue("D$carrierRow", 'The official of the carrier of airport');
+        $worksheet->getStyle("D$carrierRow")->applyFromArray($headerStyle);
+        $carrierRow++;
+
+        $worksheet->setCellValue("D$carrierRow", 'Date and signature');
+        $worksheet->getStyle("D$carrierRow")->applyFromArray($headerStyle);
+
+        // Sección derecha: Office of exchange of destination
+        $destinationRow = $currentRow - 6;
+        $worksheet->setCellValue("F$destinationRow", 'Office of exchange of destination');
+        $worksheet->getStyle("F$destinationRow")->applyFromArray($headerStyle);
+        $destinationRow++;
+
+        $worksheet->setCellValue("F$destinationRow", 'Date and signature');
+        $worksheet->getStyle("F$destinationRow")->applyFromArray($headerStyle);
+
+        // Aplicar estilos adicionales si es necesario
+        $worksheet->getStyle("A1:H$currentRow")->getAlignment()->setWrapText(true);
+
+        // Guardar el archivo en el servidor temporalmente
         $fileName = 'designado_operador_postal.xlsx';
-        $filePath = storage_path("app/public/$fileName");
-    
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
-    
+    $filePath = storage_path("app/public/$fileName");
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($filePath);
+
+        // Retornar la descarga del archivo usando el trait WithFileDownloads
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
-    public function abrirReencaminamientoModal()
-{
-    if (count($this->selectedAdmisiones) > 0) {
-        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-        if ($admissions->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas seleccionadas.');
-            return;
-        }
-        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
-        $this->showReencaminamientoModal = true;
-    } else {
-        session()->flash('error', 'Debe seleccionar al menos una admisión.');
-    }
-}
 
-public function reencaminar()
-{
-    if ($this->selectedDepartment) {
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
-        foreach ($admisiones as $admision) {
-            // Actualizar el reencaminamiento y el estado de la admisión
-            $admision->update([
-                'reencaminamiento' => $this->selectedDepartment,
-                'estado' => 8,
-            ]);
 
-            // Registrar el evento
-            Eventos::create([
-                'accion' => 'Reencaminamiento',
-                'descripcion' => "La admisión fue reencaminada al departamento: {$this->selectedDepartment}.",
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
-        }
 
-        $this->selectedAdmisiones = [];
-        $this->showReencaminamientoModal = false;
-        $this->selectedDepartment = null;
-
-        session()->flash('message', 'Las admisiones seleccionadas han sido reencaminadas.');
-    } else {
-        session()->flash('error', 'Debe seleccionar un departamento.');
-    }
-}
 
 public function mandarAVentanilla()
 {
