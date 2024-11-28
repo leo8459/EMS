@@ -26,6 +26,10 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.asignarcartero');
     }
+    public function asignarse ()
+    {
+        return view('admisiones.asignarsecartero');
+    }
     public function encamino ()
     {
         return view('admisiones.encaminocartero');
@@ -50,6 +54,10 @@ class AdmisionesController extends Controller
     public function admisiones ()
     {
         return view('admisiones.admisionesgeneradas');
+    }
+    public function ventanilla ()
+    {
+        return view('admisiones.entregasventanilla');
     }
 
     public function entregarenvios($id)

@@ -24,56 +24,66 @@ class Recibirregional extends Component
 
     public function render()
 {
-    // Obtener la ciudad del usuario autenticado
     $userCity = Auth::user()->city;
 
-    // Filtrar las admisiones según las condiciones
+    // Obtener los datos filtrados
     $admisiones = Admision::query()
+        ->when($this->searchTerm, function ($query) {
+            $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
+        })
         ->where(function ($query) use ($userCity) {
-            // Condición para estado 6: Mostrar si la ciudad del usuario coincide
             $query->where('estado', 6)
-                ->where('ciudad', $userCity);
+                ->where('ciudad', $userCity)
+                ->orWhere(function ($query) use ($userCity) {
+                    $query->where('estado', 8)
+                        ->where('reencaminamiento', $userCity);
+                });
         })
-        ->orWhere(function ($query) use ($userCity) {
-            // Condición para estado 8: Mostrar si el reencaminamiento coincide con la ciudad del usuario
-            $query->where('estado', 8)
-                ->where('reencaminamiento', $userCity);
-        })
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-        ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
+        ->orderBy('fecha', 'desc')
         ->paginate($this->perPage);
 
-    // Verificar si todos los elementos de la página están seleccionados
-    $this->selectAll = count($admisiones) > 0 && count($this->selectedAdmisiones) === count($admisiones);
+    // Si hay un término de búsqueda, acumular las selecciones
+    if (!empty($this->searchTerm)) {
+        $newSelections = $admisiones->pluck('id')->toArray();
+        $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
+
+        // Limpiar el campo de búsqueda
+        $this->searchTerm = '';
+    }
 
     return view('livewire.recibirregional', [
         'admisiones' => $admisiones,
     ]);
 }
 
+    
+    
+    
 
 
-public function openModal()
-{
-    if (empty($this->selectedAdmisiones)) {
-        session()->flash('error', 'Debe seleccionar al menos un envío.');
-        return;
+
+    public function openModal()
+    {
+        if (empty($this->selectedAdmisiones)) {
+            session()->flash('error', 'Debe seleccionar al menos un envío.');
+            return;
+        }
+    
+        // Cargar los datos de las admisiones seleccionadas
+        $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
+            ->get()
+            ->map(function ($admision) {
+                return [
+                    'codigo' => $admision->codigo, // Usar el código en lugar del ID
+                    'peso_ems' => $admision->peso_ems ?: $admision->peso,
+                    'peso_regional' => $admision->peso_regional,
+                    'observacion' => $admision->observacion,
+                ];
+            })->toArray();
+    
+        $this->showModal = true;
     }
-
-    // Cargar los datos de las admisiones seleccionadas
-    $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
-        ->get()
-        ->map(function ($admision) {
-            return [
-                'id' => $admision->id,
-                'peso_ems' => $admision->peso_ems ?: $admision->peso,
-                'peso_regional' => $admision->peso_regional,
-                'observacion' => $admision->observacion,
-            ];
-        })->toArray();
-
-    $this->showModal = true;
-}
+    
 
     public function closeModal()
     {

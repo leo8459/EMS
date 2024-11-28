@@ -6,49 +6,72 @@
     <section class="content">
         <div class="card">
             <div class="card-header">
-                <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control d-inline-block w-50" />
-                <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
+            <input 
+    type="text" 
+    wire:model.defer="searchTerm" 
+    wire:keydown.enter="$refresh" 
+    placeholder="Buscar..." 
+    class="form-control d-inline-block w-50" 
+/>
+<button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
+
+
             </div>
             <div class="card-footer">
                 <button class="btn btn-success" wire:click="openModal">Recibir Envíos</button>
             </div>
             <div class="card-body">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input type="checkbox" wire:model="selectAll">
-                            </th>                            
-                            <th>#</th>
-                            <th>Origen</th>
-                            <th>Envio</th>
-                            <th>Destino</th>
-                            <th>Código</th>
-                            <th>Peso (EMS)</th>
-                            <th>Observación</th>
-                            <th>Reencaminado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($admisiones as $admision)
-                            <tr>
-                                <td>
-                                    <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admision->id }}">
-                                </td>                                
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $admision->origen }}</td>
-                                <td>{{ $admision->destino }}</td>
-                                <td>{{ $admision->ciudad }}</td>
-                                <td>{{ $admision->codigo }}</td>
-                                <td>{{ $admision->peso_ems }}</td>
-                                <td>{{ $admision->observacion }}</td>
-                                <td>{{ $admision->reencaminamiento }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                {{ $admisiones->links() }}
-            </div>
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" wire:model="selectAll"
+                                                    wire:click="toggleSelectAll" /></th>
+                                            <th>#</th>
+                                            <th>Origen</th>
+                                            <th>Peso</th>
+                                            <th>Envio</th>
+                                            <th>Destino</th>
+                                            <th>Código</th>
+                                            <th>Fecha</th>
+                                            <th>Observación</th>
+                                            <th>Reencaminamiento</th>
+                                            @hasrole('SuperAdmin|Administrador')
+                                                <th>Admision</th>
+                                            @endhasrole
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+    @foreach ($admisiones as $admision)
+        <tr>
+            <td>
+                <input 
+                    type="checkbox" 
+                    wire:model="selectedAdmisiones" 
+                    value="{{ $admision->id }}" 
+                />
+            </td>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{ $admision->origen }}</td>
+            <td>{{ $admision->peso_regional ?: ($admision->peso_ems ?: $admision->peso) }}</td>
+            <td>{{ $admision->destino }}</td>
+            <td>{{ $admision->ciudad }}</td>
+            <td>{{ $admision->codigo }}</td>
+            <td>{{ $admision->fecha }}</td>
+            <td>{{ $admision->observacion }}</td>
+            <td>{{ $admision->reencaminamiento }}</td>
+            @hasrole('SuperAdmin|Administrador')
+                <td>{{ $admision->user->name ?? 'No asignado' }}</td>
+            @endhasrole
+        </tr>
+    @endforeach
+</tbody>
+
+
+
+                                </table>
+
+                                <!-- Botón para abrir el modal -->
+                            </div>
             
         </div>
     </section>
@@ -80,8 +103,8 @@
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     @foreach ($selectedAdmisionesData as $index => $data)
                         <div class="border rounded p-3 mb-3">
-                            <h6>Envío #{{ $data['id'] }}</h6>
-                            <div class="form-group">
+                        <h6>Envío: {{ $data['codigo'] }}</h6> <!-- Mostrar el código del envío -->
+                        <div class="form-group">
                                 <label for="pesoEms-{{ $index }}">Peso EMS (opcional)</label>
                                 <input type="number" step="0.01" class="form-control" id="pesoEms-{{ $index }}" 
                                        wire:model="selectedAdmisionesData.{{ $index }}.peso_ems"disabled>

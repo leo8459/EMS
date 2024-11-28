@@ -99,10 +99,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/entregados', \App\Livewire\Entregadosemsjota::class)->name('entregados');
     Route::get('encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero'])->name('reporte.servicio');
     Route::match(['GET', 'POST'], '/recibirregional', [AdmisionesController::class, 'regional'])->name('admisiones.pdf');
+    Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla']);
 
     //carteros
     Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
     Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero']);
+    Route::get('/asignarsecartero', [AdmisionesController::class, 'asignarse'])->name('asignarsecartero');
 
     //eventos
     Route::get('/eventosregistro', [EventosController::class, 'eventos']);

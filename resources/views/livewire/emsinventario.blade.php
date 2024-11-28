@@ -42,18 +42,20 @@
                             </div>
 
                             <div class="d-flex justify-content-end align-items-center mt-3">
-                                <a href="{{ route('asignarcartero') }}" class="btn btn-success"
-                                    style="margin-right: 10px;">
-                                    Asignar Carteros
-                                </a>
-                                <button class="btn btn-info" wire:click="abrirReencaminamientoModal"
-                                    style="margin-right: 10px;">
-                                    Reencaminamiento
-                                </button>
-                                <button class="btn btn-warning" wire:click="abrirModal">
-                                    Mandar a Regional
-                                </button>
-                            </div>
+    <a href="{{ route('asignarcartero') }}" class="btn btn-success" style="margin-right: 10px;">
+        Asignar Carteros
+    </a>
+    <button class="btn btn-info" wire:click="abrirReencaminamientoModal" style="margin-right: 10px;">
+        Reencaminamiento
+    </button>
+    <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
+        Mandar a Regional
+    </button>
+    <button class="btn btn-secondary" wire:click="mandarAVentanilla">
+        Mandar a Ventanilla
+    </button>
+</div>
+
 
                             @if (session()->has('message'))
                                 <div class="alert alert-success">

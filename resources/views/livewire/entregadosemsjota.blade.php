@@ -93,6 +93,7 @@
                                             <th>País</th>
                                             <th>Entregado</th>
                                             <th>Observación</th>
+                                            <th>Recepcionado</th>
                                             <th>Cartero</th>
                                             <th>Foto</th>
                                             <th>Firma</th>
@@ -117,6 +118,7 @@
                                                 <td>{{ $admisione->pais }}</td>
                                                 <td>{{ $admisione->updated_at->format('d/m/Y H:i') }}</td>
                                                 <td>{{ $admisione->observacion }}</td>
+                                                <td>{{ $admisione->recepcionado }}</td>
                                                 <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
                                                 <td>
                                                     @php
@@ -149,6 +151,7 @@
                                                         <span>Sin firma</span>
                                                     @endif
                                                 </td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>

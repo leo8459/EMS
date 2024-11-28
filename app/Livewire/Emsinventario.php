@@ -466,5 +466,32 @@ public function reencaminar()
     }
 }
 
-    
+public function mandarAVentanilla()
+{
+    if (count($this->selectedAdmisiones) > 0) {
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+
+        foreach ($admisiones as $admision) {
+            // Cambiar el estado a 9
+            $admision->estado = 9;
+            $admision->save();
+
+            // Registrar el evento
+            Eventos::create([
+                'accion' => 'Mandar a ventanilla',
+                'descripcion' => 'La admisión fue enviada a la ventanilla.',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
+
+        // Limpiar la selección después de procesar
+        $this->selectedAdmisiones = [];
+
+        session()->flash('message', 'Las admisiones seleccionadas se han enviado a la ventanilla.');
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
+    }
+}
+
 }

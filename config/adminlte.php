@@ -435,6 +435,30 @@ return [
             ],
         ],
         [
+            'text' => 'Ventanilla',
+            'icon' => 'fas fa-users',
+            'can'  => 'ver.ems',
+            'submenu' => [
+                [
+                    'text' => 'Inventario',
+                    'url' => 'entregasventanilla',
+                    'can'  => 'ver.porentregar',
+                    'icon' => 'fas fa-user',
+                ],
+                // [
+                //     'text' => 'En camino',
+                //     'url' => 'encaminocarteroentrega',
+                //     'can'  => 'ver.encaminocarteros',
+                //     'icon' => 'fas fa-user',
+                // ],
+                // [
+                //     'text' => 'Envios Encamino',
+                //     'url' => 'encaminocartero',
+                //     'icon' => 'fas fa-user',
+                // ],
+            ],
+        ],
+        [
             'text' => 'Eventos',
             'url' => 'eventosregistro',
             'icon' => 'fas fa-user',
