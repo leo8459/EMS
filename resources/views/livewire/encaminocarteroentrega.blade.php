@@ -97,7 +97,7 @@
                                             <td>{{ $admisione->ciudad }}</td>
                                             <td>{{ $admisione->pais }}</td>
                                             <td>{{ $admisione->fecha }}</td>
-                                            <td>{{ $admisione->observacion }}</td>
+                                            <td>{{ $admisione->observacion_entrega ? $admisione->observacion_entrega : '' }}</td>
                                             <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
 
                                             <td>

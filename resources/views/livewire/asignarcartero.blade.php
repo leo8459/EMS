@@ -10,6 +10,7 @@
                         <th>Código</th>
                         <th>Destino</th>
                         <th>Dirección</th>
+                        <th>Estado</th> <!-- Nueva columna -->
                         <th>Asignar</th>
                     </tr>
                 </thead>
@@ -19,6 +20,15 @@
                             <td>{{ $admision->codigo }}</td>
                             <td>{{ $admision->destino }}</td>
                             <td>{{ $admision->direccion }}</td>
+                            <td>
+                                @if ($admision->estado == 3 || $admision->estado == 7)
+                                    Entrega Domiciliaria
+                                @elseif ($admision->estado == 10)
+                                    Return
+                                @else
+                                    -
+                                @endif
+                            </td> <!-- Nueva lógica para mostrar el estado -->
                             <td>
                                 <button class="btn btn-primary btn-sm" wire:click="selectAdmision({{ $admision->id }})">Asignar</button>
                             </td>
@@ -68,6 +78,7 @@
                                     @endforeach
                                 </select>
                             </td>
+                           
                             <td>
                                 <button class="btn btn-warning btn-sm" wire:click="returnToLeftList({{ $index }})">Devolver a la lista</button>
                             </td>

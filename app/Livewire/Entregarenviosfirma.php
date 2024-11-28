@@ -88,4 +88,45 @@ class Entregarenviosfirma extends Component
             'admision' => $this->admision,
         ]);
     }
+
+    public function noEntregado()
+{
+    // Guardar sin cambiar el estado
+    $this->admision->update([
+        'observacion_entrega' => $this->observacion_entrega,
+    ]);
+
+    // Registrar el evento
+    Eventos::create([
+        'accion' => 'No Entregado',
+        'descripcion' => 'La admisión permanece en el estado actual.',
+        'codigo' => $this->admision->codigo,
+        'user_id' => auth()->id(),
+    ]);
+
+    session()->flash('message', 'La admisión se mantiene sin cambios.');
+    return redirect()->route('regresar');
+}
+
+public function return()
+{
+    // Cambiar estado a 10 y eliminar el user_id
+    $this->admision->update([
+        'estado' => 10,
+        'user_id' => null, // Eliminar el user_id
+    ]);
+
+    // Registrar el evento
+    Eventos::create([
+        'accion' => 'Return',
+        'descripcion' => 'La admisión fue marcada como Return y el usuario asignado fue eliminado.',
+        'codigo' => $this->admision->codigo,
+        'user_id' => auth()->id(),
+    ]);
+
+    session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
+    return redirect()->route('regresar');
+}
+
+
 }

@@ -97,8 +97,11 @@
                                 <div class="row mt-3">
                                     <div class="col-12 text-right">
                                         <button type="submit" id="submitButton" class="btn btn-primary">Guardar</button>
+                                        <button type="button" wire:click="noEntregado" class="btn btn-warning">No Entregado</button>
+                                        <button type="button" wire:click="return" class="btn btn-danger">Return</button>
                                     </div>
                                 </div>
+                                
                             </form>
                         </div>
                         <div class="card-footer">

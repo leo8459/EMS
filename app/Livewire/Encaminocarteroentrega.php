@@ -28,10 +28,10 @@ class Encaminocarteroentrega extends Component
 
     public function render()
 {
-    // Filtrar y paginar las admisiones en estado 4 y relacionadas con el usuario autenticado
+    // Filtrar y paginar las admisiones en estados 4 o 10, y relacionadas con el usuario autenticado
     $admisiones = Admision::with('user') // Aseguramos que la relación user esté cargada
         ->where('codigo', 'like', '%' . $this->searchTerm . '%')
-        ->where('estado', 4)
+        ->whereIn('estado', [4, 10]) // Filtra por estados 4 y 10
         ->where('user_id', Auth::id()) // Filtra por el usuario logueado
         ->orderBy('fecha', 'desc')
         ->paginate($this->perPage);
@@ -40,6 +40,7 @@ class Encaminocarteroentrega extends Component
         'admisiones' => $admisiones,
     ]);
 }
+
 
     public function openModal($id)
     {

@@ -85,6 +85,7 @@
 
                                             <th>Código</th>
                                             <th>Fecha</th>
+                                            <th>Estado</th> <!-- Nuevo encabezado de columna -->
                                             <th>Observación</th>
                                             @hasrole('SuperAdmin|Administrador')
                                                 <th>Admision</th>
@@ -109,7 +110,16 @@
                                                 <td>{{ $admisione->ciudad }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
-                                                <td>{{ $admisione->observacion }}</td>
+                                                <td>
+                                                    @if ($admisione->estado == 3 || $admisione->estado == 7)
+                                                        Entrega Domiciliaria
+                                                    @elseif ($admisione->estado == 10)
+                                                        Return
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td> <!-- Nueva columna con lógica de estado -->
+                                                <td>{{ $admisione->observacion_entrega ? $admisione->observacion_entrega : '' }}</td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
                                                 @endhasrole

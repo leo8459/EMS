@@ -26,46 +26,58 @@ class Asignarcartero extends Component
     public $selectedCarteroForAll; // Nuevo campo para seleccionar cartero para todas las admisiones
 
     public function render()
-    {
-        $userCity = Auth::user()->city;
-    
-        // Obtener los IDs de las admisiones ya asignadas
-        $assignedIds = array_column($this->assignedAdmisiones, 'id');
-    
-        // Filtrar y paginar las admisiones según las condiciones
-        $admisiones = Admision::query()
-            ->where(function ($query) use ($userCity) {
-                // Condición para estado 7
-                $query->where(function ($subQuery) use ($userCity) {
-                    $subQuery->where('estado', 7)
-                             ->where(function ($innerQuery) use ($userCity) {
-                                 $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
-                                            ->orWhere(function ($orQuery) use ($userCity) {
-                                                $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                                       ->where('ciudad', $userCity);    // Usar ciudad
-                                            });
-                             });
-                })
-                ->orWhere(function ($subQuery) use ($userCity) {
-                    // Condición para estado 3
-                    $subQuery->where('estado', 3)
-                             ->where('origen', $userCity); // Usar origen
-                });
+{
+    $userCity = Auth::user()->city;
+
+    // Obtener los IDs de las admisiones ya asignadas
+    $assignedIds = array_column($this->assignedAdmisiones, 'id');
+
+    // Filtrar y paginar las admisiones según las condiciones
+    $admisiones = Admision::query()
+        ->where(function ($query) use ($userCity) {
+            // Condición para estado 7
+            $query->where(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 7)
+                         ->where(function ($innerQuery) use ($userCity) {
+                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                        ->orWhere(function ($orQuery) use ($userCity) {
+                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                   ->where('ciudad', $userCity);    // Usar ciudad
+                                        });
+                         });
             })
-            ->whereNotIn('id', $assignedIds) // Excluir las admisiones ya asignadas
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-            ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
-            ->paginate($this->perPage);
-    
-        // Obtener los carteros que están en la misma ciudad del usuario autenticado
-        $carteros = User::where('city', $userCity)->get();
-    
-        return view('livewire.asignarcartero', [
-            'admisiones' => $admisiones,
-            'carteros' => $carteros,
-            'assignedAdmisiones' => $this->assignedAdmisiones,
-        ]);
-    }
+            ->orWhere(function ($subQuery) use ($userCity) {
+                // Condición para estado 3
+                $subQuery->where('estado', 3)
+                         ->where('origen', $userCity); // Usar origen
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                // Condición para estado 10
+                $subQuery->where('estado', 10)
+                         ->where(function ($innerQuery) use ($userCity) {
+                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                        ->orWhere(function ($orQuery) use ($userCity) {
+                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                   ->where('ciudad', $userCity);    // Usar ciudad
+                                        });
+                         });
+            });
+        })
+        ->whereNotIn('id', $assignedIds) // Excluir las admisiones ya asignadas
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
+        ->orderBy('fecha', 'desc') // Ordenar por fecha descendente
+        ->paginate($this->perPage);
+
+    // Obtener los carteros que están en la misma ciudad del usuario autenticado
+    $carteros = User::where('city', $userCity)->get();
+
+    return view('livewire.asignarcartero', [
+        'admisiones' => $admisiones,
+        'carteros' => $carteros,
+        'assignedAdmisiones' => $this->assignedAdmisiones,
+    ]);
+}
+
     
 
     

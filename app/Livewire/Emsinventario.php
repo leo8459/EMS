@@ -64,11 +64,22 @@ class Emsinventario extends Component
                 // Condición para estado 3
                 $subQuery->where('estado', 3)
                          ->where('origen', $userCity); // Usar origen
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                // Condición para estado 10
+                $subQuery->where('estado', 10)
+                         ->where(function ($innerQuery) use ($userCity) {
+                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
+                                        ->orWhere(function ($orQuery) use ($userCity) {
+                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
+                                                   ->where('ciudad', $userCity);    // Usar ciudad
+                                        });
+                         });
             });
         })
         ->where('codigo', 'like', '%' . $this->searchTerm . '%'); // Filtro por código
 
-    // **Filtrar por ciudad seleccionada**
+    // Filtrar por ciudad seleccionada, si aplica
     if ($this->selectedCity) {
         $admisiones = $admisiones->where(function ($query) {
             $query->where('ciudad', $this->selectedCity)
@@ -79,7 +90,7 @@ class Emsinventario extends Component
     $admisiones = $admisiones->orderBy('fecha', 'desc') // Ordenar por fecha descendente
         ->paginate($this->perPage);
 
-    // **Marcar automáticamente los checkboxes de las admisiones mostradas**
+    // Marcar automáticamente los checkboxes de las admisiones mostradas
     if ($this->cityJustUpdated) {
         $currentPageIds = $admisiones->pluck('id')->toArray();
         $this->selectedAdmisiones = $currentPageIds;
@@ -90,6 +101,7 @@ class Emsinventario extends Component
         'admisiones' => $admisiones,
     ]);
 }
+
 
     
     
