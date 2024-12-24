@@ -142,7 +142,7 @@ public function saveAssignments()
             // Registrar el evento
             \App\Models\Eventos::create([
                 'accion' => 'Asignar Cartero',
-                'descripcion' => "Envio con" . ($cartero ? $cartero->name : 'Desconocido'),
+                'descripcion' => "Envio con " . ($cartero ? $cartero->name : 'Desconocido'),
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
             ]);

@@ -23,66 +23,73 @@ class Recibirregional extends Component
 
 
     public function render()
-{
-    $userCity = Auth::user()->city;
-
-    // Obtener los datos filtrados
-    $admisiones = Admision::query()
-        ->when($this->searchTerm, function ($query) {
-            $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
-        })
-        ->where(function ($query) use ($userCity) {
-            $query->where('estado', 6)
-                ->where('ciudad', $userCity)
-                ->orWhere(function ($query) use ($userCity) {
-                    $query->where('estado', 8)
-                        ->where('reencaminamiento', $userCity);
-                });
-        })
-        ->orderBy('fecha', 'desc')
-        ->paginate($this->perPage);
-
-    // Si hay un término de búsqueda, acumular las selecciones
-    if (!empty($this->searchTerm)) {
-        $newSelections = $admisiones->pluck('id')->toArray();
-        $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
-
-        // Limpiar el campo de búsqueda
-        $this->searchTerm = '';
-    }
-
-    return view('livewire.recibirregional', [
-        'admisiones' => $admisiones,
-    ]);
-}
-
-    
-    
-    
-
-
-
-    public function openModal()
     {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Debe seleccionar al menos un envío.');
-            return;
+        $userCity = Auth::user()->city;
+    
+        // Obtener los datos filtrados
+        $admisiones = Admision::query()
+            ->when($this->searchTerm, function ($query) {
+                $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
+            })
+            ->where(function ($query) use ($userCity) {
+                $query->where('estado', 6)
+                    ->where(function ($subQuery) use ($userCity) {
+                        $subQuery->where('reencaminamiento', $userCity) // Si el reencaminamiento coincide con la ciudad del usuario
+                            ->orWhereNull('reencaminamiento') // Si no hay reencaminamiento
+                            ->where('ciudad', $userCity);    // Usar la ciudad
+                    })
+                    ->orWhere(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 8)
+                            ->where('reencaminamiento', $userCity); // Estado 8: Reencaminamiento coincide con la ciudad
+                    });
+            })
+            ->orderBy('fecha', 'desc')
+            ->paginate($this->perPage);
+    
+        // Si hay un término de búsqueda, acumular las selecciones
+        if (!empty($this->searchTerm)) {
+            $newSelections = $admisiones->pluck('id')->toArray();
+            $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
+    
+            // Limpiar el campo de búsqueda
+            $this->searchTerm = '';
         }
     
-        // Cargar los datos de las admisiones seleccionadas
-        $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
-            ->get()
-            ->map(function ($admision) {
-                return [
-                    'codigo' => $admision->codigo, // Usar el código en lugar del ID
-                    'peso_ems' => $admision->peso_ems ?: $admision->peso,
-                    'peso_regional' => $admision->peso_regional,
-                    'observacion' => $admision->observacion,
-                ];
-            })->toArray();
-    
-        $this->showModal = true;
+        return view('livewire.recibirregional', [
+            'admisiones' => $admisiones,
+        ]);
     }
+    
+
+    
+    
+    
+
+
+
+public function openModal()
+{
+    if (empty($this->selectedAdmisiones)) {
+        session()->flash('error', 'Debe seleccionar al menos un envío.');
+        return;
+    }
+
+    // Cargar los datos de las admisiones seleccionadas
+    $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
+        ->get()
+        ->map(function ($admision) {
+            return [
+                'id' => $admision->id, // Asegúrate de incluir el ID
+                'codigo' => $admision->codigo,
+                'peso_ems' => $admision->peso_ems ?: $admision->peso,
+                'peso_regional' => $admision->peso_regional,
+                'observacion' => $admision->observacion,
+            ];
+        })->toArray();
+
+    $this->showModal = true;
+}
+
     
 
     public function closeModal()
@@ -94,6 +101,10 @@ class Recibirregional extends Component
     public function recibirEnvios()
     {
         foreach ($this->selectedAdmisionesData as $data) {
+            if (!isset($data['id'])) {
+                continue; // Saltar si no hay 'id'
+            }
+    
             $admision = Admision::find($data['id']);
             if ($admision) {
                 $admision->update([
@@ -124,6 +135,7 @@ class Recibirregional extends Component
     
     
     
+    
 
     public function updatedSelectAll($value)
     {
@@ -131,14 +143,20 @@ class Recibirregional extends Component
             // Seleccionar todas las admisiones visibles (en la página actual)
             $this->selectedAdmisiones = Admision::query()
                 ->where(function ($query) {
-                    // Estado 6: Mostrar si la ciudad coincide
+                    $userCity = Auth::user()->city;
+    
                     $query->where('estado', 6)
-                        ->where('ciudad', Auth::user()->city);
+                        ->where(function ($subQuery) use ($userCity) {
+                            $subQuery->where('reencaminamiento', $userCity) // Si el reencaminamiento coincide con la ciudad del usuario
+                                ->orWhereNull('reencaminamiento') // Si no hay reencaminamiento
+                                ->where('ciudad', $userCity);    // Usar la ciudad
+                        });
                 })
                 ->orWhere(function ($query) {
-                    // Estado 8: Mostrar si el reencaminamiento coincide con la ciudad del usuario
+                    $userCity = Auth::user()->city;
+    
                     $query->where('estado', 8)
-                        ->where('reencaminamiento', Auth::user()->city);
+                        ->where('reencaminamiento', $userCity); // Estado 8: Reencaminamiento coincide con la ciudad
                 })
                 ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Aplicar búsqueda
                 ->pluck('id') // Obtener los IDs
@@ -148,6 +166,7 @@ class Recibirregional extends Component
             $this->selectedAdmisiones = [];
         }
     }
+    
     public function generatePDF(Request $request)
     {
         $admisiones = Admision::whereIn('id', $request->selectedAdmisiones)->get();
