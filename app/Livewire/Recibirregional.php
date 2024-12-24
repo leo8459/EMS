@@ -6,7 +6,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Eventos;
+use Illuminate\Http\Request;
 
 class Recibirregional extends Component
 {
@@ -17,94 +18,136 @@ class Recibirregional extends Component
     public $selectedAdmisiones = [];
     public $showModal = false;
     public $pesoEms, $pesoRegional, $observacion;
-    public $selectedAdmisionesData = []; // Array para almacenar los datos seleccionados
+    public $selectedAdmisionesData = [];
     public $selectAll = false;
-
-
 
     public function render()
     {
         $userCity = Auth::user()->city;
-    
-        // Obtener los datos filtrados
+
+        // Consulta base para las admisiones
         $admisiones = Admision::query()
             ->when($this->searchTerm, function ($query) {
                 $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
             })
             ->where(function ($query) use ($userCity) {
                 $query->where('estado', 6)
-                    ->where(function ($subQuery) use ($userCity) {
-                        $subQuery->where('reencaminamiento', $userCity) // Si el reencaminamiento coincide con la ciudad del usuario
-                            ->orWhereNull('reencaminamiento') // Si no hay reencaminamiento
-                            ->where('ciudad', $userCity);    // Usar la ciudad
-                    })
-                    ->orWhere(function ($subQuery) use ($userCity) {
-                        $subQuery->where('estado', 8)
-                            ->where('reencaminamiento', $userCity); // Estado 8: Reencaminamiento coincide con la ciudad
-                    });
+                      ->where(function ($subQuery) use ($userCity) {
+                          $subQuery->where('reencaminamiento', $userCity)
+                                   ->orWhereNull('reencaminamiento')
+                                   ->where('ciudad', $userCity);
+                      })
+                      ->orWhere(function ($subQuery) use ($userCity) {
+                          $subQuery->where('estado', 8)
+                                   ->where('reencaminamiento', $userCity);
+                      });
             })
             ->orderBy('fecha', 'desc')
             ->paginate($this->perPage);
-    
-        // Si hay un término de búsqueda, acumular las selecciones
-        if (!empty($this->searchTerm)) {
-            $newSelections = $admisiones->pluck('id')->toArray();
-            $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
-    
-            // Limpiar el campo de búsqueda
-            $this->searchTerm = '';
-        }
-    
+
         return view('livewire.recibirregional', [
             'admisiones' => $admisiones,
         ]);
     }
-    
 
-    
-    
-    
-
-
-
-public function openModal()
-{
-    if (empty($this->selectedAdmisiones)) {
-        session()->flash('error', 'Debe seleccionar al menos un envío.');
-        return;
+    /**
+     * Método para el botón "Buscar" 
+     * (no hace nada especial más que forzar un render 
+     *  cuando cambie searchTerm)
+     */
+    public function buscar()
+    {
+        // Dejar vacío o poner alguna lógica de validación
+        // Al cambiar $searchTerm con wire:model.defer, Livewire
+        // hará un refresco automático del render.
     }
 
-    // Cargar los datos de las admisiones seleccionadas
-    $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
-        ->get()
-        ->map(function ($admision) {
-            return [
-                'id' => $admision->id, // Asegúrate de incluir el ID
-                'codigo' => $admision->codigo,
-                'peso_ems' => $admision->peso_ems ?: $admision->peso,
-                'peso_regional' => $admision->peso_regional,
-                'observacion' => $admision->observacion,
-            ];
-        })->toArray();
+    /**
+     * Se dispara cuando cambia el valor de $selectAll.
+     * Si $selectAll es true, selecciona todos los registros
+     * según la consulta actual.
+     */
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            // Seleccionar todos (filtrados por la ciudad y el estado)
+            $userCity = Auth::user()->city;
 
-    $this->showModal = true;
-}
+            $visibleAdmisiones = Admision::query()
+                ->when($this->searchTerm, function ($query) {
+                    $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
+                })
+                ->where(function ($query) use ($userCity) {
+                    $query->where('estado', 6)
+                          ->where(function ($subQuery) use ($userCity) {
+                              $subQuery->where('reencaminamiento', $userCity)
+                                       ->orWhereNull('reencaminamiento')
+                                       ->where('ciudad', $userCity);
+                          })
+                          ->orWhere(function ($subQuery) use ($userCity) {
+                              $subQuery->where('estado', 8)
+                                       ->where('reencaminamiento', $userCity);
+                          });
+                })
+                ->pluck('id')
+                ->toArray();
 
-    
+            $this->selectedAdmisiones = $visibleAdmisiones;
 
+        } else {
+            // Deseleccionar todo
+            $this->selectedAdmisiones = [];
+        }
+    }
+
+    /**
+     * Abre el modal de "Recibir envíos" si hay admisiones seleccionadas,
+     * cargando además los datos en $selectedAdmisionesData.
+     */
+    public function openModal()
+    {
+        if (empty($this->selectedAdmisiones)) {
+            session()->flash('error', 'Debe seleccionar al menos un envío.');
+            return;
+        }
+
+        $this->selectedAdmisionesData = Admision::whereIn('id', $this->selectedAdmisiones)
+            ->get()
+            ->map(function ($admision) {
+                return [
+                    'id' => $admision->id,
+                    'codigo' => $admision->codigo,
+                    'peso_ems' => $admision->peso_ems ?: $admision->peso,
+                    'peso_regional' => $admision->peso_regional,
+                    'observacion' => $admision->observacion,
+                ];
+            })->toArray();
+
+        $this->showModal = true;
+    }
+
+    /**
+     * Cierra el modal y resetea pesos/observación 
+     * (pero no borra la selección, para que sea persistente).
+     */
     public function closeModal()
     {
         $this->showModal = false;
         $this->reset(['pesoEms', 'pesoRegional', 'observacion']);
     }
 
+    /**
+     * Guarda los cambios de peso/observación en cada admisión 
+     * y cambia el estado a 7 (Recibido).
+     * Además, genera un PDF con los datos.
+     */
     public function recibirEnvios()
     {
         foreach ($this->selectedAdmisionesData as $data) {
             if (!isset($data['id'])) {
-                continue; // Saltar si no hay 'id'
+                continue;
             }
-    
+
             $admision = Admision::find($data['id']);
             if ($admision) {
                 $admision->update([
@@ -113,7 +156,7 @@ public function openModal()
                     'observacion' => $data['observacion'] ?? null,
                     'estado' => 7,
                 ]);
-    
+
                 Eventos::create([
                     'accion' => 'Recibir Regional',
                     'descripcion' => 'Recepción de admisión desde la regional.',
@@ -122,59 +165,25 @@ public function openModal()
                 ]);
             }
         }
-    
-        // Generar PDF
+
+        // Generar el PDF con todas las admisiones que se acaban de recibir
         $admisiones = Admision::whereIn('id', array_column($this->selectedAdmisionesData, 'id'))->get();
         $pdf = \PDF::loadView('pdfs.recibidosregional', compact('admisiones'));
-    
+
         // Descargar PDF
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'admisiones_recibidas.pdf');
     }
-    
-    
-    
-    
 
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            // Seleccionar todas las admisiones visibles (en la página actual)
-            $this->selectedAdmisiones = Admision::query()
-                ->where(function ($query) {
-                    $userCity = Auth::user()->city;
-    
-                    $query->where('estado', 6)
-                        ->where(function ($subQuery) use ($userCity) {
-                            $subQuery->where('reencaminamiento', $userCity) // Si el reencaminamiento coincide con la ciudad del usuario
-                                ->orWhereNull('reencaminamiento') // Si no hay reencaminamiento
-                                ->where('ciudad', $userCity);    // Usar la ciudad
-                        });
-                })
-                ->orWhere(function ($query) {
-                    $userCity = Auth::user()->city;
-    
-                    $query->where('estado', 8)
-                        ->where('reencaminamiento', $userCity); // Estado 8: Reencaminamiento coincide con la ciudad
-                })
-                ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Aplicar búsqueda
-                ->pluck('id') // Obtener los IDs
-                ->toArray();
-        } else {
-            // Deseleccionar todo
-            $this->selectedAdmisiones = [];
-        }
-    }
-    
+    /**
+     * Ejemplo de método para descargar PDF sin el modal 
+     * (opcional, si se usa en otra parte).
+     */
     public function generatePDF(Request $request)
     {
         $admisiones = Admision::whereIn('id', $request->selectedAdmisiones)->get();
-    
         $pdf = \PDF::loadView('pdfs.recibidosregional', compact('admisiones'));
         return $pdf->download('admisiones_recibidas_regional.pdf');
     }
-    
-
-
 }

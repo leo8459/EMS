@@ -115,17 +115,11 @@ public function toggleSelectAll()
     $this->selectAll = !$this->selectAll;
 
     if ($this->selectAll) {
-        $newSelections = Admision::where(function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->where('estado', 3)
-                             ->where('origen', Auth::user()->city)
-                             ->where('ciudad', '!=', Auth::user()->city);
-                })
-                ->orWhere(function ($subQuery) {
-                    $subQuery->where('estado', 7)
-                             ->where('ciudad', Auth::user()->city)
-                             ->where('origen', '!=', Auth::user()->city);
-                });
+        // Obtener todos los IDs visibles en la página actual
+        $visibleAdmisiones = Admision::query()
+            ->where(function ($query) {
+                $query->where('estado', 3)
+                    ->orWhere('estado', 7);
             })
             ->where('codigo', 'like', '%' . $this->searchTerm . '%')
             ->orderBy('fecha', 'desc')
@@ -133,13 +127,25 @@ public function toggleSelectAll()
             ->pluck('id')
             ->toArray();
 
-        // Agregar nuevas selecciones sin sobrescribir las existentes
-        $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $newSelections));
+        // Actualizar la selección
+        $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $visibleAdmisiones));
     } else {
-        // Deseleccionar todos
-        $this->selectedAdmisiones = [];
+        // Deseleccionar todos los elementos de la página actual
+        $visibleAdmisiones = Admision::query()
+            ->where(function ($query) {
+                $query->where('estado', 3)
+                    ->orWhere('estado', 7);
+            })
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+            ->orderBy('fecha', 'desc')
+            ->limit($this->perPage)
+            ->pluck('id')
+            ->toArray();
+
+        $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, $visibleAdmisiones);
     }
 }
+
 
     
 

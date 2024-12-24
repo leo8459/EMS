@@ -809,7 +809,9 @@ fields.forEach(function(field) {
             $('#modalExpedicionHoy').modal('hide');
         });
     });
-
+    window.addEventListener('page-reload', () => {
+        location.reload();
+    });
 
 
 </script>

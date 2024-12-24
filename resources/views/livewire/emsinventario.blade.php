@@ -69,8 +69,12 @@
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th><input type="checkbox" wire:model="selectAll"
-                                                    wire:click="toggleSelectAll" /></th>
+                                            <th>
+                                                <input type="checkbox" 
+                                                       wire:model="selectAll" 
+                                                       wire:click="toggleSelectAll" 
+                                                       {{ count($selectedAdmisiones) === $admisiones->count() ? 'checked' : '' }} />
+                                            </th>
                                             <th>#</th>
                                             <th>Origen</th>
                                             <th>Servicio</th>
@@ -80,10 +84,9 @@
                                             <th>Precio (Bs)</th>
                                             <th>Destino</th>
                                             <th>Envio</th>
-
                                             <th>Código</th>
                                             <th>Fecha</th>
-                                            <th>Estado</th> <!-- Nuevo encabezado de columna -->
+                                            <th>Estado</th>
                                             <th>Observación</th>
                                             @hasrole('SuperAdmin|Administrador')
                                                 <th>Admision</th>
@@ -94,8 +97,9 @@
                                         @foreach ($admisiones as $admisione)
                                             <tr>
                                                 <td>
-                                                    <input type="checkbox" wire:model="selectedAdmisiones"
-                                                        value="{{ $admisione->id }}" />
+                                                    <input type="checkbox" 
+                                                           wire:model="selectedAdmisiones" 
+                                                           value="{{ $admisione->id }}" />
                                                 </td>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $admisione->origen }}</td>
@@ -104,9 +108,7 @@
                                                 <td>{{ $admisione->cantidad }}</td>
                                                 <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
                                                 <td>{{ $admisione->precio }}</td>
-                                                <td>
-                                                    {{ $admisione->reencaminamiento ?? $admisione->ciudad }}
-                                                </td>
+                                                <td>{{ $admisione->reencaminamiento ?? $admisione->ciudad }}</td>
                                                 <td>{{ $admisione->destino }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
@@ -119,13 +121,14 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td>{{ $admisione->observacion_entrega ? $admisione->observacion_entrega : '' }}</td>
+                                                <td>{{ $admisione->observacion_entrega ?? '' }}</td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
                                                 @endhasrole
                                             </tr>
                                         @endforeach
                                     </tbody>
+                                    
                                     
                                 </table>
 
