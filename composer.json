@@ -18,6 +18,7 @@
         "milon/barcode": "^11.0",
         "opcodesio/log-viewer": "^3.11",
         "phpoffice/phpspreadsheet": "^3.5",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.9"
     },
     "require-dev": {

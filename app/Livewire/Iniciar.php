@@ -104,15 +104,46 @@ class Iniciar extends Component
 
     public function store()
     {
-        // Validar los datos
+        // Validar los datos del formulario
         $this->validate();
-    
+
         // Establecer la fecha actual
         $this->fecha = now();
-    
+
         // Calcular el precio basado en el peso y el destino
         $this->updatePrice();
-    
+
+        // Generar el código dinámicamente
+        $prefixes = [
+            'EMS' => 'EN',
+            'ENCOMIENDA' => 'CN',
+            // Agrega otros servicios y prefijos según sea necesario
+        ];
+        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
+
+        $cityCodes = [
+            'LA PAZ' => '1',
+            'COCHABAMBA' => '2',
+            // Agrega más ciudades y códigos según sea necesario
+        ];
+        $city = Auth::user()->city;
+        $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
+
+        // Obtener los últimos dos dígitos del año actual
+        $yearSuffix = now()->format('y'); // Esto devuelve '25' para el año 2025
+
+        // Obtener el número máximo utilizado para este servicio, ciudad y año
+        $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
+            ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
+            ->value('max_number');
+
+        $newNumber = $lastNumber ? $lastNumber + 1 : 1;
+        $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
+
+        // Sufijo es 'BO'
+        $suffix = 'BO';
+        $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
+
         // Crear el registro en la base de datos
         $admision = Admision::create([
             'origen' => $this->origen,
@@ -137,23 +168,21 @@ class Iniciar extends Component
             'pais' => $this->pais,
             'contenido' => $this->contenido,
             'estado' => 1,
-            'user_id' => Auth::id(), // Guardar el ID del usuario autenticado
-            'creacionadmision' => Auth::user()->name, // Guardar el nombre del usuario autenticado
+            'user_id' => Auth::id(),
         ]);
-    
-        // Crear un registro en la tabla 'eventos'
+
+        // Registrar el evento en la tabla 'eventos'
         Eventos::create([
             'accion' => 'Recibir',
             'descripcion' => 'Creación de admisión',
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
-            'created_at' => $admision->created_at, // Opcional, se generará automáticamente si no lo especificas
         ]);
-    
+        // Enlace QR fijo
+        $qrLink = 'https://correos.gob.bo:8000/';
         // Preparar los datos para el PDF usando el registro recién creado
         $data = [
             'origen' => $admision->origen,
-            'servicio' => $admision->servicio,
             'fecha' => $admision->fecha,
             'servicio' => $admision->servicio,
             'tipo_correspondencia' => $admision->tipo_correspondencia,
@@ -170,104 +199,107 @@ class Iniciar extends Component
             'nombre_destinatario' => $admision->nombre_destinatario,
             'telefono_destinatario' => $admision->telefono_destinatario,
             'direccion' => $admision->direccion,
+            'provincia' => $admision->provincia,
             'ciudad' => $admision->ciudad,
             'pais' => $admision->pais,
+            'qrLink' => $qrLink, // Enlace QR fijo
+            'contenido' => $admision->contenido, // Agrega este campo
+
         ];
-    
+
         // Renderizar la vista y generar el PDF
         $pdf = Pdf::loadView('pdfs.admision', $data);
-    
-        // Descargar el PDF automáticamente
-        $response = response()->streamDownload(
+
+        // Descargar automáticamente el PDF
+        return response()->streamDownload(
             fn() => print($pdf->stream('admision.pdf')),
             'admision.pdf'
         );
-    
-        // Emitir un evento de recarga para actualizar la página automáticamente
-        $this->dispatch('page-reload');
-    
-        return $response;
+
+        // Mensaje de éxito
+        session()->flash('message', 'Admisión creada exitosamente.');
     }
-    
+
+
 
 
 
     public function edit($id)
-{
-    $admision = Admision::findOrFail($id);
-    $this->admisionId = $admision->id;
+    {
+        $admision = Admision::findOrFail($id);
+        $this->admisionId = $admision->id;
 
-    // Llenar las propiedades con los datos de la admisión
-    $this->origen = $admision->origen;
-    $this->servicio = $admision->servicio;
-    $this->tipo_correspondencia = $admision->tipo_correspondencia;
-    $this->cantidad = $admision->cantidad;
-    $this->peso = $admision->peso;
-    $this->destino = $admision->destino;
-    $this->codigo = $admision->codigo;
-    $this->precio = $admision->precio;
-    $this->numero_factura = $admision->numero_factura;
-    $this->nombre_remitente = $admision->nombre_remitente;
-    $this->nombre_envia = $admision->nombre_envia;
-    $this->carnet = $admision->carnet;
-    $this->telefono_remitente = $admision->telefono_remitente;
-    $this->nombre_destinatario = $admision->nombre_destinatario;
-    $this->telefono_destinatario = $admision->telefono_destinatario;
-    $this->direccion = $admision->direccion;
-    $this->provincia = $admision->provincia;
-    $this->ciudad = $admision->ciudad;
-    $this->pais = $admision->pais;
+        // Llenar las propiedades con los datos de la admisión
+        $this->origen = $admision->origen;
+        $this->servicio = $admision->servicio;
+        $this->tipo_correspondencia = $admision->tipo_correspondencia;
+        $this->cantidad = $admision->cantidad;
+        $this->peso = $admision->peso;
+        $this->destino = $admision->destino;
+        $this->codigo = $admision->codigo;
+        $this->precio = $admision->precio;
+        $this->numero_factura = $admision->numero_factura;
+        $this->nombre_remitente = $admision->nombre_remitente;
+        $this->nombre_envia = $admision->nombre_envia;
+        $this->carnet = $admision->carnet;
+        $this->telefono_remitente = $admision->telefono_remitente;
+        $this->nombre_destinatario = $admision->nombre_destinatario;
+        $this->telefono_destinatario = $admision->telefono_destinatario;
+        $this->direccion = $admision->direccion;
+        $this->provincia = $admision->provincia;
+        $this->ciudad = $admision->ciudad;
+        $this->pais = $admision->pais;
 
-    // Abrir el modal de edición
-    $this->dispatch('open-edit-modal');
-}
-
-
-
-public function update()
-{
-    $this->validate();
-
-    if ($this->admisionId) {
-        $admision = Admision::findOrFail($this->admisionId);
-
-        // Actualizar la admisión
-        $admision->update([
-            'origen' => $this->origen,
-            'servicio' => $this->servicio,
-            'tipo_correspondencia' => $this->tipo_correspondencia,
-            'cantidad' => $this->cantidad,
-            'peso' => $this->peso,
-            'destino' => $this->destino,
-            'codigo' => $this->codigo,
-            'precio' => $this->precio,
-            'numero_factura' => $this->numero_factura,
-            'nombre_remitente' => $this->nombre_remitente,
-            'nombre_envia' => $this->nombre_envia,
-            'carnet' => $this->carnet,
-            'telefono_remitente' => $this->telefono_remitente,
-            'nombre_destinatario' => $this->nombre_destinatario,
-            'telefono_destinatario' => $this->telefono_destinatario,
-            'direccion' => $this->direccion,
-            'provincia' => $this->provincia,
-            'ciudad' => $this->ciudad,
-            'pais' => $this->pais,
-            'contenido' => $this->contenido,
-        ]);
-
-        // Registrar el evento de edición
-        Eventos::create([
-            'accion' => 'Editar',
-            'descripcion' => 'Edición de admisión',
-            'codigo' => $admision->codigo,
-            'user_id' => Auth::id(),
-        ]);
-
-        // Mensaje de éxito y cerrar modal
-        session()->flash('message', 'Registro actualizado exitosamente.');
-        $this->dispatch('close-edit-modal');
+        // Abrir el modal de edición
+        $this->dispatch('open-edit-modal');
     }
-}
+
+
+
+    public function update()
+    {
+        $this->validate();
+
+        if ($this->admisionId) {
+            $admision = Admision::findOrFail($this->admisionId);
+
+            // Actualizar la admisión
+            $admision->update([
+                'origen' => $this->origen,
+                'servicio' => $this->servicio,
+                'tipo_correspondencia' => $this->tipo_correspondencia,
+                'cantidad' => $this->cantidad,
+                'peso' => $this->peso,
+                'destino' => $this->destino,
+                'codigo' => $this->codigo,
+                'precio' => $this->precio,
+                'numero_factura' => $this->numero_factura,
+                'nombre_remitente' => $this->nombre_remitente,
+                'nombre_envia' => $this->nombre_envia,
+                'carnet' => $this->carnet,
+                'telefono_remitente' => $this->telefono_remitente,
+                'nombre_destinatario' => $this->nombre_destinatario,
+                'telefono_destinatario' => $this->telefono_destinatario,
+                'direccion' => $this->direccion,
+                'provincia' => $this->provincia,
+                'ciudad' => $this->ciudad,
+                'pais' => $this->pais,
+                'contenido' => $this->contenido,
+            ]);
+
+            // Registrar el evento de edición
+            Eventos::create([
+                'accion' => 'Editar',
+                'descripcion' => 'Edición de admisión',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+
+            // Mensaje de éxito y cerrar modal
+            session()->flash('message', 'Registro actualizado exitosamente.');
+            $this->dispatch('close-edit-modal');
+        }
+    }
 
 
 
@@ -276,22 +308,22 @@ public function update()
 
 
     public function delete($id)
-{
-    $admision = Admision::findOrFail($id);
+    {
+        $admision = Admision::findOrFail($id);
 
-    // Cambiar el estado a 0 (inactivo)
-    $admision->update(['estado' => 0]);
+        // Cambiar el estado a 0 (inactivo)
+        $admision->update(['estado' => 0]);
 
-    // Registrar el evento de cambio de estado
-    Eventos::create([
-        'accion' => 'Eliminar',
-        'descripcion' => 'Cambio de estado de admisión a Eliminada',
-        'codigo' => $admision->codigo,
-        'user_id' => Auth::id(),
-    ]);
+        // Registrar el evento de cambio de estado
+        Eventos::create([
+            'accion' => 'Eliminar',
+            'descripcion' => 'Cambio de estado de admisión a Eliminada',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
 
-    session()->flash('message', 'La admisión ha sido eliminada exitosamente.');
-}
+        session()->flash('message', 'La admisión ha sido eliminada exitosamente.');
+    }
 
 
 
@@ -539,7 +571,7 @@ public function update()
     public function reimprimir($id)
     {
         $admision = Admision::findOrFail($id);
-    
+
         $data = [
             'origen' => $admision->origen,
             'fecha' => $admision->fecha,
@@ -562,7 +594,7 @@ public function update()
             'ciudad' => $admision->ciudad,
             'pais' => $admision->pais,
         ];
-    
+
         // Registrar el evento con la hora actual
         Eventos::create([
             'accion' => 'Reimprimir',
@@ -570,17 +602,17 @@ public function update()
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
         ]);
-    
+
         // Generar el PDF
         $pdf = Pdf::loadView('pdfs.admision', $data);
-    
+
         // Retornar el PDF para descarga
         return response()->streamDownload(
             fn() => print($pdf->stream('admision.pdf')),
             'admision.pdf'
         );
     }
-    
+
 
 
     public function entregarAExpedicion()
@@ -590,11 +622,11 @@ public function update()
             $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)
                 ->where('origen', $this->origen)
                 ->get();
-    
+
             foreach ($admisiones as $admision) {
                 // Cambiar el estado de la admisión a "Entregado a Expedición"
                 $admision->update(['estado' => 2]);
-    
+
                 // Registrar el evento
                 Eventos::create([
                     'accion' => 'Entregar a Expedición',
@@ -607,17 +639,16 @@ public function update()
 
             // Mostrar mensaje de éxito
             session()->flash('message', 'Las admisiones seleccionadas fueron entregadas a expedición correctamente.');
-    
+
             // Limpiar selección
             $this->selectedAdmisiones = [];
             $this->selectAll = false;
             return $this->generarReporte($admisiones);
-
         } else {
             session()->flash('error', 'No se seleccionaron admisiones para entregar a expedición.');
         }
     }
-    
+
 
 
 
@@ -629,43 +660,43 @@ public function update()
     public function abrirModalEntregarHoy()
     {
         $today = Carbon::today(); // Fecha actual sin hora
-    
+
         // Obtener las admisiones generadas hoy
         $this->admisionesParaExpedicion = Admision::where('origen', $this->origen)
             ->whereDate('fecha', $today)
             ->where('estado', 1) // Solo admisiones activas
             ->get()
             ->toArray(); // Convertir a array para usar en la vista
-    
+
         if (empty($this->admisionesParaExpedicion)) {
             session()->flash('error', 'No hay registros generados hoy para enviar a expedición.');
             return;
         }
-    
+
         // Mostrar el modal
         $this->dispatch('mostrar-modal-expedicion-hoy');
     }
-    
+
     // Método para confirmar y procesar la entrega
     public function confirmarEntregarHoy()
     {
         $today = Carbon::today();
-    
+
         // Obtener las admisiones generadas hoy
         $admisiones = Admision::where('origen', $this->origen)
             ->whereDate('fecha', $today)
             ->where('estado', 1) // Solo procesar admisiones activas
             ->get();
-    
+
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No hay registros generados hoy para entregar a expedición.');
             return;
         }
-    
+
         foreach ($admisiones as $admision) {
             // Actualizar estado de la admisión
             $admision->update(['estado' => 2]);
-    
+
             // Registrar evento
             Eventos::create([
                 'accion' => 'Entregar a Expedición',
@@ -674,36 +705,36 @@ public function update()
                 'user_id' => Auth::id(),
             ]);
         }
-    
+
         // Generar y descargar el PDF
         return $this->generarReporte($admisiones);
     }
-    
 
-    
+
+
     public function generarReporte($admisiones)
     {
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No hay registros para generar el reporte.');
             return;
         }
-    
+
         // Preparar los datos para la vista
         $data = [
             'admisiones' => $admisiones,
         ];
-    
+
         // Generar el PDF
         $pdf = Pdf::loadView('pdfs.reporte_admisiones', $data);
-    
+
         // Descargar automáticamente el PDF
         return response()->streamDownload(
             fn() => print($pdf->stream('reporte_admisiones.pdf')),
             'reporte_admisiones.pdf'
         );
     }
-    
-    
+
+
 
     public function updatedServicio()
     {
@@ -713,31 +744,32 @@ public function update()
             'ENCOMIENDA' => 'CN',
             // Agrega otros servicios y prefijos según sea necesario
         ];
-    
-        // Obtener el prefijo basado en el servicio seleccionado
-        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX'; // Prefijo por defecto 'XX' si no se encuentra
-    
+        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
+
+        $cityCodes = [
+            'LA PAZ' => '0',
+            'COCHABAMBA' => '1',
+            // Agrega más ciudades y sus códigos según sea necesario
+        ];
+        $city = Auth::user()->city;
+        $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
+
+        // Obtener los últimos dos dígitos del año actual
+        $yearSuffix = now()->format('y');
+
+        // Obtener el número máximo utilizado para este servicio, ciudad y año
+        // Obtener el número máximo utilizado para este servicio, ciudad y año
+        $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
+            ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
+            ->value('max_number');
+
+        $newNumber = $lastNumber ? $lastNumber + 1 : 1;
+        $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
+
         // Sufijo es 'BO'
         $suffix = 'BO';
-    
-        // Obtener el número máximo utilizado para este servicio
-        $lastNumber = Admision::where('codigo', 'like', $prefix . '%')
-            ->selectRaw("MAX(CAST(SUBSTRING(codigo FROM 3 FOR 9) AS INTEGER)) as max_number")
-            ->value('max_number');
-    
-        if ($lastNumber) {
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-    
-        // Completar con ceros a la izquierda hasta 9 dígitos
-        $numberPart = str_pad($newNumber, 9, '0', STR_PAD_LEFT);
-    
-        // Generar el nuevo código
-        $this->codigo = $prefix . $numberPart . $suffix;
-    }
-    
-    
 
+        // Generar el nuevo código
+        $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
+    }
 }

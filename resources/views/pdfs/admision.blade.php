@@ -15,7 +15,7 @@
     table-layout: fixed;
     border-collapse: collapse;
     font-size: 8px; /* Reducimos el tamaño de fuente */
-    margin-bottom: 5px; /* Reducimos el margen entre tablas */
+    margin-bottom: 3px; /* Reducimos el margen entre tablas */
     page-break-inside: avoid;
 }
 
@@ -35,7 +35,7 @@
     justify-content: center;
     align-items: center;
     overflow: auto;
-    margin-top: 10px; /* Ajusta el margen para que haya espacio suficiente */
+    margin-top: 3px; /* Ajusta el margen para que haya espacio suficiente */
 }
 
 .rotated-table {
@@ -52,7 +52,7 @@
 <body>
     <!-- Primera tabla -->
     <div>
-        <table style="width: 700px;">
+        <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
@@ -66,8 +66,8 @@
             <thead>
                 <tr>
                     <td colspan="3">
-                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
-                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 8px; font-weight: bold;">AGENCIA BOLIVIANA DE CORREOS</span>
                     </td>
                     <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
                         <div style="display: inline-block; text-align: center;">
@@ -80,56 +80,68 @@
                     
                     
                     
-                    <td rowspan="8" style="text-align: center; font-size: 7px;">
-                        {{-- Datos de ubicación --}}
+                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
+                        <div style="text-align: center; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                        </div>
                     </td>
+                    
                 </tr>
-                
                 <tr>
                     <td>OF. ORIGEN: <br>
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $ciudad }}</div>
+                        <div style="text-align: right;">{{ $destino }}</div>
                     </td>
                     <td></td>
                 </tr>
                 <tr>
                     <td colspan="3" rowspan="2">
                         NOMBRE REMITENTE: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">NOMBRE DESTINATARIO: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_destinatario }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_destinatario }}</div>
                     </td>
                 </tr>
                 <tr></tr>
                 <tr>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:
-                        <div style="text-align: right; font-size: 14px;"><br>{{ $telefono_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;"><br>{{ $telefono_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:<br>
-                        <div style="text-align: right; font-size: 14px;">
+                        <div style="text-align: right; font-size: 8px;">
                             {{ $direccion }}<br>{{ $telefono_destinatario }}</div>
                     </td>
+                </tr>
                 </tr>
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: right; font-size: 14px;">{{ $tipo_correspondencia }}</div>
+                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                            @if(!empty($contenido))
+                                {{ $contenido }}
+                            @endif
+                        </div>
                     </td>
-                    <td rowspan="2" style="vertical-align: top;">FIRMA AGBC:<br></td>
-                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA:<br></td>
+                    <td rowspan="2" style="vertical-align: top;">
+                        {{ Auth::user()->name }}:<br>
+                    </td>
+                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
+                
                 <tr>
-                    <td>IMPORTE: <br>
-                        <div style="text-align: right;">{{ $precio }}</div>
+                    <td>FECHA:<br>
+                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
                     </td>
+                  
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>IMPORTE: <br>
+                        <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
             </thead>
@@ -137,25 +149,25 @@
     </div>
 
     <!-- Añadimos un margen grande entre las tablas repetidas -->
-    <div style="height: 10px;"></div>
+    <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
 
     <div class="page-break">
-        <table style="width: 700px;">
+        <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
                 <col style="width: 80px">
                 <col style="width: 86px">
-                <col style="width: 108px">
-                <col style="width: 138px">
+                <col style="width: 150px"> <!-- Agrandar la columna de DESCRIPCIÓN -->
+                <col style="width: 90px"> <!-- Reducir DIRECCIÓN Y TELÉFONO -->
                 <col style="width: 20px">
                 <col style="width: 125px">
             </colgroup>
             <thead>
                 <tr>
                     <td colspan="3">
-                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
-                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 8px; font-weight: bold;">AGENCIA BOLIVIANA DE CORREOS</span>
                     </td>
                     <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
                         <div style="display: inline-block; text-align: center;">
@@ -168,8 +180,11 @@
                     
                     
                     
-                    <td rowspan="8" style="text-align: center; font-size: 7px;">
-                        {{-- Datos de ubicación --}}
+                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
+                        <div style="text-align: center; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                        </div>
                     </td>
                 </tr>
                 <tr>
@@ -184,19 +199,19 @@
                 <tr>
                     <td colspan="3" rowspan="2">
                         NOMBRE REMITENTE: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">NOMBRE DESTINATARIO: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_destinatario }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_destinatario }}</div>
                     </td>
                 </tr>
                 <tr></tr>
                 <tr>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:
-                        <div style="text-align: right; font-size: 14px;"><br>{{ $telefono_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;"><br>{{ $telefono_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:<br>
-                        <div style="text-align: right; font-size: 14px;">
+                        <div style="text-align: right; font-size: 8px;">
                             {{ $direccion }}<br>{{ $telefono_destinatario }}</div>
                     </td>
                 </tr>
@@ -204,27 +219,42 @@
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: right; font-size: 14px;">{{ $tipo_correspondencia }}</div>
+                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                            @if(!empty($contenido))
+                                {{ $contenido }}
+                            @endif
+                        </div>
                     </td>
-                    <td rowspan="2" style="vertical-align: top;">FIRMA AGBC:<br></td>
+                    <td rowspan="2" style="vertical-align: top;">
+                        {{ Auth::user()->name }}:<br>
+                    </td>
                     <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
+                
                 <tr>
-                    <td>IMPORTE: <br>
-                        <div style="text-align: right;">{{ $precio }}</div>
+                    <td>FECHA:<br>
+                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
                     </td>
+                  
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>IMPORTE: <br>
+                        <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
             </thead>
         </table>
     </div>
+
+
+
+
+
+    <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
+
   <div class="page-break">
-        <table style="width: 700px;">
+        <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
@@ -238,8 +268,8 @@
             <thead>
                 <tr>
                     <td colspan="3">
-                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
-                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 8px; font-weight: bold;">AGENCIA BOLIVIANA DE CORREOS</span>
                     </td>
                     <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
                         <div style="display: inline-block; text-align: center;">
@@ -252,10 +282,15 @@
                     
                     
                     
-                    <td rowspan="8" style="text-align: center; font-size: 7px;">
-                        {{-- Datos de ubicación --}}
+                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
+                        <div style="text-align: center; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                        </div>
                     </td>
+                    
                 </tr>
+                <tr>
                     <td>OF. ORIGEN: <br>
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
@@ -267,19 +302,19 @@
                 <tr>
                     <td colspan="3" rowspan="2">
                         NOMBRE REMITENTE: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">NOMBRE DESTINATARIO: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_destinatario }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_destinatario }}</div>
                     </td>
                 </tr>
                 <tr></tr>
                 <tr>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:
-                        <div style="text-align: right; font-size: 14px;"><br>{{ $telefono_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;"><br>{{ $telefono_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:<br>
-                        <div style="text-align: right; font-size: 14px;">
+                        <div style="text-align: right; font-size: 8px;">
                             {{ $direccion }}<br>{{ $telefono_destinatario }}</div>
                     </td>
                 </tr>
@@ -287,27 +322,37 @@
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: right; font-size: 14px;">{{ $tipo_correspondencia }}</div>
+                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                            @if(!empty($contenido))
+                                {{ $contenido }}
+                            @endif
+                        </div>
                     </td>
-                    <td rowspan="2" style="vertical-align: top;">FIRMA AGBC:<br></td>
-                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA:<br></td>
+                    <td rowspan="2" style="vertical-align: top;">
+                        {{ Auth::user()->name }}:<br>
+                    </td>
+                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
+                
                 <tr>
-                    <td>IMPORTE: <br>
-                        <div style="text-align: right;">{{ $precio }}</div>
+                    <td>FECHA:<br>
+                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
                     </td>
+                  
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>IMPORTE: <br>
+                        <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
             </thead>
         </table>
     </div>
+    <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
+
     <div class="page-break">
-        <table style="width: 700px;">
+        <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
@@ -321,8 +366,8 @@
             <thead>
                 <tr>
                     <td colspan="3">
-                        <img src="{{ public_path('images/images.png') }}" alt="" width="150" height="50"><br>
-                        <span style="font-size: 12px; font-weight: bold;">Servicio: {{ $servicio }}</span>
+                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
+                        <span style="font-size: 8px; font-weight: bold;">AGENCIA BOLIVIANA DE CORREOS</span>
                     </td>
                     <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
                         <div style="display: inline-block; text-align: center;">
@@ -335,9 +380,15 @@
                     
                     
                     
-                    <td rowspan="8" style="text-align: center; font-size: 7px;">
-                        {{-- Datos de ubicación --}}
+                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
+                        <div style="text-align: center; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                        </div>
                     </td>
+                    
+
+
                 </tr>
                 <tr>
                     <td>OF. ORIGEN: <br>
@@ -351,19 +402,19 @@
                 <tr>
                     <td colspan="3" rowspan="2">
                         NOMBRE REMITENTE: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">NOMBRE DESTINATARIO: <br>
-                        <div style="text-align: right; font-size: 14px;">{{ $nombre_destinatario }}</div>
+                        <div style="text-align: right; font-size: 8px;">{{ $nombre_destinatario }}</div>
                     </td>
                 </tr>
                 <tr></tr>
                 <tr>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:
-                        <div style="text-align: right; font-size: 14px;"><br>{{ $telefono_remitente }}</div>
+                        <div style="text-align: right; font-size: 8px;"><br>{{ $telefono_remitente }}</div>
                     </td>
                     <td colspan="3" rowspan="2">DIRECCIÓN Y TELÉFONO:<br>
-                        <div style="text-align: right; font-size: 14px;">
+                        <div style="text-align: right; font-size: 8px;">
                             {{ $direccion }}<br>{{ $telefono_destinatario }}</div>
                     </td>
                 </tr>
@@ -371,20 +422,28 @@
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: right; font-size: 14px;">{{ $tipo_correspondencia }}</div>
+                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                            @if(!empty($contenido))
+                                {{ $contenido }}
+                            @endif
+                        </div>
                     </td>
-                    <td rowspan="2" style="vertical-align: top;">FIRMA AGBC:<br></td>
-                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA:<br></td>
+                    <td rowspan="2" style="vertical-align: top;">
+                        {{ Auth::user()->name }}:<br>
+                    </td>
+                    <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
+                
                 <tr>
-                    <td>IMPORTE: <br>
-                        <div style="text-align: right;">{{ $precio }}</div>
+                    <td>FECHA:<br>
+                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
                     </td>
+                  
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>IMPORTE: <br>
+                        <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
             </thead>
