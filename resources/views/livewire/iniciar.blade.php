@@ -118,10 +118,27 @@
                                                            <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
 
                                                     @endhasrole
-
+                                                        <button type="button" class="btn btn-success" onclick="abrirWhatsApp('{{ $admisione->telefono_remitente }}', '{{ $admisione->nombre_destinatario }}', '{{ $admisione->codigo }}')">
+                                                            Mandar Mensaje
+                                                        </button>
+                                                    
+                                                    
                                                 </td>
                                             </tr>
                                         @endforeach
+                                        <script>
+                                     function abrirWhatsApp(telefono, nombre_remitente, codigo) {
+    // Crear la URL de WhatsApp
+    const mensaje = `Hola estimado cliente de la Agencia Boliviana de Correos, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: ${codigo}`;
+    const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+
+    console.log("Abriendo WhatsApp con URL:", url);
+
+    // Abrir la URL en una nueva ventana
+    window.open(url, '_blank', 'noopener');
+}
+
+                                        </script>
                                     </tbody>
                             </table>
                         </div>
@@ -354,7 +371,8 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                             <button type="button" class="btn btn-secondary" onclick="saveFrequentSend()">Guardar como envío frecuente</button>
-
+                           
+                            
                             <button type="submit" class="btn btn-primary">Guardar</button>
                         </div>
                     </form>
@@ -812,6 +830,6 @@ fields.forEach(function(field) {
     window.addEventListener('page-reload', () => {
         location.reload();
     });
-
+ 
 
 </script>

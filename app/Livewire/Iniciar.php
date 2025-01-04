@@ -178,6 +178,8 @@ class Iniciar extends Component
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
         ]);
+
+
         // Enlace QR fijo
         $qrLink = 'https://correos.gob.bo:8000/';
         // Preparar los datos para el PDF usando el registro recién creado
@@ -222,7 +224,44 @@ class Iniciar extends Component
 
 
 
+//     public function redirectToWhatsApp()
+// {
+//     // Limpiar y preparar el número de teléfono
+//     $telefono = preg_replace('/\D/', '', $this->telefono_remitente);
 
+//     // Preparar el mensaje para el destinatario
+//     $mensaje = urlencode("Hola {$this->nombre_destinatario}, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: {$this->codigo}");
+
+//     // Generar el enlace de WhatsApp Web
+//     $url = "https://web.whatsapp.com/send?phone={$telefono}&text={$mensaje}";
+
+//     // Redirigir al enlace
+//     return redirect()->to($url);
+// }
+public function enviarMensajeWhatsApp($admisionId)
+{
+    $admision = Admision::findOrFail($admisionId);
+
+    // Limpia el número de teléfono de caracteres no numéricos
+    $telefono = preg_replace('/\D/', '', $admision->telefono_remitente);
+
+    // Crea el mensaje personalizado con el nombre del remitente
+    $mensaje = urlencode("Hola {$admision->nombre_remitente}, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: {$admision->codigo}.");
+
+    // Construir la URL de WhatsApp
+    $url = "https://web.whatsapp.com/send?phone={$telefono}&text={$mensaje}";
+
+    // Debug para verificar la URL generada
+    // \Log::debug("WhatsApp URL: $url"); // Revisa este log en `storage/logs/laravel.log`
+
+    // Enviar la URL al frontend
+    $this->dispatch('abrir-whatsapp', ['url' => $url]);
+}
+
+
+
+
+    
 
     public function edit($id)
     {
@@ -572,6 +611,8 @@ class Iniciar extends Component
     {
         $admision = Admision::findOrFail($id);
 
+        $qrLink = 'https://correos.gob.bo:8000/';
+        // Preparar los datos para el PDF usando el registro recién creado
         $data = [
             'origen' => $admision->origen,
             'fecha' => $admision->fecha,
@@ -593,6 +634,9 @@ class Iniciar extends Component
             'provincia' => $admision->provincia,
             'ciudad' => $admision->ciudad,
             'pais' => $admision->pais,
+            'qrLink' => $qrLink, // Enlace QR fijo
+            'contenido' => $admision->contenido, // Agrega este campo
+
         ];
 
         // Registrar el evento con la hora actual
