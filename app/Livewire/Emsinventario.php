@@ -38,27 +38,10 @@ class Emsinventario extends Component
 
     
     public function updatedSelectedCity()
-{
-    $this->resetPage(); // Reseteamos la paginación a la página 1
-
-    if ($this->selectedCity) {
-        // Obtener todos los IDs de admisiones relacionadas con la ciudad seleccionada
-        $allIds = Admision::query()
-            ->where(function ($query) {
-                $query->where('ciudad', $this->selectedCity)
-                      ->orWhere('reencaminamiento', $this->selectedCity);
-            })
-            ->pluck('id')
-            ->toArray();
-
-        // Seleccionar todas las admisiones de la ciudad
-        $this->selectedAdmisiones = $allIds;
-    } else {
-        // Limpiar selección si no hay ciudad seleccionada
-        $this->selectedAdmisiones = [];
+    {
+        $this->resetPage(); // Reseteamos la paginación a la página 1
+        $this->cityJustUpdated = true; // Indicamos que la ciudad ha sido actualizada
     }
-}
-
     
     public function render()
 {
@@ -126,90 +109,69 @@ class Emsinventario extends Component
     
     
 
+    
 public function toggleSelectAll()
 {
     $this->selectAll = !$this->selectAll;
 
-    // Obtener las admisiones visibles en la página actual
-    $visibleAdmisiones = Admision::query()
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por el término de búsqueda
-        ->when($this->selectedCity, function ($query) {
-            $query->where(function ($q) {
-                $q->where('ciudad', $this->selectedCity)
-                  ->orWhere('reencaminamiento', $this->selectedCity);
-            });
-        })
-        ->orderBy('fecha', 'desc')
-        ->paginate($this->perPage) // Solo los registros visibles en la página actual
-        ->pluck('id') // Obtener solo los IDs
-        ->toArray();
-
     if ($this->selectAll) {
-        // Seleccionar solo los visibles en la tabla actual
+        // Obtener todos los IDs visibles en la página actual
+        $visibleAdmisiones = Admision::query()
+            ->where(function ($query) {
+                $query->where('estado', 3)
+                    ->orWhere('estado', 7);
+            })
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+            ->orderBy('fecha', 'desc')
+            ->limit($this->perPage)
+            ->pluck('id')
+            ->toArray();
+
+        // Actualizar la selección
         $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $visibleAdmisiones));
     } else {
-        // Deseleccionar los visibles en la tabla actual
+        // Deseleccionar todos los elementos de la página actual
+        $visibleAdmisiones = Admision::query()
+            ->where(function ($query) {
+                $query->where('estado', 3)
+                    ->orWhere('estado', 7);
+            })
+            ->where('codigo', 'like', '%' . $this->searchTerm . '%')
+            ->orderBy('fecha', 'desc')
+            ->limit($this->perPage)
+            ->pluck('id')
+            ->toArray();
+
         $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, $visibleAdmisiones);
     }
 }
-
-
-
 
 
     
 
 public function abrirModal()
 {
-    $userCity = Auth::user()->city;
+    if (count($this->selectedAdmisiones) > 0) {
+        $admissions = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
-    // Filtrar las admisiones seleccionadas basadas en los estados, ciudad del usuario y los IDs seleccionados
-    $admissions = Admision::query()
-        ->whereIn('id', $this->selectedAdmisiones) // Solo las seleccionadas
-        ->where(function ($query) use ($userCity) {
-            // Condiciones según los estados y la ciudad del usuario
-            $query->where(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 7)
-                         ->where(function ($innerQuery) use ($userCity) {
-                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento
-                                        ->orWhere(function ($orQuery) use ($userCity) {
-                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                                   ->where('ciudad', $userCity);    // Usar ciudad
-                                        });
-                         });
-            })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 3)
-                         ->where('origen', $userCity); // Usar origen
-            })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 10)
-                         ->where(function ($innerQuery) use ($userCity) {
-                             $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento
-                                        ->orWhere(function ($orQuery) use ($userCity) {
-                                            $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                                   ->where('ciudad', $userCity);    // Usar ciudad
-                                        });
-                         });
-            });
-        })
-        ->get();
+        if ($admissions->isEmpty()) {
+            session()->flash('error', 'No hay admisiones seleccionadas.');
+            return;
+        }
 
-    // Verificar si hay registros seleccionados válidos
-    if ($admissions->isEmpty()) {
-        session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
-        return;
+        $this->showModal = true;
+
+        $this->destinoModal = null;
+        $this->ciudadModal = null;
+
+        $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
+
+        // Inicializar el campo de reencaminamiento en null
+        $this->selectedDepartment = null;
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
     }
-
-    // Preparar datos para el modal
-    $this->showModal = true;
-    $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
-    $this->destinoModal = null;
-    $this->ciudadModal = null;
-    $this->selectedDepartment = null;
 }
-
-
 
 
     
@@ -227,56 +189,31 @@ public function mandarARegional()
         return;
     }
 
-    // Obtener las admisiones seleccionadas que cumplen las condiciones
-    $userCity = Auth::user()->city;
-    $admisiones = Admision::query()
-        ->whereIn('id', $this->selectedAdmisiones)
-        ->where(function ($query) use ($userCity) {
-            $query->where(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 7)
-                         ->where(function ($innerQuery) use ($userCity) {
-                             $innerQuery->where('reencaminamiento', $userCity)
-                                        ->orWhere(function ($orQuery) use ($userCity) {
-                                            $orQuery->whereNull('reencaminamiento')
-                                                   ->where('ciudad', $userCity);
-                                        });
-                         });
-            })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 3)
-                         ->where('origen', $userCity);
-            })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 10)
-                         ->where(function ($innerQuery) use ($userCity) {
-                             $innerQuery->where('reencaminamiento', $userCity)
-                                        ->orWhere(function ($orQuery) use ($userCity) {
-                                            $orQuery->whereNull('reencaminamiento')
-                                                   ->where('ciudad', $userCity);
-                                        });
-                         });
-            });
-        })
-        ->get();
+    // Obtener las admisiones seleccionadas
+    $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
     if ($admisiones->isEmpty()) {
         session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
         return;
     }
 
-    // Actualizar las admisiones seleccionadas
     foreach ($admisiones as $admision) {
         $admision->estado = 6; // Cambiar el estado a "Mandado a regional"
         $admision->reencaminamiento = $this->selectedDepartment; // Asignar el departamento seleccionado
         $admision->save();
+
+        // Registrar el evento
+        Eventos::create([
+            'accion' => 'Mandar a regional',
+            'descripcion' => 'La admisión fue enviada a la regional.',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
     }
 
-    session()->flash('message', 'Las admisiones seleccionadas fueron enviadas a la regional.');
-    $this->showModal = false;
-    $this->selectedAdmisiones = [];
-    $this->selectedAdmisionesCodes = [];
+    // Generar el Excel y retornar la descarga
+    return $this->generarExcel();
 }
-
 
 
 
