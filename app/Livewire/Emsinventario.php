@@ -22,7 +22,7 @@ class Emsinventario extends Component
     use WithPagination;
     public $currentPageIds = [];
     public $searchTerm = '';
-    public $perPage = 10;
+    public $perPage = 10000000;
     public $admisionId;
     public $selectedAdmisiones = [];
     public $showModal = false;
