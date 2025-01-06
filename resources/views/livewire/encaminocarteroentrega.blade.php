@@ -77,10 +77,23 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($admisiones as $admisione)
-                                        <tr>
+                                        @php
+                                            $now = \Carbon\Carbon::now();
+                                            $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
+                                            $diffInHours = $now->diffInHours($fechaAdmision);
+                                            $rowClass = '';
+                                
+                                            if ($diffInHours <= 24) {
+                                                $rowClass = 'table-success'; // Verde: menos de 24 horas
+                                            } elseif ($diffInHours <= 48) {
+                                                $rowClass = 'table-warning'; // Amarillo: entre 24 y 48 horas
+                                            } else {
+                                                $rowClass = 'table-danger'; // Rojo: más de 48 horas
+                                            }
+                                        @endphp
+                                        <tr class="{{ $rowClass }}">
                                             <td>
-                                                <input type="checkbox" wire:model="selectedAdmisiones"
-                                                    value="{{ $admisione->id }}" />
+                                                <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
                                             </td>
                                             <td>{{ $loop->iteration }}</td> <!-- Mostrar número de fila -->
                                             <td>{{ $admisione->origen }}</td>
@@ -91,7 +104,6 @@
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
                                             <td>{{ $admisione->codigo }}</td>
-
                                             <td>{{ $admisione->direccion }}</td>
                                             <td>{{ $admisione->provincia }}</td>
                                             <td>{{ $admisione->ciudad }}</td>
@@ -99,7 +111,6 @@
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion_entrega ? $admisione->observacion_entrega : '' }}</td>
                                             <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
-
                                             <td>
                                                 <a href="{{ route('entregarenviosfirma', ['id' => $admisione->id]) }}" class="btn btn-primary">
                                                     Entregar Admision
@@ -108,6 +119,7 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                
                             </table>
                             <!-- Modal para subir foto y añadir recepcionado y observacion_entrega -->
                             @if ($showModal)
