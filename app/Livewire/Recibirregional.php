@@ -20,6 +20,10 @@ class Recibirregional extends Component
     public $pesoEms, $pesoRegional, $observacion;
     public $selectedAdmisionesData = [];
     public $selectAll = false;
+    public $damagedAdmisiones = [];
+    public $misroutedAdmisiones = [];
+
+
 
     public function render()
     {
@@ -32,23 +36,80 @@ class Recibirregional extends Component
             })
             ->where(function ($query) use ($userCity) {
                 $query->where('estado', 6)
-                      ->where(function ($subQuery) use ($userCity) {
-                          $subQuery->where('reencaminamiento', $userCity)
-                                   ->orWhereNull('reencaminamiento')
-                                   ->where('ciudad', $userCity);
-                      })
-                      ->orWhere(function ($subQuery) use ($userCity) {
-                          $subQuery->where('estado', 8)
-                                   ->where('reencaminamiento', $userCity);
-                      });
+                    ->where(function ($subQuery) use ($userCity) {
+                        $subQuery->where('reencaminamiento', $userCity)
+                            ->orWhereNull('reencaminamiento')
+                            ->where('ciudad', $userCity);
+                    })
+                    ->orWhere(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 8)
+                            ->where('reencaminamiento', $userCity);
+                    });
             })
             ->orderBy('fecha', 'desc')
             ->paginate($this->perPage);
 
+        
+            $notificacionesDañadas = Admision::where('notificacion', 'DAÑADO')
+            ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
+            ->where('origen', $userCity)
+            ->whereNotNull('notificacion') // Verificando que no sea nulo
+            ->get();
+        
+        if ($notificacionesDañadas->isEmpty()) {
+            toastr()->error('No se encontraron admisiones con notificaciones de tipo "DAÑADO".');
+        } else {
+            $detalleNotificaciones = $notificacionesDañadas->pluck('codigo')->implode(', ');
+            toastr()->error('Se encontraron admisiones con notificaciones de tipo "DAÑADO" en los siguientes registros: ' . $detalleNotificaciones);
+        }
+            $notificacionesMalencaminadas = Admision::where('notificacion', 'MALENCAMINADO')
+            ->whereIn('estado', [7, 3, 10]) // Agregando los estados
+            ->where('origen', $userCity)
+            ->whereNotNull('notificacion') // Verificando que no sea nulo
+            ->get();
+        
+        if ($notificacionesMalencaminadas->isEmpty()) {
+            toastr()->error('No se encontraron notificaciones mal encaminadas con los criterios especificados.');
+        } else {
+            $detalleNotificaciones = $notificacionesMalencaminadas->pluck('codigo')->implode(', ');
+            toastr()->error('Se encontraron notificaciones mal encaminadas en las siguientes admisiones: ' . $detalleNotificaciones);
+        }
+       
+
+        $notificacionesFaltantes = Admision::where('notificacion', 'FALTANTE')
+    ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
+    ->where('origen', $userCity)
+    ->whereNotNull('notificacion') // Verificando que no sea nulo
+    ->get();
+
+if ($notificacionesFaltantes->isEmpty()) {
+    toastr()->error('No se encontraron admisiones con notificaciones de tipo "FALTANTE".');
+} else {
+    $detalleNotificaciones = $notificacionesFaltantes->pluck('codigo')->implode(', ');
+    toastr()->error('Se encontraron admisiones con notificaciones de tipo "FALTANTE" en los siguientes registros: ' . $detalleNotificaciones);
+}
+
+$notificacionesSobrantes = Admision::where('notificacion', 'SOBRANTE')
+    ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
+    ->where('origen', $userCity)
+    ->whereNotNull('notificacion') // Verificando que no sea nulo
+    ->get();
+
+if ($notificacionesSobrantes->isEmpty()) {
+    toastr()->error('No se encontraron admisiones con notificaciones de tipo "SOBRANTE".');
+} else {
+    $detalleNotificaciones = $notificacionesSobrantes->pluck('codigo')->implode(', ');
+    toastr()->error('Se encontraron admisiones con notificaciones de tipo "SOBRANTE" en los siguientes registros: ' . $detalleNotificaciones);
+}
+
         return view('livewire.recibirregional', [
             'admisiones' => $admisiones,
+            'notificacionesDañadas' => $notificacionesDañadas,
+            'notificacionesMalencaminadas' => $notificacionesMalencaminadas,
         ]);
     }
+
+
 
     /**
      * Método para el botón "Buscar" 
@@ -79,21 +140,20 @@ class Recibirregional extends Component
                 })
                 ->where(function ($query) use ($userCity) {
                     $query->where('estado', 6)
-                          ->where(function ($subQuery) use ($userCity) {
-                              $subQuery->where('reencaminamiento', $userCity)
-                                       ->orWhereNull('reencaminamiento')
-                                       ->where('ciudad', $userCity);
-                          })
-                          ->orWhere(function ($subQuery) use ($userCity) {
-                              $subQuery->where('estado', 8)
-                                       ->where('reencaminamiento', $userCity);
-                          });
+                        ->where(function ($subQuery) use ($userCity) {
+                            $subQuery->where('reencaminamiento', $userCity)
+                                ->orWhereNull('reencaminamiento')
+                                ->where('ciudad', $userCity);
+                        })
+                        ->orWhere(function ($subQuery) use ($userCity) {
+                            $subQuery->where('estado', 8)
+                                ->where('reencaminamiento', $userCity);
+                        });
                 })
                 ->pluck('id')
                 ->toArray();
 
             $this->selectedAdmisiones = $visibleAdmisiones;
-
         } else {
             // Deseleccionar todo
             $this->selectedAdmisiones = [];
