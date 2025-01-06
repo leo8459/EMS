@@ -13,20 +13,22 @@
                         <div class="card-header">
                             <!-- Barra de búsqueda y botón Nuevo Despacho -->
                             <div class="d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                    class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                 <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#createPaqueteModal">
                                     Nuevo Admision
                                 </button>
-                                <button type="button" class="btn btn-warning mt-2" wire:click="entregarAExpedicion">Entregar a Expedición</button>
+                                <button type="button" class="btn btn-warning mt-2"
+                                    wire:click="entregarAExpedicion">Entregar a Expedición</button>
                                 <button type="button" class="btn btn-primary mt-2" wire:click="abrirModalEntregarHoy">
                                     Entregar a Expedición Generado Hoy
                                 </button>
-                                
-                                
-                                
+
+
+
                             </div>
                         </div>
 
@@ -75,7 +77,8 @@
                                         @foreach ($admisiones as $admisione)
                                             <tr>
                                                 <td>
-                                                    <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
+                                                    <input type="checkbox" wire:model="selectedAdmisiones"
+                                                        value="{{ $admisione->id }}" />
                                                 </td>
                                                 <td>{{ $loop->iteration }}</td> <!-- Mostrar número de fila -->
                                                 <td>{{ $admisione->origen }}</td>
@@ -106,55 +109,58 @@
                                                     @endhasrole --}}
 
                                                     @hasrole('ADMINISTRADOR')
-                                                    <button type="button" class="btn btn-danger" wire:click="delete({{ $admisione->id }})">Eliminar</button>
-                                                    
+                                                        <button type="button" class="btn btn-danger"
+                                                            wire:click="delete({{ $admisione->id }})">Eliminar</button>
                                                     @endhasrole
-                                                      @hasrole('ADMINISTRADOR|ADMISION')
-                                                      <button type="button" class="btn btn-secondary" wire:click="reimprimir({{ $admisione->id }})">Reimprimir</button>
+                                                    @hasrole('ADMINISTRADOR|ADMISION')
+                                                        <button type="button" class="btn btn-secondary"
+                                                            wire:click="reimprimir({{ $admisione->id }})">Reimprimir</button>
+                                                    @endhasrole
 
+                                                    @hasrole('ADMINISTRADOR|ADMISION')
+                                                        <button type="button" class="btn btn-info"
+                                                            wire:click="edit({{ $admisione->id }})" data-toggle="modal"
+                                                            data-target="#updateDespachoModal">Editar</button>
                                                     @endhasrole
-                                                    
-                                                           @hasrole('ADMINISTRADOR|ADMISION')
-                                                           <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})" data-toggle="modal" data-target="#updateDespachoModal">Editar</button>
+                                                    <button type="button" class="btn btn-success"
+                                                        onclick="abrirWhatsApp('{{ $admisione->telefono_remitente }}', '{{ $admisione->nombre_destinatario }}', '{{ $admisione->codigo }}')">
+                                                        Mandar Mensaje
+                                                    </button>
 
-                                                    @endhasrole
-                                                        <button type="button" class="btn btn-success" onclick="abrirWhatsApp('{{ $admisione->telefono_remitente }}', '{{ $admisione->nombre_destinatario }}', '{{ $admisione->codigo }}')">
-                                                            Mandar Mensaje
-                                                        </button>
-                                                    
-                                                    
+
                                                 </td>
                                             </tr>
                                         @endforeach
                                         <script>
-                                     function abrirWhatsApp(telefono, nombre_remitente, codigo) {
-    // Crear la URL de WhatsApp
-    const mensaje = `Hola estimado cliente de la Agencia Boliviana de Correos, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: ${codigo}`;
-    const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+                                            function abrirWhatsApp(telefono, nombre_remitente, codigo) {
+                                                // Crear la URL de WhatsApp
+                                                const mensaje = 
+    `Hola estimado cliente de la Agencia Boliviana de Correos, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: ${codigo}. Para rastrear tu paquete, entra a esta página: https://correos.gob.bo:8000`;
+const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
 
-    console.log("Abriendo WhatsApp con URL:", url);
+                                                console.log("Abriendo WhatsApp con URL:", url);
 
-    // Abrir la URL en una nueva ventana
-    window.open(url, '_blank', 'noopener');
-}
-
+                                                // Abrir la URL en una nueva ventana
+                                                window.open(url, '_blank', 'noopener');
+                                            }
                                         </script>
                                     </tbody>
-                            </table>
-                        </div>
+                                </table>
+                            </div>
 
-                        <!-- Paginación -->
-                        <div class="card-footer">
-                            {{ $admisiones->links() }}
+                            <!-- Paginación -->
+                            <div class="card-footer">
+                                {{ $admisiones->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <!-- Modal para Crear Nuevo Paquete -->
-    <div wire:ignore.self class="modal fade" id="createPaqueteModal" tabindex="-1" role="dialog" aria-labelledby="createPaqueteModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="createPaqueteModal" tabindex="-1" role="dialog"
+        aria-labelledby="createPaqueteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -165,14 +171,15 @@
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="store">
-    
+
                         <!-- Sección DATOS -->
                         <h5 class="mt-3" style="color: #003366;">DATOS</h5>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="origen">Origen*</label>
-                                    <input type="text" class="form-control" id="origen" wire:model="origen" readonly>
+                                    <input type="text" class="form-control" id="origen" wire:model="origen"
+                                        readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -191,13 +198,14 @@
                                         <option value="AVISO DE RECIBO">AVISO DE RECIBO</option> --}}
 
                                     </select>
-                                    
+
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="tipo_correspondencia">Correspondencia*</label>
-                                    <select class="form-control" id="tipo_correspondencia" wire:model="tipo_correspondencia" wire:ignore>
+                                    <select class="form-control" id="tipo_correspondencia"
+                                        wire:model="tipo_correspondencia" wire:ignore>
                                         <option value="">Seleccione el tipo de correspondencia</option>
                                         <option value="CARTA">CARTA</option>
                                         <option value="ENCOMIENDA">ENCOMIENDA</option>
@@ -217,19 +225,21 @@
                             <label for="contenido">Contenido</label>
                             <textarea class="form-control" id="contenido" wire:model="contenido"></textarea>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="cantidad">Cantidad*</label>
-                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad" wire:model="cantidad" value="1" disabled>
+                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad"
+                                        wire:model="cantidad" value="1" disabled>
                                 </div>
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="destino">Destino*</label>
-                                    <select class="form-control" id="destino" wire:model="destino" wire:ignore wire:change="updatePrice">
+                                    <select class="form-control" id="destino" wire:model="destino" wire:ignore
+                                        wire:change="updatePrice">
                                         <option value="">Seleccione el destino</option>
                                         <option value="NACIONAL">NACIONAL</option>
                                         <option value="CIUDADES INTERMEDIAS">CIUDADES INTERMEDIAS</option>
@@ -245,7 +255,8 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="codigo">Código*</label>
-                                    <input type="text" class="form-control" id="codigo" wire:model="codigo"disabled>
+                                    <input type="text" class="form-control" id="codigo"
+                                        wire:model="codigo"disabled>
                                 </div>
                             </div>
                         </div>
@@ -253,16 +264,17 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="numero_factura">Número de Factura</label>
-                                    <input type="text" class="form-control" id="numero_factura" wire:model="numero_factura">
+                                    <input type="text" class="form-control" id="numero_factura"
+                                        wire:model="numero_factura">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="peso">Peso (Kg.)*</label>
                                     <input type="text" class="form-control" id="peso" wire:model="peso"
-                                    placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
-                             
-                             
+                                        placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
+
+
 
 
                                 </div>
@@ -270,26 +282,32 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="precio">Precio*</label>
-                                    <input type="text" class="form-control" id="precio" wire:model="precio" readonly>
+                                    <input type="text" class="form-control" id="precio" wire:model="precio"
+                                        readonly>
                                 </div>
                             </div>
                         </div>
-    
+
                         <!-- Sección REMITENTE -->
                         <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group" style="position: relative;">
                                     <label for="nombre_remitente">Nombre Remitente*</label>
-                                    <input type="text" class="form-control" id="nombre_remitente" wire:model="nombre_remitente" oninput="showSuggestions(this.value)" wire:ignore>
+                                    <input type="text" class="form-control" id="nombre_remitente"
+                                        wire:model="nombre_remitente" oninput="showSuggestions(this.value)"
+                                        wire:ignore>
                                     <!-- Contenedor para las sugerencias -->
-                                    <div id="suggestions" style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;"></div>
+                                    <div id="suggestions"
+                                        style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="nombre_envia">Nombre y Apellido del que Envia</label>
-                                    <input type="text" class="form-control" id="nombre_envia" wire:model="nombre_envia">
+                                    <input type="text" class="form-control" id="nombre_envia"
+                                        wire:model="nombre_envia">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -303,24 +321,27 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="telefono_remitente">Teléfono Remitente*</label>
-                                    <input type="text" class="form-control" id="telefono_remitente" wire:model="telefono_remitente">
+                                    <input type="text" class="form-control" id="telefono_remitente"
+                                        wire:model="telefono_remitente">
                                 </div>
                             </div>
                         </div>
-    
+
                         <!-- Sección DESTINATARIO -->
                         <h5 class="mt-3" style="color: #003366;">DESTINATARIO</h5>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="nombre_destinatario">Nombre Destinatario*</label>
-                                    <input type="text" class="form-control" id="nombre_destinatario" wire:model="nombre_destinatario">
+                                    <input type="text" class="form-control" id="nombre_destinatario"
+                                        wire:model="nombre_destinatario">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="telefono_destinatario">Teléfono Destinatario</label>
-                                    <input type="text" class="form-control" id="telefono_destinatario" wire:model="telefono_destinatario">
+                                    <input type="text" class="form-control" id="telefono_destinatario"
+                                        wire:model="telefono_destinatario">
                                 </div>
                             </div>
                         </div>
@@ -328,36 +349,38 @@
                             <div class="col-12"> <!-- Cambiado a col-12 para ocupar todo el ancho -->
                                 <div class="form-group">
                                     <label for="direccion">Dirección*</label>
-                                    <input type="text" class="form-control" id="direccion" wire:model="direccion">
+                                    <input type="text" class="form-control" id="direccion"
+                                        wire:model="direccion">
                                 </div>
                             </div>
                         </div>
 
-                            <div class="row">
+                        <div class="row">
 
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="ciudad">Ciudad*</label>
-                                        <select class="form-control" id="ciudad" wire:model="ciudad">
-                                            <option value="">Seleccione una ciudad</option>
-                                            <option value="LA PAZ">LA PAZ</option>
-                                            <option value="POTOSI">POTOSI</option>
-                                            <option value="ORURO">ORURO</option>
-                                            <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                            <option value="CHUQUISACA">CHUQUISACA</option>
-                                            <option value="COCHABAMBA">COCHABAMBA</option>
-                                            <option value="BENI">BENI</option>
-                                            <option value="PANDO">PANDO</option>
-                                            <option value="TARIJA">TARIJA</option>
-                                        </select>
-                                    </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ciudad">Ciudad*</label>
+                                    <select class="form-control" id="ciudad" wire:model="ciudad">
+                                        <option value="">Seleccione una ciudad</option>
+                                        <option value="LA PAZ">LA PAZ</option>
+                                        <option value="POTOSI">POTOSI</option>
+                                        <option value="ORURO">ORURO</option>
+                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                        <option value="BENI">BENI</option>
+                                        <option value="PANDO">PANDO</option>
+                                        <option value="TARIJA">TARIJA</option>
+                                    </select>
                                 </div>
-                                
-                                
+                            </div>
+
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="provincia">Provincia</label>
-                                    <input type="text" class="form-control" id="provincia" wire:model="provincia">
+                                    <input type="text" class="form-control" id="provincia"
+                                        wire:model="provincia">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -367,12 +390,13 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-secondary" onclick="saveFrequentSend()">Guardar como envío frecuente</button>
-                           
-                            
+                            <button type="button" class="btn btn-secondary" onclick="saveFrequentSend()">Guardar
+                                como envío frecuente</button>
+
+
                             <button type="submit" class="btn btn-primary">Guardar</button>
                         </div>
                     </form>
@@ -380,37 +404,39 @@
             </div>
         </div>
     </div>
-    
-    
-    
 
-   <!-- Modal -->
-   <div wire:ignore.self class="modal fade" id="modalExpedicionHoy" tabindex="-1" role="dialog" aria-labelledby="modalExpedicionHoyLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalExpedicionHoyLabel">Confirmar Entrega a Expedición</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>¿Está seguro de que desea enviar las siguientes admisiones a expedición?</p>
-                <ul>
-                    @foreach ($admisionesParaExpedicion as $admision)
-                        <li>{{ $admision['codigo'] }} - {{ $admision['origen'] }} - {{ $admision['destino'] }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" wire:click="confirmarEntregarHoy">Guardar</button>
+
+
+
+    <!-- Modal -->
+    <div wire:ignore.self class="modal fade" id="modalExpedicionHoy" tabindex="-1" role="dialog"
+        aria-labelledby="modalExpedicionHoyLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalExpedicionHoyLabel">Confirmar Entrega a Expedición</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de que desea enviar las siguientes admisiones a expedición?</p>
+                    <ul>
+                        @foreach ($admisionesParaExpedicion as $admision)
+                            <li>{{ $admision['codigo'] }} - {{ $admision['origen'] }} - {{ $admision['destino'] }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="confirmarEntregarHoy">Guardar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-    
+
 
 
     <!-- Modal para Editar -->
@@ -427,14 +453,15 @@
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="store">
-    
+
                         <!-- Sección DATOS -->
                         <h5 class="mt-3" style="color: #003366;">DATOS</h5>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="origen">Origen*</label>
-                                    <input type="text" class="form-control" id="origen" wire:model="origen" readonly>
+                                    <input type="text" class="form-control" id="origen" wire:model="origen"
+                                        readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -444,13 +471,14 @@
                                         <option value="">Seleccione el servicio</option>
                                         <option value="EMS">EMS</option>
                                     </select>
-                                    
+
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="tipo_correspondencia">Correspondencia*</label>
-                                    <select class="form-control" id="tipo_correspondencia" wire:model="tipo_correspondencia" wire:ignore>
+                                    <select class="form-control" id="tipo_correspondencia"
+                                        wire:model="tipo_correspondencia" wire:ignore>
                                         <option value="">Seleccione el tipo de correspondencia</option>
                                         <option value="CARTA">CARTA</option>
                                         <option value="SACA M">SACA M</option>
@@ -464,14 +492,16 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="cantidad">Cantidad*</label>
-                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad" wire:model="cantidad" value="1" disabled>
+                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad"
+                                        wire:model="cantidad" value="1" disabled>
                                 </div>
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="destino">Destino*</label>
-                                    <select class="form-control" id="destino" wire:model="destino" wire:ignore wire:change="updatePrice">
+                                    <select class="form-control" id="destino" wire:model="destino" wire:ignore
+                                        wire:change="updatePrice">
                                         <option value="">Seleccione el destino</option>
                                         <option value="NACIONAL">NACIONAL</option>
                                         <option value="CIUDADES INTERMEDIAS">CIUDADES INTERMEDIAS</option>
@@ -491,65 +521,74 @@
                                 </div>
                             </div>
                         </div> --}}
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="numero_factura">Número de Factura</label>
-                                    <input type="text" class="form-control" id="numero_factura" wire:model="numero_factura">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="numero_factura">Número de Factura</label>
+                                        <input type="text" class="form-control" id="numero_factura"
+                                            wire:model="numero_factura">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="peso">Peso (Kg.)*</label>
-                                    <input type="text" class="form-control" id="peso" wire:model="peso"
-                                    placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
-                             
-                             
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="peso">Peso (Kg.)*</label>
+                                        <input type="text" class="form-control" id="peso" wire:model="peso"
+                                            placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
 
 
+
+
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="precio">Precio*</label>
+                                        <input type="text" class="form-control" id="precio"
+                                            wire:model="precio" readonly>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="precio">Precio*</label>
-                                    <input type="text" class="form-control" id="precio" wire:model="precio" readonly>
+
+                            <!-- Sección REMITENTE -->
+                            <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group" style="position: relative;">
+                                        <label for="nombre_remitente">Nombre Remitente*</label>
+                                        <input type="text" class="form-control" id="nombre_remitente"
+                                            wire:model="nombre_remitente" oninput="showSuggestions(this.value)"
+                                            wire:ignore>
+                                        <!-- Contenedor para las sugerencias -->
+                                        <div id="suggestions"
+                                            style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="nombre_envia">Nombre Envía*</label>
+                                        <input type="text" class="form-control" id="nombre_envia"
+                                            wire:model="nombre_envia">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="carnet">Carnet*</label>
+                                        <input type="text" class="form-control" id="carnet"
+                                            wire:model="carnet">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="telefono_remitente">Teléfono Remitente*</label>
+                                        <input type="text" class="form-control" id="telefono_remitente"
+                                            wire:model="telefono_remitente">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-    
-                        <!-- Sección REMITENTE -->
-                        <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group" style="position: relative;">
-                                    <label for="nombre_remitente">Nombre Remitente*</label>
-                                    <input type="text" class="form-control" id="nombre_remitente" wire:model="nombre_remitente" oninput="showSuggestions(this.value)" wire:ignore>
-                                    <!-- Contenedor para las sugerencias -->
-                                    <div id="suggestions" style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="nombre_envia">Nombre Envía*</label>
-                                    <input type="text" class="form-control" id="nombre_envia" wire:model="nombre_envia">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="carnet">Carnet*</label>
-                                    <input type="text" class="form-control" id="carnet" wire:model="carnet">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="telefono_remitente">Teléfono Remitente*</label>
-                                    <input type="text" class="form-control" id="telefono_remitente" wire:model="telefono_remitente">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
 
                         <!-- Sección DESTINATARIO -->
@@ -560,13 +599,15 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="nombre_destinatario">Nombre Destinatario*</label>
-                                    <input type="text" class="form-control" id="nombre_destinatario" wire:model="nombre_destinatario">
+                                    <input type="text" class="form-control" id="nombre_destinatario"
+                                        wire:model="nombre_destinatario">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="telefono_destinatario">Teléfono Destinatario*</label>
-                                    <input type="text" class="form-control" id="telefono_destinatario" wire:model="telefono_destinatario">
+                                    <input type="text" class="form-control" id="telefono_destinatario"
+                                        wire:model="telefono_destinatario">
                                 </div>
                             </div>
                         </div>
@@ -574,35 +615,37 @@
                             <div class="col-12"> <!-- Cambiado a col-12 para ocupar todo el ancho -->
                                 <div class="form-group">
                                     <label for="direccion">Dirección*</label>
-                                    <input type="text" class="form-control" id="direccion" wire:model="direccion">
+                                    <input type="text" class="form-control" id="direccion"
+                                        wire:model="direccion">
                                 </div>
                             </div>
                         </div>
 
-                            <div class="row">
+                        <div class="row">
 
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="ciudad">Ciudad*</label>
-                                        <select class="form-control" id="ciudad" wire:model="ciudad">
-                                            <option value="">Seleccione una ciudad</option>
-                                            <option value="LA PAZ">LA PAZ</option>
-                                            <option value="POTOSI">POTOSI</option>
-                                            <option value="ORURO">ORURO</option>
-                                            <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                            <option value="CHUQUISACA">CHUQUISACA</option>
-                                            <option value="COCHABAMBA">COCHABAMBA</option>
-                                            <option value="BENI">BENI</option>
-                                            <option value="PANDO">PANDO</option>
-                                            <option value="TARIJA">TARIJA</option>
-                                        </select>
-                                    </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="ciudad">Ciudad*</label>
+                                    <select class="form-control" id="ciudad" wire:model="ciudad">
+                                        <option value="">Seleccione una ciudad</option>
+                                        <option value="LA PAZ">LA PAZ</option>
+                                        <option value="POTOSI">POTOSI</option>
+                                        <option value="ORURO">ORURO</option>
+                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                        <option value="BENI">BENI</option>
+                                        <option value="PANDO">PANDO</option>
+                                        <option value="TARIJA">TARIJA</option>
+                                    </select>
                                 </div>
-                                
+                            </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="provincia">Provincia</label>
-                                    <input type="text" class="form-control" id="provincia" wire:model="provincia">
+                                    <input type="text" class="form-control" id="provincia"
+                                        wire:model="provincia">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -612,8 +655,8 @@
                                 </div>
                             </div>
                         </div>
-    
-                        
+
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -643,6 +686,7 @@
     function closeUpdateModal() {
         $('#updateDespachoModal').modal('hide');
     }
+
     function saveFrequentSend() {
         let frequentSends = JSON.parse(localStorage.getItem('frequentSends')) || [];
         let data = {
@@ -670,7 +714,8 @@
         };
 
         // Evitar duplicados basados en el nombre del remitente y código
-        if (!frequentSends.some(send => send.nombre_remitente === data.nombre_remitente && send.codigo === data.codigo)) {
+        if (!frequentSends.some(send => send.nombre_remitente === data.nombre_remitente && send.codigo === data
+            .codigo)) {
             frequentSends.push(data);
             localStorage.setItem('frequentSends', JSON.stringify(frequentSends));
             alert('Envío guardado como frecuente.');
@@ -678,6 +723,7 @@
             alert('Este envío ya está guardado como frecuente.');
         }
     }
+
     function showSuggestions(value) {
         let frequentSends = JSON.parse(localStorage.getItem('frequentSends')) || [];
         let suggestionsDiv = document.getElementById('suggestions');
@@ -687,7 +733,8 @@
             return;
         }
 
-        let suggestions = frequentSends.filter(send => send.nombre_remitente.toLowerCase().includes(value.toLowerCase()));
+        let suggestions = frequentSends.filter(send => send.nombre_remitente.toLowerCase().includes(value
+        .toLowerCase()));
         suggestions.forEach(send => {
             let div = document.createElement('div');
             div.innerHTML = send.nombre_remitente;
@@ -710,9 +757,15 @@
         document.getElementById('numero_factura').value = send.numero_factura;
 
         // Disparar eventos de cambio para que Livewire detecte los cambios en los combos
-        document.getElementById('servicio').dispatchEvent(new Event('change', { bubbles: true }));
-        document.getElementById('tipo_correspondencia').dispatchEvent(new Event('change', { bubbles: true }));
-        document.getElementById('destino').dispatchEvent(new Event('change', { bubbles: true }));
+        document.getElementById('servicio').dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
+        document.getElementById('tipo_correspondencia').dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
+        document.getElementById('destino').dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
 
         // REMITENTE
         document.getElementById('nombre_remitente').value = send.nombre_remitente;
@@ -726,20 +779,22 @@
         document.getElementById('direccion').value = send.direccion;
         document.getElementById('provincia').value = send.provincia;
         document.getElementById('ciudad').value = send.ciudad;
-        document.getElementById('ciudad').dispatchEvent(new Event('change', { bubbles: true }));
+        document.getElementById('ciudad').dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
 
         document.getElementById('pais').value = send.pais;
 
         // Disparar eventos de entrada para que Livewire detecte los cambios en otros campos
         let fields = [
-    'peso', 'codigo', 'numero_factura', 'nombre_remitente',
-    'nombre_envia', 'carnet', 'telefono_remitente', 'nombre_destinatario',
-    'telefono_destinatario', 'direccion', 'provincia', 'pais' // 'ciudad' removido
-];
+            'peso', 'codigo', 'numero_factura', 'nombre_remitente',
+            'nombre_envia', 'carnet', 'telefono_remitente', 'nombre_destinatario',
+            'telefono_destinatario', 'direccion', 'provincia', 'pais' // 'ciudad' removido
+        ];
 
-fields.forEach(function(field) {
-    triggerInputEvent(field);
-});
+        fields.forEach(function(field) {
+            triggerInputEvent(field);
+        });
         // Limpiar las sugerencias
         document.getElementById('suggestions').innerHTML = '';
 
@@ -748,31 +803,35 @@ fields.forEach(function(field) {
     }
 
     function triggerInputEvent(elementId) {
-    var element = document.getElementById(elementId);
-    if (element.tagName === 'SELECT') {
-        // Disparar evento 'change' para selects
-        element.dispatchEvent(new Event('change', { bubbles: true }));
-    } else {
-        // Disparar evento 'input' para inputs
-        element.dispatchEvent(new Event('input', { bubbles: true }));
+        var element = document.getElementById(elementId);
+        if (element.tagName === 'SELECT') {
+            // Disparar evento 'change' para selects
+            element.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
+        } else {
+            // Disparar evento 'input' para inputs
+            element.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+        }
     }
-}
 
 
     // Ocultar sugerencias cuando se hace clic fuera
-    document.addEventListener('livewire:load', function () {
-    window.addEventListener('pdf-downloaded', () => {
-        location.reload(); // Recarga la página
+    document.addEventListener('livewire:load', function() {
+        window.addEventListener('pdf-downloaded', () => {
+            location.reload(); // Recarga la página
+        });
     });
-});
 
- // Escuchar eventos de Livewire para abrir o cerrar el modal
- document.addEventListener('livewire:load', function () {
-        window.addEventListener('open-edit-modal', function () {
+    // Escuchar eventos de Livewire para abrir o cerrar el modal
+    document.addEventListener('livewire:load', function() {
+        window.addEventListener('open-edit-modal', function() {
             openUpdateModal();
         });
 
-        window.addEventListener('close-edit-modal', function () {
+        window.addEventListener('close-edit-modal', function() {
             closeUpdateModal();
         });
 
@@ -780,7 +839,7 @@ fields.forEach(function(field) {
             location.reload(); // Recarga la página
         });
     });
-    document.addEventListener('livewire:load', function () {
+    document.addEventListener('livewire:load', function() {
         Livewire.on('toggleSelectAll', (selectAll, currentPageIds) => {
             // Marca o desmarca los checkboxes según el estado de selectAll
             currentPageIds.forEach(id => {
@@ -791,45 +850,43 @@ fields.forEach(function(field) {
             });
         });
     });
-    document.addEventListener('DOMContentLoaded', function () {
-        window.addEventListener('mostrar-modal-expedicion-hoy', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('mostrar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('show'); // Usa Bootstrap para mostrar el modal
         });
 
-        window.addEventListener('ocultar-modal-expedicion-hoy', function () {
+        window.addEventListener('ocultar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('hide'); // Usa Bootstrap para ocultar el modal
         });
     });
 
 
-    document.addEventListener('livewire:load', function () {
+    document.addEventListener('livewire:load', function() {
         // Mostrar el modal
-        window.addEventListener('mostrar-modal-expedicion-hoy', function () {
+        window.addEventListener('mostrar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('show');
         });
 
         // Ocultar el modal
-        window.addEventListener('ocultar-modal-expedicion-hoy', function () {
+        window.addEventListener('ocultar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('hide');
         });
     });
 
 
 
-    document.addEventListener('livewire:load', function () {
+    document.addEventListener('livewire:load', function() {
         // Mostrar el modal
-        window.addEventListener('mostrar-modal-expedicion-hoy', function () {
+        window.addEventListener('mostrar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('show');
         });
 
         // Ocultar el modal
-        window.addEventListener('ocultar-modal-expedicion-hoy', function () {
+        window.addEventListener('ocultar-modal-expedicion-hoy', function() {
             $('#modalExpedicionHoy').modal('hide');
         });
     });
     window.addEventListener('page-reload', () => {
         location.reload();
     });
- 
-
 </script>

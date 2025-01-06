@@ -42,20 +42,21 @@
                             </div>
 
                             <div class="d-flex justify-content-end align-items-center mt-3">
-    <a href="{{ route('asignarcartero') }}" class="btn btn-success" style="margin-right: 10px;">
-        Asignar Carteros
-    </a>
-    
-   <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
-        Mandar a Regional / Reencaminar
-    </button>
-    <button class="btn btn-secondary" wire:click="mandarAVentanilla">
-        Mandar a Ventanilla
-    </button>
-</div>
+                                <a href="{{ route('asignarcartero') }}" class="btn btn-success"
+                                    style="margin-right: 10px;">
+                                    Asignar Carteros
+                                </a>
+
+                                <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
+                                    Mandar a Regional / Reencaminar
+                                </button>
+                                <button class="btn btn-secondary" wire:click="mandarAVentanilla">
+                                    Mandar a Ventanilla
+                                </button>
+                            </div>
 
 
-                            @if (session()->has('message'))
+                            {{-- @if (session()->has('message'))
                                 <div class="alert alert-success">
                                     {{ session('message') }}
                                 </div>
@@ -64,16 +65,15 @@
                                 <div class="alert alert-danger">
                                     {{ session('error') }}
                                 </div>
-                            @endif
+                            @endif --}}
                             <div class="card-body">
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
                                             <th>
-                                                <input type="checkbox" 
-                                                       wire:model="selectAll" 
-                                                       wire:click="toggleSelectAll" 
-                                                       {{ count($selectedAdmisiones) === $admisiones->count() ? 'checked' : '' }} />
+                                                <input type="checkbox" wire:model="selectAll"
+                                                    wire:click="toggleSelectAll"
+                                                    {{ count($selectedAdmisiones) === $admisiones->count() ? 'checked' : '' }} />
                                             </th>
                                             <th>#</th>
                                             <th>Origen</th>
@@ -86,7 +86,6 @@
                                             <th>Envio</th>
                                             <th>Código</th>
                                             <th>Fecha</th>
-                                            <th>Estado</th>
                                             <th>Observación</th>
                                             @hasrole('SuperAdmin|Administrador')
                                                 <th>Admision</th>
@@ -95,11 +94,24 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($admisiones as $admisione)
-                                            <tr>
+                                            @php
+                                                $now = \Carbon\Carbon::now();
+                                                $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
+                                                $diffInHours = $now->diffInHours($fechaAdmision);
+                                                $rowClass = '';
+
+                                                if ($diffInHours <= 24) {
+                                                    $rowClass = 'table-success'; // Verde
+                                                } elseif ($diffInHours <= 48) {
+                                                    $rowClass = 'table-warning'; // Amarillo
+                                                } else {
+                                                    $rowClass = 'table-danger'; // Rojo
+                                                }
+                                            @endphp
+                                            <tr class="{{ $rowClass }}">
                                                 <td>
-                                                    <input type="checkbox" 
-                                                           wire:model="selectedAdmisiones" 
-                                                           value="{{ $admisione->id }}" />
+                                                    <input type="checkbox" wire:model="selectedAdmisiones"
+                                                        value="{{ $admisione->id }}" />
                                                 </td>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $admisione->origen }}</td>
@@ -112,15 +124,6 @@
                                                 <td>{{ $admisione->destino }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
-                                                <td>
-                                                    @if ($admisione->estado == 3 || $admisione->estado == 7)
-                                                        Entrega Domiciliaria
-                                                    @elseif ($admisione->estado == 10)
-                                                        Return
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
                                                 <td>{{ $admisione->observacion_entrega ?? '' }}</td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
@@ -128,64 +131,75 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                    
-                                    
+
+
+
+
+
+
                                 </table>
 
                                 <!-- Botón para abrir el modal -->
                             </div>
                             @if ($showModal)
-                            <div class="modal fade show d-block" tabindex="-1" role="dialog">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <!-- Encabezado -->
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirmar Envío</h5>
-                                            <button type="button" class="close" wire:click="$set('showModal', false)">
-                                                <span>&times;</span>
-                                            </button>
-                                        </div>
-                                        <!-- Cuerpo -->
-                                        <div class="modal-body">
-                                            <p>Puede enviar las admisiones seleccionadas a la regional o reencaminarlas a otro departamento.</p>
-                                            <!-- Combo box para seleccionar el departamento de reencaminamiento -->
-                                            <div class="form-group">
-                                                <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
-                                                <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
-                                                    <option value="">Seleccione un departamento</option>
-                                                    <option value="LA PAZ">LA PAZ</option>
-                                                    <option value="ORURO">ORURO</option>
-                                                    <option value="BENI">BENI</option>
-                                                    <option value="COCHABAMBA">COCHABAMBA</option>
-                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                                    <option value="POTOSI">POTOSI</option>
-                                                    <option value="CHUQUISACA">CHUQUISACA</option>
-                                                    <option value="PANDO">PANDO</option>
-                                                    <option value="TARIJA">TARIJA</option>
-                                                </select>
-                                                @if (!$selectedDepartment)
-                                                    <small class="text-danger">Debe seleccionar un departamento.</small>
-                                                @endif
+                                <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <!-- Encabezado -->
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Envío</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showModal', false)">
+                                                    <span>&times;</span>
+                                                </button>
                                             </div>
-                                            
-                                            <!-- Mostrar los códigos de las admisiones seleccionadas -->
-                                            <ul>
-                                                @foreach ($selectedAdmisionesCodes as $codigo)
-                                                    <li>Código: {{ $codigo }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                        <!-- Pie -->
-                                        <div class="modal-footer">
-                                            <button class="btn btn-primary" wire:click="mandarARegional">Guardar y Generar Excel</button>
-                                            <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
+                                            <!-- Cuerpo -->
+                                            <div class="modal-body">
+                                                <p>Puede enviar las admisiones seleccionadas a la regional o
+                                                    reencaminarlas a otro departamento.</p>
+                                                <!-- Combo box para seleccionar el departamento de reencaminamiento -->
+                                                <div class="form-group">
+                                                    <label for="selectedDepartment">Reencaminar al departamento
+                                                        (obligatorio):</label>
+                                                    <select wire:model="selectedDepartment" class="form-control"
+                                                        id="selectedDepartment">
+                                                        <option value="">Seleccione un departamento</option>
+                                                        <option value="LA PAZ">LA PAZ</option>
+                                                        <option value="ORURO">ORURO</option>
+                                                        <option value="BENI">BENI</option>
+                                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                        <option value="POTOSI">POTOSI</option>
+                                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                                        <option value="PANDO">PANDO</option>
+                                                        <option value="TARIJA">TARIJA</option>
+                                                    </select>
+                                                    @if (!$selectedDepartment)
+                                                        <small class="text-danger">Debe seleccionar un
+                                                            departamento.</small>
+                                                    @endif
+                                                </div>
+
+                                                <!-- Mostrar los códigos de las admisiones seleccionadas -->
+                                                <ul>
+                                                    @foreach ($selectedAdmisionesCodes as $codigo)
+                                                        <li>Código: {{ $codigo }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            <!-- Pie -->
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary" wire:click="mandarARegional">Guardar y
+                                                    Generar Excel</button>
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showModal', false)">Cancelar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                        
-                        
+                            @endif
+
+
                             @if ($showReencaminamientoModal)
                                 <div class="modal fade show d-block" tabindex="-1" role="dialog"
                                     style="background-color: rgba(0,0,0,0.5);">

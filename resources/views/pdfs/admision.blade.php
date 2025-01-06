@@ -84,6 +84,8 @@
                         <div style="text-align: center; margin: 0 auto;">
                             <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+
                         </div>
                     </td>
                     
@@ -93,7 +95,7 @@
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $destino }}</div>
+                        <div style="text-align: right;">{{ $ciudad }}</div>
                     </td>
                     <td></td>
                 </tr>
@@ -184,6 +186,8 @@
                         <div style="text-align: center; margin: 0 auto;">
                             <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+
                         </div>
                     </td>
                 </tr>
@@ -192,7 +196,7 @@
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $destino }}</div>
+                        <div style="text-align: right;">{{ $ciudad }}</div>
                     </td>
                     <td></td>
                 </tr>
@@ -286,6 +290,8 @@
                         <div style="text-align: center; margin: 0 auto;">
                             <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+
                         </div>
                     </td>
                     
@@ -295,7 +301,7 @@
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $destino }}</div>
+                        <div style="text-align: right;">{{ $ciudad }}</div>
                     </td>
                     <td></td>
                 </tr>
@@ -384,6 +390,8 @@
                         <div style="text-align: center; margin: 0 auto;">
                             <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
+                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+
                         </div>
                     </td>
                     
@@ -395,7 +403,7 @@
                         <div style="text-align: right;">{{ $origen }}</div>
                     </td>
                     <td>OF. DESTINO: <br>
-                        <div style="text-align: right;">{{ $destino }}</div>
+                        <div style="text-align: right;">{{ $ciudad }}</div>
                     </td>
                     <td></td>
                 </tr>
