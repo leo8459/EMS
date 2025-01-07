@@ -169,6 +169,8 @@ class Iniciar extends Component
             'contenido' => $this->contenido,
             'estado' => 1,
             'user_id' => Auth::id(),
+            'creacionadmision' => Auth::user()->name, // Guardar el nombre del usuario autenticado
+
         ]);
 
         // Registrar el evento en la tabla 'eventos'

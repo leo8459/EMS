@@ -36,7 +36,9 @@ class Admisionesgeneradas extends Component
     public $selectedCity = null;
     public $cityJustUpdated = false;
     public $origen;
-
+    public $startDate; // Fecha inicial
+    public $endDate; // Fecha final
+    
 
 
     public function render()
@@ -65,13 +67,13 @@ public function exportToExcel()
     $user = Auth::user(); // Obtener el usuario logueado
     $userName = $user->name; // Obtener el nombre del usuario logueado
 
-    // Filtrar admisiones según la ciudad del usuario y el nombre del creador
-    $admisiones = Admision::where('origen', $user->city) // Filtrar según la ciudad del usuario
+    // Filtrar admisiones por ciudad, usuario creador y rango de fechas
+    $admisiones = Admision::where('origen', $user->city) // Filtrar por ciudad del usuario
         ->where('creacionadmision', $userName) // Filtrar por el nombre del usuario creador
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%')
-        ->orderBy('fecha', 'desc')
+        ->whereBetween('fecha', [$this->startDate, $this->endDate]) // Filtro por rango de fechas
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda si se proporciona
+        ->orderBy('fecha', 'desc') // Ordenar por fecha
         ->get();
-
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 
@@ -201,6 +203,24 @@ public function exportToExcel()
 }
 
 
+
+public function exportToPDF()
+{
+    // Filtrar admisiones por rango de fechas
+    $admisiones = Admision::whereBetween('fecha', [$this->startDate, $this->endDate]) // Filtro por rango de fechas
+        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda si se proporciona
+        ->orderBy('fecha', 'desc') // Ordenar por fecha
+        ->get();
+
+    // Generar el PDF
+    $pdf = Pdf::loadView('pdfs.reporte_admisionespdf', compact('admisiones'));
+
+    // Descargar el PDF
+    return response()->streamDownload(
+        fn() => print($pdf->stream()),
+        'Reporte_Admisiones_Kardex.pdf'
+    );
+}
 
 
     

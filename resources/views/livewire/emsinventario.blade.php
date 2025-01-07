@@ -71,7 +71,6 @@
                                     <thead>
                                         <tr>
                                             <th>
-                                                <input type="checkbox" wire:click="toggleSelectAll" />
                                             </th>
                                             <th>#</th>
                                             <th>Origen</th>

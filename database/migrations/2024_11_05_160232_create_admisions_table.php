@@ -42,7 +42,10 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->string('contenido')->nullable();
             $table->string('reencaminamiento')->nullable();
+            $table->string('recepcionado')->nullable();
             
+            $table->string('observacion_entrega')->nullable();
+
             $table->string('creacionadmision')->nullable();
             $table->enum('notificacion', ['FALTANTE', 'SOBRANTE', 'MALENCAMINADO', 'DAÑADO'])->nullable();
 

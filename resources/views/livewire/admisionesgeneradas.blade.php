@@ -28,9 +28,23 @@
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
 
                                 </div>
-                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Descargar Excel</button>
+                                {{-- <button type="button" class="btn btn-success" wire:click="exportToExcel">Descargar Excel</button>
+                                <button type="button" class="btn btn-danger" wire:click="exportToPDF">Descargar PDF</button> --}}
 
                             </div>
+                            <div class="form-inline">
+                                <label for="startDate">Desde:</label>
+                                <input type="date" id="startDate" wire:model="startDate" class="form-control mx-2">
+                            
+                                <label for="endDate">Hasta:</label>
+                                <input type="date" id="endDate" wire:model="endDate" class="form-control mx-2">
+                            
+                                <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar PDF</button>
+                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar Excel</button>
+                            </div>
+                            
+                            
+                            
                         </div>
                         @if (session()->has('message'))
                             <div class="alert alert-success">
