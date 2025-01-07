@@ -75,10 +75,10 @@
                                 <!-- Botón para exportar PDF -->
                                 <div>
                                     <button wire:click="exportToPDF" class="btn btn-danger mt-4">
-                                        <i class="fas fa-file-pdf"></i> Exportar a PDF
+                                        <i class="fas fa-file-pdf"></i>Entregados Carteros
                                     </button>
                                     <button wire:click="exportNewReportToPDF" class="btn btn-success mt-4">
-                                        <i class="fas fa-file-pdf"></i> Exportar General a PDF
+                                        <i class="fas fa-file-pdf"></i> Entregados/PorEntregar
                                     </button>
                                 </div>
                             </div>
