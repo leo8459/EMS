@@ -133,7 +133,7 @@
         </tbody>
     </table>
 
-    <h3>Envíos Faltantes</h3>
+    <h3>Envíos por Entregar</h3>
     <table>
         <thead>
             <tr>
