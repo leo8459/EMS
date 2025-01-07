@@ -33,6 +33,20 @@
 
                             </div>
                             <div class="form-inline">
+                                <label for="department">Departamento:</label>
+    <select id="department" wire:model="department" class="form-control mx-2">
+        <option value="">Todos</option> <!-- Opción para incluir todos los departamentos -->
+        <option value="LA PAZ">LA PAZ</option>
+        <option value="COCHABAMBA">COCHABAMBA</option>
+        <option value="SANTA CRUZ">SANTA CRUZ</option>
+        <option value="ORURO">ORURO</option>
+        <option value="POTOSI">POTOSI</option>
+        <option value="CHUQUISACA">CHUQUISACA</option>
+        <option value="BENI">BENI</option>
+        <option value="PANDO">PANDO</option>
+        <option value="TARIJA">TARIJA</option>
+    </select>
+
                                 <label for="startDate">Desde:</label>
                                 <input type="date" id="startDate" wire:model="startDate" class="form-control mx-2">
                             

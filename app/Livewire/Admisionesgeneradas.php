@@ -38,7 +38,8 @@ class Admisionesgeneradas extends Component
     public $origen;
     public $startDate; // Fecha inicial
     public $endDate; // Fecha final
-    
+    public $department; // Departamento seleccionado (opcional)
+
 
 
     public function render()
@@ -206,11 +207,29 @@ public function exportToExcel()
 
 public function exportToPDF()
 {
-    // Filtrar admisiones por rango de fechas
-    $admisiones = Admision::whereBetween('fecha', [$this->startDate, $this->endDate]) // Filtro por rango de fechas
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda si se proporciona
-        ->orderBy('fecha', 'desc') // Ordenar por fecha
-        ->get();
+    // Crear la consulta base
+    $query = Admision::query();
+
+    // Aplicar el filtro por rango de fechas, asegurando que la fecha final incluya el final del día
+    if ($this->startDate && $this->endDate) {
+        $query->whereBetween('fecha', [
+            $this->startDate, 
+            Carbon::parse($this->endDate)->endOfDay() // Incluye las 23:59 del día final
+        ]);
+    }
+
+    // Aplicar el filtro por término de búsqueda si se proporciona
+    if ($this->searchTerm) {
+        $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
+    }
+
+    // Aplicar el filtro por departamento (basado en el origen) si se selecciona uno
+    if ($this->department) {
+        $query->where('origen', $this->department);
+    }
+
+    // Obtener los resultados
+    $admisiones = $query->orderBy('fecha', 'desc')->get();
 
     // Generar el PDF
     $pdf = Pdf::loadView('pdfs.reporte_admisionespdf', compact('admisiones'));
@@ -221,6 +240,7 @@ public function exportToPDF()
         'Reporte_Admisiones_Kardex.pdf'
     );
 }
+
 
 
     
