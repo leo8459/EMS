@@ -40,6 +40,7 @@ class Admision extends Model
         'reencaminamiento',
         'creacionadmision',
         'user_id',
+        'notificacion',
         'observacion',    // <= Asegúrate de que esté
 
 

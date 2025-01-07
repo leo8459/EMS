@@ -17,7 +17,7 @@ class Recibir extends Component
     use WithPagination;
     public $currentPageIds = [];
     public $searchTerm = '';
-    public $perPage = 10;
+    public $perPage = 1000;
     public $admisionId;
     public $selectedAdmisiones = []; // Para almacenar los IDs seleccionados
     public $selectAll = false; // Añadido para controlar el seleccionar todo

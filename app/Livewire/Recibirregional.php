@@ -207,16 +207,17 @@ if ($notificacionesSobrantes->isEmpty()) {
             if (!isset($data['id'])) {
                 continue;
             }
-
+    
             $admision = Admision::find($data['id']);
             if ($admision) {
                 $admision->update([
                     'peso_ems' => $data['peso_ems'] ?? null,
                     'peso_regional' => $data['peso_regional'] ?? null,
                     'observacion' => $data['observacion'] ?? null,
+                    'notificacion' => $data['notificacion'] ?? null, // Guardar notificación
                     'estado' => 7,
                 ]);
-
+    
                 Eventos::create([
                     'accion' => 'Recibir Regional',
                     'descripcion' => 'Recepción de admisión desde la regional.',
@@ -225,16 +226,17 @@ if ($notificacionesSobrantes->isEmpty()) {
                 ]);
             }
         }
-
+    
         // Generar el PDF con todas las admisiones que se acaban de recibir
         $admisiones = Admision::whereIn('id', array_column($this->selectedAdmisionesData, 'id'))->get();
         $pdf = \PDF::loadView('pdfs.recibidosregional', compact('admisiones'));
-
+    
         // Descargar PDF
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'admisiones_recibidas.pdf');
     }
+    
 
     /**
      * Ejemplo de método para descargar PDF sin el modal 

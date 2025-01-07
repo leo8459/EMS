@@ -155,6 +155,20 @@
                                         wire:model="selectedAdmisionesData.{{ $index }}.observacion"
                                     ></textarea>
                                 </div>
+                                 <!-- Combo Box: Notificación -->
+                        <div class="form-group">
+                            <label for="notificacion-{{ $index }}">Notificación</label>
+                            <select 
+                                class="form-control" 
+                                id="notificacion-{{ $index }}" 
+                                wire:model="selectedAdmisionesData.{{ $index }}.notificacion">
+                                <option value="">Seleccione...</option>
+                                <option value="FALTANTE">FALTANTE</option>
+                                <option value="SOBRANTE">SOBRANTE</option>
+                                <option value="MALENCAMINADO">MALENCAMINADO</option>
+                                <option value="DAÑADO">DAÑADO</option>
+                            </select>
+                        </div>
                             </div>
                         @endforeach
                     </div>
