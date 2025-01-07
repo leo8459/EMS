@@ -24,15 +24,18 @@
                             <div class="d-flex justify-content-between">
                                 <!-- Filtro de búsqueda -->
                                 <div>
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-                                    <button type="button" class="btn btn-primary mt-2" wire:click="$refresh">Buscar</button>
+                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                        class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                    <button type="button" class="btn btn-primary mt-2"
+                                        wire:click="$refresh">Buscar</button>
                                 </div>
 
                                 <!-- Filtros por fechas -->
                                 <div class="d-flex">
                                     <div class="mr-2">
                                         <label for="startDate">Fecha Inicio:</label>
-                                        <input type="date" wire:model="startDate" id="startDate" class="form-control">
+                                        <input type="date" wire:model="startDate" id="startDate"
+                                            class="form-control">
                                     </div>
                                     <div>
                                         <label for="endDate">Fecha Fin:</label>
@@ -50,12 +53,32 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
+                                <!-- Filtro por Departamento -->
+                                <div>
+                                    <label for="department">Filtrar por Departamento:</label>
+                                    <select wire:model="department" id="department" class="form-control">
+                                        <option value="">Todos</option>
+                                        <!-- Opción para mostrar todos los departamentos -->
+                                        <option value="LA PAZ">LA PAZ</option>
+                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                        <option value="ORURO">ORURO</option>
+                                        <option value="POTOSI">POTOSI</option>
+                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                        <option value="BENI">BENI</option>
+                                        <option value="PANDO">PANDO</option>
+                                        <option value="TARIJA">TARIJA</option>
+                                    </select>
+                                </div>
+
 
                                 <!-- Botón para exportar PDF -->
                                 <div>
                                     <button wire:click="exportToPDF" class="btn btn-danger mt-4">
                                         <i class="fas fa-file-pdf"></i> Exportar a PDF
+                                    </button>
+                                    <button wire:click="exportNewReportToPDF" class="btn btn-success mt-4">
+                                        <i class="fas fa-file-pdf"></i> Exportar General a PDF
                                     </button>
                                 </div>
                             </div>
@@ -102,7 +125,8 @@
                                     <tbody>
                                         @foreach ($admisiones as $admisione)
                                             <tr>
-                                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" /></td>
+                                                <td><input type="checkbox" wire:model="selectedAdmisiones"
+                                                        value="{{ $admisione->id }}" /></td>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $admisione->origen }}</td>
                                                 <td>{{ $admisione->servicio }}</td>
@@ -119,7 +143,8 @@
                                                 <td>{{ $admisione->updated_at->format('d/m/Y H:i') }}</td>
                                                 <td>{{ $admisione->observacion }}</td>
                                                 <td>{{ $admisione->recepcionado }}</td>
-                                                <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
+                                                <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}
+                                                </td>
                                                 <td>
                                                     @php
                                                         $extensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -134,18 +159,24 @@
                                                     @endphp
 
                                                     @if ($photoPath)
-                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                            <img src="{{ asset($photoPath) }}" alt="Foto de admisión" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                                                        <div
+                                                            style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                            <img src="{{ asset($photoPath) }}" alt="Foto de admisión"
+                                                                style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
                                                         </div>
-                                                        <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
+                                                        <a href="{{ asset($photoPath) }}" download
+                                                            class="btn btn-sm btn-secondary">Descargar</a>
                                                     @else
                                                         <span>Sin foto</span>
                                                     @endif
                                                 </td>
                                                 <td>
                                                     @if ($admisione->firma_entrega)
-                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                            <img src="{{ $admisione->firma_entrega }}" alt="Firma de entrega" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                                                        <div
+                                                            style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                            <img src="{{ $admisione->firma_entrega }}"
+                                                                alt="Firma de entrega"
+                                                                style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
                                                         </div>
                                                     @else
                                                         <span>Sin firma</span>
