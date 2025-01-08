@@ -175,7 +175,7 @@ class Iniciar extends Component
 
         // Registrar el evento en la tabla 'eventos'
         Eventos::create([
-            'accion' => 'Recibir',
+            'accion' => 'Crear',
             'descripcion' => 'Creación de admisión',
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),

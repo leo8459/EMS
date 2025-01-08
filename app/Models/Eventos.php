@@ -16,6 +16,12 @@ class Eventos extends Model
         'user_id',
         'created_at',
         'updated_at',
+        'origen',
+    'destino',
+    'cantidad',
+    'peso',
+    'observacion',
+    'fecha_recibido',
     ];
     public function user()
     {

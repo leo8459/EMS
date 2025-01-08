@@ -18,6 +18,12 @@ return new class extends Migration
             $table->string('codigo')->nullable();
             $table->timestamps();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('origen')->nullable();
+            $table->string('destino')->nullable();
+            $table->integer('cantidad')->nullable();
+            $table->float('peso')->nullable();
+            $table->text('observacion')->nullable();
+            $table->timestamp('fecha_recibido')->nullable();
 
         });
     }

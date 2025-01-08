@@ -22,7 +22,9 @@ class Recibirregional extends Component
     public $selectAll = false;
     public $damagedAdmisiones = [];
     public $misroutedAdmisiones = [];
-
+    public $startDate; // Agregado: para almacenar la fecha de inicio
+    public $endDate; // Agregado: para almacenar la fecha de fin
+    public $selectedDepartment; // Agregado: para el filtro de departamento
 
 
     public function render()
@@ -116,6 +118,13 @@ if ($notificacionesSobrantes->isEmpty()) {
      * (no hace nada especial más que forzar un render 
      *  cuando cambie searchTerm)
      */
+    public function mount()
+{
+    $this->startDate = now()->startOfMonth()->format('Y-m-d'); // Fecha de inicio predeterminada (inicio del mes actual)
+    $this->endDate = now()->format('Y-m-d'); // Fecha de fin predeterminada (hoy)
+    $this->selectedDepartment = ''; // Sin departamento seleccionado por defecto
+}
+
     public function buscar()
     {
         // Dejar vacío o poner alguna lógica de validación
@@ -219,10 +228,16 @@ if ($notificacionesSobrantes->isEmpty()) {
                 ]);
     
                 Eventos::create([
-                    'accion' => 'Recibir Regional',
+                   'accion' => 'Recibir Regional',
                     'descripcion' => 'Recepción de admisión desde la regional.',
                     'codigo' => $admision->codigo,
                     'user_id' => auth()->id(),
+                    'origen' => $admision->origen ?? 'No especificado',
+                    'destino' => $admision->reencaminamiento ?? $admision->ciudad ?? 'No especificado', // Primero reencaminamiento, luego ciudad
+                    'cantidad' => $admision->cantidad ?? 0,
+                    'peso' => $admision->peso_ems ?? $admision->peso ?? 0.0,
+                    'observacion' => $admision->observacion ?? 'Sin observación',
+                    'fecha_recibido' => now(),
                 ]);
             }
         }
@@ -248,4 +263,37 @@ if ($notificacionesSobrantes->isEmpty()) {
         $pdf = \PDF::loadView('pdfs.recibidosregional', compact('admisiones'));
         return $pdf->download('admisiones_recibidas_regional.pdf');
     }
+
+
+    public function downloadReport2()
+{
+    if (!$this->startDate || !$this->endDate) {
+        session()->flash('error', 'Por favor seleccione un rango de fechas.');
+        return;
+    }
+
+    // Filtrar eventos por fechas y destino (en lugar de reencaminamiento o ciudad)
+    $query = \App\Models\Eventos::where('accion', 'Recibir Regional')
+        ->whereBetween('created_at', [$this->startDate, $this->endDate]);
+
+    if ($this->selectedDepartment) {
+        $query->where('destino', $this->selectedDepartment); // Filtrar por destino
+    }
+
+    $eventos = $query->get();
+
+    if ($eventos->isEmpty()) {
+        session()->flash('error', 'No se encontraron registros en este rango de fechas.');
+        return;
+    }
+
+    // Generar el PDF con el diseño
+    $pdf = \PDF::loadView('pdfs.recibidosregional2', ['admisiones' => $eventos]);
+
+    return response()->streamDownload(function () use ($pdf) {
+        echo $pdf->stream();
+    }, 'reporte_admisiones_recibidas_' . now()->format('Ymd_His') . '.pdf');
+}
+
+    
 }

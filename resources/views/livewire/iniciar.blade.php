@@ -134,9 +134,9 @@
                                         <script>
                                             function abrirWhatsApp(telefono, nombre_remitente, codigo) {
                                                 // Crear la URL de WhatsApp
-                                                const mensaje = 
-    `Hola estimado cliente de la Agencia Boliviana de Correos, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: ${codigo}. Para rastrear tu paquete, entra a esta página: https://correos.gob.bo:8000`;
-const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+                                                const mensaje =
+                                                    `Hola estimado cliente de la Agencia Boliviana de Correos, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: ${codigo}. Para rastrear tu paquete, entra a esta página: https://correos.gob.bo:8000`;
+                                                const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
 
                                                 console.log("Abriendo WhatsApp con URL:", url);
 
@@ -715,7 +715,7 @@ const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURICom
 
         // Evitar duplicados basados en el nombre del remitente y código
         if (!frequentSends.some(send => send.nombre_remitente === data.nombre_remitente && send.codigo === data
-            .codigo)) {
+                .codigo)) {
             frequentSends.push(data);
             localStorage.setItem('frequentSends', JSON.stringify(frequentSends));
             alert('Envío guardado como frecuente.');
@@ -734,7 +734,7 @@ const url = `https://web.whatsapp.com/send?phone=${telefono}&text=${encodeURICom
         }
 
         let suggestions = frequentSends.filter(send => send.nombre_remitente.toLowerCase().includes(value
-        .toLowerCase()));
+            .toLowerCase()));
         suggestions.forEach(send => {
             let div = document.createElement('div');
             div.innerHTML = send.nombre_remitente;
