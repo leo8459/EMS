@@ -8,6 +8,8 @@ use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Eventos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache; // Asegúrate de incluir esto
+use Carbon\Carbon;
 
 class Recibirregional extends Component
 {
@@ -119,11 +121,12 @@ if ($notificacionesSobrantes->isEmpty()) {
      *  cuando cambie searchTerm)
      */
     public function mount()
-{
-    $this->startDate = now()->startOfMonth()->format('Y-m-d'); // Fecha de inicio predeterminada (inicio del mes actual)
-    $this->endDate = now()->format('Y-m-d'); // Fecha de fin predeterminada (hoy)
-    $this->selectedDepartment = ''; // Sin departamento seleccionado por defecto
-}
+    {
+        $this->startDate = null; // Fecha de inicio vacía
+        $this->endDate = null;   // Fecha de fin vacía
+        $this->selectedDepartment = ''; // Sin departamento seleccionado por defecto
+    }
+    
 
     public function buscar()
     {
@@ -272,9 +275,13 @@ if ($notificacionesSobrantes->isEmpty()) {
         return;
     }
 
-    // Filtrar eventos por fechas y destino (en lugar de reencaminamiento o ciudad)
+    // Convertir las fechas al inicio y fin del día
+    $start = Carbon::parse($this->startDate)->startOfDay(); // Inicio del día
+    $end = Carbon::parse($this->endDate)->endOfDay(); // Fin del día (23:59:59)
+
+    // Filtrar eventos por fechas
     $query = \App\Models\Eventos::where('accion', 'Recibir Regional')
-        ->whereBetween('created_at', [$this->startDate, $this->endDate]);
+        ->whereBetween('created_at', [$start, $end]);
 
     if ($this->selectedDepartment) {
         $query->where('destino', $this->selectedDepartment); // Filtrar por destino

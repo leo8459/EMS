@@ -170,33 +170,37 @@ class Recibir extends Component
 
 
     public function downloadReport()
-{
-    if (!$this->startDate || !$this->endDate) {
-        session()->flash('error', 'Por favor seleccione un rango de fechas.');
-        return;
+    {
+        if (!$this->startDate || !$this->endDate) {
+            session()->flash('error', 'Por favor seleccione un rango de fechas.');
+            return;
+        }
+    
+        // Convertir las fechas al inicio y fin del día
+        $start = Carbon::parse($this->startDate)->startOfDay(); // Inicio del día (00:00:00)
+        $end = Carbon::parse($this->endDate)->endOfDay(); // Fin del día (23:59:59)
+    
+        // Obtener eventos de tipo "Recibir" filtrados por fechas y departamento
+        $query = \App\Models\Eventos::where('accion', 'Recibir')
+            ->whereBetween('created_at', [$start, $end]);
+    
+        if ($this->selectedDepartment) {
+            $query->where('origen', $this->selectedDepartment);
+        }
+    
+        $eventos = $query->get();
+    
+        if ($eventos->isEmpty()) {
+            session()->flash('error', 'No se encontraron registros en este rango de fechas.');
+            return;
+        }
+    
+        // Generar el PDF con el diseño
+        $pdf = \PDF::loadView('pdfs.recibir2', ['admisiones' => $eventos]);
+    
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'reporte_admisiones_recibidas_' . now()->format('Ymd_His') . '.pdf');
     }
-
-    // Obtener eventos de tipo "Recibir" filtrados por fechas y departamento
-    $query = \App\Models\Eventos::where('accion', 'Recibir')
-        ->whereBetween('created_at', [$this->startDate, $this->endDate]);
-
-    if ($this->selectedDepartment) {
-        $query->where('origen', $this->selectedDepartment);
-    }
-
-    $eventos = $query->get();
-
-    if ($eventos->isEmpty()) {
-        session()->flash('error', 'No se encontraron registros en este rango de fechas.');
-        return;
-    }
-
-    // Generar el PDF con el diseño
-    $pdf = \PDF::loadView('pdfs.recibir2', ['admisiones' => $eventos]);
-
-    return response()->streamDownload(function () use ($pdf) {
-        echo $pdf->stream();
-    }, 'reporte_admisiones_recibidas_' . now()->format('Ymd_His') . '.pdf');
-}
     
 }
