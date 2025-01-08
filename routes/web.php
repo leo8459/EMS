@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleHasPermissionController;
 use App\Http\Controllers\AdmisionesController;
 use App\Http\Controllers\EventosController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,6 +109,11 @@ Route::middleware('auth')->group(function () {
 
     //eventos
     Route::get('/eventosregistro', [EventosController::class, 'eventos']);
+
+
+
+    //dashboard
+    Route::get('/dashboardgeneral', [DashboardAdminController::class, 'dashboardadmin']);
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
