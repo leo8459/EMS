@@ -9,7 +9,7 @@
 @livewire('inventarioadmin')
 @endhasrole
 @hasrole ('ADMISION')
-@livewire('iniciar')
+@livewire('inventario')
 @endhasrole
 @include('footer')
 @endsection

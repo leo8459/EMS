@@ -8,7 +8,7 @@
 @hasrole ('ADMINISTRADOR')
 @livewire('recibiradmin')
 @endhasrole
-@hasrole ('ADMISION')
+@hasrole ('EMS')
 @livewire('recibir')
 @endhasrole
 @include('footer')
