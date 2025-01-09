@@ -5,6 +5,11 @@
 @endsection
 
 @section('content')
+@hasrole ('ADMINISTRADOR')
+@livewire('iniciaradmin')
+@endhasrole
+@hasrole ('ADMISION')
 @livewire('iniciar')
+@endhasrole
 @include('footer')
 @endsection

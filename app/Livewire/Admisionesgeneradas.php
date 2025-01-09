@@ -70,11 +70,15 @@ public function exportToExcel()
 
     // Filtrar admisiones por ciudad, usuario creador y rango de fechas
     $admisiones = Admision::where('origen', $user->city) // Filtrar por ciudad del usuario
-        ->where('creacionadmision', $userName) // Filtrar por el nombre del usuario creador
-        ->whereBetween('fecha', [$this->startDate, $this->endDate]) // Filtro por rango de fechas
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda si se proporciona
-        ->orderBy('fecha', 'desc') // Ordenar por fecha
-        ->get();
+    ->where('creacionadmision', $userName) // Filtrar por el nombre del usuario creador
+    ->whereBetween('fecha', [
+        $this->startDate, 
+        Carbon::parse($this->endDate)->endOfDay() // Incluye hasta las 23:59 del día final
+    ])
+    ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por término de búsqueda si se proporciona
+    ->orderBy('fecha', 'desc') // Ordenar por fecha
+    ->get();
+
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 

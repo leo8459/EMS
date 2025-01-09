@@ -34,6 +34,8 @@
 
                             </div>
                             <div class="form-inline">
+                                @hasrole ('ADMINISTRADOR')
+
                                 <label for="department">Departamento:</label>
                                 <select id="department" wire:model="department" class="form-control mx-2">
                                     <option value="">Todos</option>
@@ -48,17 +50,21 @@
                                     <option value="PANDO">PANDO</option>
                                     <option value="TARIJA">TARIJA</option>
                                 </select>
+                                @endhasrole
 
                                 <label for="startDate">Desde:</label>
                                 <input type="date" id="startDate" wire:model="startDate" class="form-control mx-2">
 
                                 <label for="endDate">Hasta:</label>
                                 <input type="date" id="endDate" wire:model="endDate" class="form-control mx-2">
+                                @hasrole ('ADMINISTRADOR')
 
                                 <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar
                                     PDF</button>
+                                    @endhasrole
+
                                 <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar
-                                    Excel</button>
+                                    Arqueo</button>
                             </div>
 
 

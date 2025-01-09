@@ -39,25 +39,19 @@ class Admisionesgeneradasadmin extends Component
 
 
     public function render()
-{
-    // Obtener la ciudad y el nombre del usuario autenticado
-    $userCity = Auth::user()->city;
-    $userName = Auth::user()->name;
-
-    // Filtrar y paginar los registros
-    $admisiones = Admision::where('origen', $userCity) // Filtrar por la ciudad del usuario
-        ->where('creacionadmision', $userName) // Filtrar por el nombre del usuario creador
-        ->where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtro por código
-        ->orderBy('fecha', 'desc') // Ordenar por fecha
-        ->paginate($this->perPage);
-
-    // Guardar los IDs de la página actual
-    $this->currentPageIds = $admisiones->pluck('id')->toArray();
-
-    return view('livewire.admisionesgeneradasadmin', [
-        'admisiones' => $admisiones,
-    ]);
-}
+    {
+        // Obtener todos los registros de la tabla Admision con paginación
+        $admisiones = Admision::orderBy('fecha', 'desc') // Ordenar por fecha descendente
+            ->paginate($this->perPage); // Aplicar paginación
+    
+        // Guardar los IDs de la página actual
+        $this->currentPageIds = $admisiones->pluck('id')->toArray();
+    
+        return view('livewire.admisionesgeneradasadmin', [
+            'admisiones' => $admisiones,
+        ]);
+    }
+    
 
 public function exportToExcel()
 {
