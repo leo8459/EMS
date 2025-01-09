@@ -48,10 +48,9 @@
                                             </select>
                                             
                                 
-                                            <button type="button" class="btn btn-primary" wire:click="$refresh">Filtrar</button>
                                         </div>
                                         <div class="ml-auto">
-                                            <button type="button" class="btn btn-success" wire:click="downloadReport">Descargar Reporte</button>
+                                            <button type="button" class="btn btn-success" wire:click="downloadReport">Reporte Recibidos</button>
                                         </div>
                                         <div class="ml-auto">
                                     

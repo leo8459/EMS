@@ -128,9 +128,10 @@ class Iniciar extends Component
             'ORURO' => '3',
             'POTOSI' => '4',
             'CHUQUISACA' => '5',
-            'BENI' => '6',
+            'TARIJA' => '6',
             'PANDO' => '7',
-            'TARIJA' => '8'
+            'BENI' => '8',
+
         ];
         
         $city = Auth::user()->city;
