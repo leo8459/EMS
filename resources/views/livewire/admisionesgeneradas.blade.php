@@ -23,7 +23,8 @@
                         <div class="card-header">
                             <div class="d-flex align-items-center">
                                 <div class="float-left d-flex align-items-center">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                        class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
 
@@ -34,31 +35,34 @@
                             </div>
                             <div class="form-inline">
                                 <label for="department">Departamento:</label>
-    <select id="department" wire:model="department" class="form-control mx-2">
-        <option value="">Todos</option> <!-- Opción para incluir todos los departamentos -->
-        <option value="LA PAZ">LA PAZ</option>
-        <option value="COCHABAMBA">COCHABAMBA</option>
-        <option value="SANTA CRUZ">SANTA CRUZ</option>
-        <option value="ORURO">ORURO</option>
-        <option value="POTOSI">POTOSI</option>
-        <option value="CHUQUISACA">CHUQUISACA</option>
-        <option value="BENI">BENI</option>
-        <option value="PANDO">PANDO</option>
-        <option value="TARIJA">TARIJA</option>
-    </select>
+                                <select id="department" wire:model="department" class="form-control mx-2">
+                                    <option value="">Todos</option>
+                                    <!-- Opción para incluir todos los departamentos -->
+                                    <option value="LA PAZ">LA PAZ</option>
+                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                    <option value="ORURO">ORURO</option>
+                                    <option value="POTOSI">POTOSI</option>
+                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                    <option value="BENI">BENI</option>
+                                    <option value="PANDO">PANDO</option>
+                                    <option value="TARIJA">TARIJA</option>
+                                </select>
 
                                 <label for="startDate">Desde:</label>
                                 <input type="date" id="startDate" wire:model="startDate" class="form-control mx-2">
-                            
+
                                 <label for="endDate">Hasta:</label>
                                 <input type="date" id="endDate" wire:model="endDate" class="form-control mx-2">
-                            
-                                <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar PDF</button>
-                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar Excel</button>
+
+                                <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar
+                                    PDF</button>
+                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar
+                                    Excel</button>
                             </div>
-                            
-                            
-                            
+
+
+
                         </div>
                         @if (session()->has('message'))
                             <div class="alert alert-success">
@@ -91,7 +95,7 @@
                                         <th class="d-none d-lg-table-cell">País</th>
                                         <th>Fecha</th>
                                         @hasrole('ADMINISTRADOR')
-                                        <th>Acciones</th>
+                                            <th>Acciones</th>
                                         @endhasrole
 
                                     </tr>
@@ -100,7 +104,8 @@
                                     @foreach ($admisiones as $admisione)
                                         <tr>
                                             <td>
-                                                <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
+                                                <input type="checkbox" wire:model="selectedAdmisiones"
+                                                    value="{{ $admisione->id }}" />
                                             </td>
                                             <td>{{ $loop->iteration }}</td> <!-- Mostrar número de fila -->
                                             <td>{{ $admisione->origen }}</td>
@@ -111,7 +116,7 @@
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
                                             <td>{{ $admisione->codigo }}</td>
-                                           
+
                                             <td>{{ $admisione->direccion }}</td>
                                             <td>{{ $admisione->provincia }}</td>
                                             <td>{{ $admisione->ciudad }}</td>
@@ -120,10 +125,11 @@
 
                                             <td>
                                                 {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
- @hasrole('ADMINISTRADOR')
- <button type="button" class="btn btn-warning" wire:click="devolverAdmision({{ $admisione->id }})">Devolver a admisión</button>
-
-                                                    @endhasrole
+                                                @hasrole('ADMINISTRADOR')
+                                                    <button type="button" class="btn btn-warning"
+                                                        wire:click="devolverAdmision({{ $admisione->id }})">Devolver a
+                                                        admisión</button>
+                                                @endhasrole
                                             </td>
                                         </tr>
                                     @endforeach

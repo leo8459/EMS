@@ -122,10 +122,17 @@ class Iniciar extends Component
         $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
 
         $cityCodes = [
-            'LA PAZ' => '1',
+            'LA PAZ' => '0',
+            'SANTA CRUZ' => '1',
             'COCHABAMBA' => '2',
-            // Agrega más ciudades y códigos según sea necesario
+            'ORURO' => '3',
+            'POTOSI' => '4',
+            'CHUQUISACA' => '5',
+            'BENI' => '6',
+            'PANDO' => '7',
+            'TARIJA' => '8'
         ];
+        
         $city = Auth::user()->city;
         $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
 

@@ -80,46 +80,48 @@
         }
     </style>
 
-    <!-- Título General -->
-    <div class="dashboard-title">Resumen Nivel Nacional</div>
+    <!-- Título General (Solo para Administradores) -->
+    @if (Auth::user()->hasRole('ADMINISTRADOR'))
+        <div class="dashboard-title">Resumen Nivel Nacional</div>
 
-    <!-- Datos Generales -->
-    <div class="dashboard-card">
-        <div class="card-content">
-            <p>Total Admisiones</p>
-            <h3>{{ $totalAdmisiones }}</h3>
+        <!-- Datos Generales -->
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Total Admisiones</p>
+                <h3>{{ $totalAdmisiones }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #FF5722, #FFC107);">
+                📋
+            </div>
         </div>
-        <div class="card-icon" style="background: linear-gradient(45deg, #FF5722, #FFC107);">
-            📋
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Total Entregados</p>
+                <h3>{{ $totalEntregados }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
+                ✅
+            </div>
         </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-content">
-            <p>Total Entregados</p>
-            <h3>{{ $totalEntregados }}</h3>
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Total Recaudado</p>
+                <h3>${{ number_format($totalRecaudado, 2) }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
+                💰
+            </div>
         </div>
-        <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
-            ✅
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Admisiones Generadas Hoy</p>
+                <h3>{{ $admisionesHoy }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">
+                📅
+            </div>
         </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-content">
-            <p>Total Recaudado</p>
-            <h3>${{ number_format($totalRecaudado, 2) }}</h3>
-        </div>
-        <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
-            💰
-        </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-content">
-            <p>Admisiones Generadas Hoy</p>
-            <h3>{{ $admisionesHoy }}</h3>
-        </div>
-        <div class="card-icon" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">
-            📅
-        </div>
-    </div>
+    @endif
 
     <!-- Datos por Departamento -->
     @foreach ($datosPorDepartamento as $departamento => $datos)
@@ -137,28 +139,9 @@
                     </div>
                 </div>
 
-                <!-- Total Entregados -->
-                <div class="dashboard-card">
-                    <div class="card-content">
-                        <p>Total Entregados</p>
-                        <h3>{{ $datos['totalEntregados'] }}</h3>
-                    </div>
-                    <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
-                        ✅
-                    </div>
-                </div>
+             
 
-                <!-- Total Recaudado -->
-                <div class="dashboard-card">
-                    <div class="card-content">
-                        <p>Total Recaudado</p>
-                        <h3>${{ number_format($datos['totalRecaudado'], 2) }}</h3>
-                    </div>
-                    <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
-                        💰
-                    </div>
-                </div>
-
+          
                 <!-- Admisiones Generadas Hoy -->
                 <div class="dashboard-card">
                     <div class="card-content">
@@ -169,6 +152,27 @@
                         📅
                     </div>
                 </div>
+                   <!-- Total Entregados -->
+                   <div class="dashboard-card">
+                    <div class="card-content">
+                        <p>Total Entregados</p>
+                        <h3>{{ $datos['totalEntregados'] }}</h3>
+                    </div>
+                    <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
+                        ✅
+                    </div>
+                </div>
+                      <!-- Total Recaudado -->
+                      <div class="dashboard-card">
+                        <div class="card-content">
+                            <p>Total Recaudado</p>
+                            <h3>${{ number_format($datos['totalRecaudado'], 2) }}</h3>
+                        </div>
+                        <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
+                            💰
+                        </div>
+                    </div>
+    
             </div>
         </div>
     @endforeach
