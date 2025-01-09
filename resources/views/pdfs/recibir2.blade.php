@@ -104,7 +104,7 @@
                     <td>{{ $admision->codigo }}</td>
                     <td>{{ number_format($admision->peso, 2) }}</td>
                     <td>{{ $admision->created_at->format('d/m/Y H:i') }}</td>
-                    <td>{{ $admision->observacion ?? 'Sin observación' }}</td>
+                    <td>{{ $admision->observacion}}</td>
                 </tr>
             @endforeach
         </tbody>

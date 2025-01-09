@@ -53,6 +53,18 @@
                                         <div class="ml-auto">
                                             <button type="button" class="btn btn-success" wire:click="downloadReport">Descargar Reporte</button>
                                         </div>
+                                        <div class="ml-auto">
+                                    
+                                            <button type="button" class="btn btn-warning" wire:click="recibirAdmision">Recibir Admisión</button>
+    
+                                    </div>
+                                    <div class="ml-auto">
+                                        <button type="button" class="btn btn-info" wire:click="recibirHoy">
+                                            Recibir Todos Hoy
+                                        </button>
+                                    </div>
+                                    
+                                    
                                     </div>
                                 </div>
                                 
@@ -164,7 +176,7 @@
                 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar y Recibir</button>
+                    <button type="submit" class="btn btn-primary">Guardar y Descargar Reporte</button>
                 </div>
             </div>
         </form>
