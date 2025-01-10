@@ -54,6 +54,9 @@
         <div class="title">Arqueo</div>
         <div class="subtitle">AGENCIA BOLIVIANA DE CORREOS</div>
         <div class="subtitle">EXPRESADO EN BS.</div>
+        <div class="footer">
+            <p>Total Importe: {{ $admisiones->sum('precio') }} Bs</p>
+        </div>
     </div>
 
     <table>

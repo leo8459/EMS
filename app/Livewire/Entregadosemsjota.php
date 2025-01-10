@@ -132,13 +132,13 @@ class Entregadosemsjota extends Component
 
     // Obtener totales
     $totalEntregados = (clone $query)->where('estado', 5)->count();
-    $totalFaltantes = (clone $query)->whereIn('estado', [2, 3, 4, 6, 7, 8, 9, 10])->count();
+    $totalFaltantes = (clone $query)->whereIn('estado', [1,2, 3, 4, 6, 7, 8, 9, 10])->count();
 
     // Obtener admisiones entregadas
     $admisionesEntregados = (clone $query)->where('estado', 5)->orderBy('fecha', 'desc')->get();
 
     // Obtener admisiones faltantes
-    $admisionesFaltantes = (clone $query)->whereIn('estado', [2, 3, 4, 6, 7, 8, 9, 10])->orderBy('fecha', 'desc')->get();
+    $admisionesFaltantes = (clone $query)->whereIn('estado', [1,2, 3, 4, 6, 7, 8, 9, 10])->orderBy('fecha', 'desc')->get();
 
     // Generar el PDF
     $pdf = Pdf::loadView('pdfs.entregados_faltantes', [

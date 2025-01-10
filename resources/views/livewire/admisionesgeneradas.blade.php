@@ -60,7 +60,7 @@
                                 @hasrole ('ADMINISTRADOR')
 
                                 <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar
-                                    PDF</button>
+                                    Arqueo total</button>
                                     @endhasrole
 
                                 <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar

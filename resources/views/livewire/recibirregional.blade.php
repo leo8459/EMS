@@ -73,7 +73,7 @@
                             <th>Código</th>
                             <th>Fecha</th>
                             <th>Observación</th>
-                            <th>Reencaminamiento</th>
+                            {{-- <th>Reencaminamiento</th> --}}
                             @hasrole('SuperAdmin|Administrador')
                                 <th>Admisión</th>
                             @endhasrole
@@ -94,11 +94,11 @@
                                 <td>{{ $admision->origen }}</td>
                                 <td>{{ $admision->peso_regional ?: ($admision->peso_ems ?: $admision->peso) }}</td>
                                 <td>{{ $admision->destino }}</td>
-                                <td>{{ $admision->ciudad }}</td>
+                                <td>{{ $admision->reencaminamiento ?? $admisione->ciudad }}</td>
                                 <td>{{ $admision->codigo }}</td>
                                 <td>{{ $admision->fecha }}</td>
                                 <td>{{ $admision->observacion }}</td>
-                                <td>{{ $admision->reencaminamiento }}</td>
+                                {{-- <td>{{ $admision->reencaminamiento ?? $admisione->ciudad }}</td> --}}
                                 @hasrole('SuperAdmin|Administrador')
                                     <td>{{ $admision->user->name ?? 'No asignado' }}</td>
                                 @endhasrole
