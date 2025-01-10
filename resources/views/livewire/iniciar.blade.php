@@ -188,15 +188,12 @@
                                     <select class="form-control" id="servicio" wire:model="servicio">
                                         <option value="">Seleccione el servicio</option>
                                         <option value="EMS">EMS</option>
+                                        <option value="SUPEREXPRESS">SUPEREXPRESS</option>
                                         {{-- <option value="ENCOMIENDA">ENCOMIENDA</option>
                                         <option value="TRADICIONAL">TRADICIONAL</option>
                                         <option value="CERTIFICADA">CERTIFICADA</option>
                                         <option value="ORDINARIA">ORDINARIA</option>
-                                        <option value="ECA/PLIEGOS">ECA/PLIEGOS</option>
-                                        <option value="SUPEREXPRESS">SUPEREXPRESS</option>
-                                        <option value="EXPRESO">EXPRESO</option>
-                                        <option value="AVISO DE RECIBO">AVISO DE RECIBO</option> --}}
-
+                                        <option value="EXPRESO">EXPRESO</option> --}}
                                     </select>
 
                                 </div>

@@ -49,4 +49,8 @@ class Admision extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function tarifa()
+    {
+        return $this->belongsTo(Tarifa::class);
+    }
 }

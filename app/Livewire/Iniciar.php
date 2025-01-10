@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Tarifa;
 
 class Iniciar extends Component
 {
@@ -116,7 +117,7 @@ class Iniciar extends Component
         // Generar el código dinámicamente
         $prefixes = [
             'EMS' => 'EN',
-            'ENCOMIENDA' => 'CN',
+            'SUPEREXPRESS' => 'EX',
             // Agrega otros servicios y prefijos según sea necesario
         ];
         $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
@@ -232,22 +233,6 @@ class Iniciar extends Component
         session()->flash('message', 'Admisión creada exitosamente.');
     }
 
-
-
-//     public function redirectToWhatsApp()
-// {
-//     // Limpiar y preparar el número de teléfono
-//     $telefono = preg_replace('/\D/', '', $this->telefono_remitente);
-
-//     // Preparar el mensaje para el destinatario
-//     $mensaje = urlencode("Hola {$this->nombre_destinatario}, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: {$this->codigo}");
-
-//     // Generar el enlace de WhatsApp Web
-//     $url = "https://web.whatsapp.com/send?phone={$telefono}&text={$mensaje}";
-
-//     // Redirigir al enlace
-//     return redirect()->to($url);
-// }
 public function enviarMensajeWhatsApp($admisionId)
 {
     $admision = Admision::findOrFail($admisionId);

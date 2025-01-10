@@ -9,6 +9,8 @@ use App\Http\Controllers\AdmisionesController;
 use App\Http\Controllers\EventosController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardAdminController;
+use App\Http\Controllers\Tarifa;
+use App\Http\Controllers\TarifaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +84,7 @@ Route::middleware('auth')->group(function () {
         }
         abort(404);
     })->name('download.pdf');
+    Route::get('/tarifas', [TarifaController::class, 'obtenertarifas']);
 
 
 

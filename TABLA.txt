@@ -1,0 +1,1 @@
+    php artisan migrate --path=/database/migrations/2024_11_05_160232_create_admisions_table.php

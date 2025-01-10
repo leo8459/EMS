@@ -54,12 +54,12 @@ return new class extends Migration
 
 
 
-
+            $table->foreignId('tarifa_id')->constrained('tarifas')->onDelete('cascade'); // Relación con tarifas
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
         });
     }
-    
+
 
     /**
      * Reverse the migrations.
