@@ -443,7 +443,7 @@ return [
         [
             'text' => 'Ventanilla',
             'icon' => 'fas fa-users',
-            'can'  => 'ver.ems',
+            'can'  => 'ver.ventanilla',
             'submenu' => [
                 [
                     'text' => 'Inventario',
@@ -451,6 +451,13 @@ return [
                     'can'  => 'ver.porentregar',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Inventario Ventanilla',
+                    'url' => 'inventarioventanilla',
+                    'can'  => 'ver.inventario.ventanilla',
+                    'icon' => 'fas fa-user',
+                ],
+
                 // [
                 //     'text' => 'En camino',
                 //     'url' => 'encaminocarteroentrega',

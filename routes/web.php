@@ -85,7 +85,7 @@ Route::middleware('auth')->group(function () {
         abort(404);
     })->name('download.pdf');
 
-    
+
     Route::get('/tarifas', [TarifaController::class, 'obtenertarifas']);
 
 
@@ -115,7 +115,8 @@ Route::middleware('auth')->group(function () {
     //eventos
     Route::get('/eventosregistro', [EventosController::class, 'eventos']);
 
-
+    //VENTANILLA
+    Route::get('/inventarioventanilla', [AdmisionesController::class, 'recibirventanilla']);
 
     //dashboard
     Route::get('/dashboardgeneral', [DashboardAdminController::class, 'dashboardadmin']);

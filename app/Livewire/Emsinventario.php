@@ -422,7 +422,7 @@ public function mandarAVentanilla()
 
         foreach ($admisiones as $admision) {
             // Cambiar el estado a 9
-            $admision->estado = 9;
+            $admision->estado = 11;
             $admision->save();
 
             // Registrar el evento

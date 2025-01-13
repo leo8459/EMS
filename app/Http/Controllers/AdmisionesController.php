@@ -59,7 +59,10 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.entregasventanilla');
     }
-
+    public function recibirventanilla ()
+    {
+        return view('admisiones.inventarioventanilla');
+    }
     public function entregarenvios($id)
     {
         // Buscar la admisión por ID
