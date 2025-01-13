@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Eventos;
 
 class Inventarioventanilla extends Component
 {
@@ -53,8 +54,23 @@ class Inventarioventanilla extends Component
     public function acceptSelected()
     {
         if (count($this->selectedAdmisiones) > 0) {
+            // Actualizar estado de las admisiones seleccionadas
             Admision::whereIn('id', $this->selectedAdmisiones)
                 ->update(['estado' => 9]);
+    
+            // Registrar el evento para cada admisión seleccionada
+            foreach ($this->selectedAdmisiones as $admisionId) {
+                $admision = Admision::find($admisionId); // Buscar la admisión por ID
+                if ($admision) {
+                    Eventos::create([
+                        'accion' => 'Aceptar Envios',
+                        'descripcion' => 'El envio fue recibido por ventanilla.',
+                        'codigo' => $admision->codigo,
+                        'user_id' => Auth::id(),
+                    ]);
+                }
+            }
+    
             session()->flash('message', 'Los envíos seleccionados fueron aceptados correctamente.');
             $this->selectedAdmisiones = []; // Limpiar selección tras aceptar
     
@@ -64,5 +80,6 @@ class Inventarioventanilla extends Component
             session()->flash('error', 'No se seleccionó ningún envío.');
         }
     }
+    
     
 }
