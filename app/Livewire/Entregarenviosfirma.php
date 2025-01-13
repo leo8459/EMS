@@ -36,47 +36,51 @@ class Entregarenviosfirma extends Component
      * Guardar la admisión con los datos actualizados.
      */
     public function guardarAdmision()
-    {
-        // Validar datos
-        $this->validate([
-            'photo' => 'nullable|image|max:10240',
-            'recepcionado' => 'required|string|max:255',
-            'observacion_entrega' => 'nullable|string|max:1000',
-            'firma' => 'required|string',
-        ]);
-    
-        // Manejo del archivo (foto)
-        $filename = null;
-        if ($this->photo) {
-            $filename = $this->admision->codigo . '.' . $this->photo->extension();
-            $this->photo->storeAs('admisiones', $filename, 'public');
-        }
-    
-        // Guardar en la base de datos
-        $resultado = $this->admision->update([
-            'estado' => 5, // Estado entregado
-            'recepcionado' => $this->recepcionado,
-            'observacion_entrega' => $this->observacion_entrega,
-            'firma_entrega' => $this->firma,
-            'user_id' => auth()->id(), // Guardar el ID del usuario logueado
-        ]);
-    
-        if ($resultado) {
-            // Registrar el evento
-            Eventos::create([
-                'accion' => 'Entregar Envío',
-                'descripcion' => 'La admisión fue entregada correctamente.',
-                'codigo' => $this->admision->codigo,
-                'user_id' => auth()->id(),
-            ]);
-    
-            session()->flash('message', 'Admisión entregada correctamente.');
-            return redirect(request()->header('Referer'));
-        } else {
-            session()->flash('message', 'Error al guardar la admisión.');
-        }
-        
+{
+    // Validar datos
+    $this->validate([
+        'photo' => 'nullable|image|max:10240',
+        'recepcionado' => 'required|string|max:255',
+        'observacion_entrega' => 'nullable|string|max:1000',
+        'firma' => 'nullable|string',
+    ]);
+
+    // Manejo del archivo (foto)
+    $filename = null;
+    if ($this->photo) {
+        $filename = $this->admision->codigo . '.' . $this->photo->extension();
+        $this->photo->storeAs('admisiones', $filename, 'public');
     }
+
+    // Actualizar dirección
+    $nuevaDireccion = 'VENTANILLA'; // Nuevo valor para la dirección
+
+    // Guardar en la base de datos
+    $resultado = $this->admision->update([
+        'estado' => 5, // Estado entregado
+        'recepcionado' => $this->recepcionado,
+        'observacion_entrega' => $this->observacion_entrega,
+        'firma_entrega' => $this->firma,
+        'user_id' => auth()->id(), // Guardar el ID del usuario logueado
+        'direccion' => $nuevaDireccion, // Actualizar dirección
+    ]);
+
+    if ($resultado) {
+        // Registrar el evento
+        Eventos::create([
+            'accion' => 'Entregar Envío',
+            'descripcion' => 'La admisión fue entregada correctamente.',
+            'codigo' => $this->admision->codigo,
+            'user_id' => auth()->id(),
+        ]);
+
+        session()->flash('message', 'Admisión entregada correctamente.');
+        return redirect(request()->header('Referer'));
+    } else {
+        session()->flash('message', 'Error al guardar la admisión.');
+    }
+}
+
     
     
     
