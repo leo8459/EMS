@@ -35,7 +35,9 @@ class Emsinventario extends Component
     public $lastSearchTerm = ''; // Almacena el término de la última búsqueda
     public $selectedCity = null;
     public $cityJustUpdated = false;
-
+    public $showEditModal = false; // Controla la visibilidad del modal de edición
+    public $editAdmisionId = null; // Almacena el ID de la admisión que se está editando
+    public $editDireccion = ''; // Dirección editable
     
     public function updatedSelectedCity()
     {
@@ -440,6 +442,40 @@ public function mandarAVentanilla()
         session()->flash('message', 'Las admisiones seleccionadas se han enviado a la ventanilla.');
     } else {
         session()->flash('error', 'Debe seleccionar al menos una admisión.');
+    }
+}
+public function abrirEditModal($admisionId)
+{
+    $admision = Admision::find($admisionId);
+    if ($admision) {
+        $this->editAdmisionId = $admision->id;
+        $this->editDireccion = $admision->direccion;
+        $this->showEditModal = true;
+    } else {
+        session()->flash('error', 'No se encontró la admisión.');
+    }
+}
+
+// Método para guardar los cambios
+public function guardarEdicion()
+{
+    $admision = Admision::find($this->editAdmisionId);
+    if ($admision) {
+        $admision->direccion = $this->editDireccion;
+        $admision->save();
+
+        session()->flash('message', 'La dirección ha sido actualizada correctamente.');
+        $this->showEditModal = false;
+        Eventos::create([
+            'accion' => 'Cambio de Direccion',
+            'descripcion' => 'El encargado cambio la direccion.',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+        // Recargar la página
+        return redirect(request()->header('Referer'));
+    } else {
+        session()->flash('error', 'No se encontró la admisión para actualizar.');
     }
 }
 

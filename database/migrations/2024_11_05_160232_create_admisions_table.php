@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('ciudad')->nullable();
             $table->string('pais')->nullable();
             $table->text('firma_entrega')->nullable();
-            $table->string('photo')->nullable();
+            $table->text('photo')->nullable();
             $table->string('contenido')->nullable();
             $table->string('reencaminamiento')->nullable();
             $table->string('recepcionado')->nullable();

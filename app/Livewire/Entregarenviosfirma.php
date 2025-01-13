@@ -71,10 +71,11 @@ class Entregarenviosfirma extends Component
             ]);
     
             session()->flash('message', 'Admisión entregada correctamente.');
-            return redirect()->route('regresar');
+            return redirect(request()->header('Referer'));
         } else {
             session()->flash('message', 'Error al guardar la admisión.');
         }
+        
     }
     
     
@@ -108,7 +109,7 @@ class Entregarenviosfirma extends Component
         ]);
     
         session()->flash('message', 'La admisión se mantiene sin cambios.');
-        return redirect()->route('regresar');
+        return redirect(request()->header('Referer'));
     }
         
 
@@ -129,7 +130,7 @@ public function return()
     ]);
 
     session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
-    return redirect()->route('regresar');
+    return redirect(request()->header('Referer'));
 }
 
 

@@ -26,7 +26,11 @@
                                 <div class="float-left d-flex align-items-center">
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..."
                                         class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-
+                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success"
+                                        style="margin-right: 10px;">
+                                        Asignar Carteros
+                                    </a>
+    
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 </div>
                                

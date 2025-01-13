@@ -122,6 +122,11 @@
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
                                                 <td>{{ $admisione->observacion_entrega ?? '' }}</td>
+                                                <td>
+                                                    <button class="btn btn-info btn-sm" wire:click="abrirEditModal({{ $admisione->id }})">
+                                                        Cambiar Direccion
+                                                    </button>
+                                                </td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
                                                 @endhasrole
@@ -236,7 +241,50 @@
                                     </div>
                                 </div>
                             @endif
-
+                            @if ($showEditModal)
+                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <!-- Encabezado -->
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Editar Dirección</h5>
+                                            <button type="button" class="close" wire:click="$set('showEditModal', false)">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <!-- Cuerpo -->
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="editDireccion">Dirección:</label>
+                                                <input type="text" id="editDireccion" wire:model="editDireccion" class="form-control">
+                                                @error('editDireccion') 
+                                                    <small class="text-danger">{{ $message }}</small> 
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- Pie -->
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary" wire:click="guardarEdicion">Guardar Cambios</button>
+                                            <button class="btn btn-secondary" wire:click="$set('showEditModal', false)">Cancelar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        @if (session()->has('message'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('message') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    
+                    @if (session()->has('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                                            
                             <div class="card-footer">
                                 {{ $admisiones->links() }}
                             </div>
