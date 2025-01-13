@@ -147,29 +147,32 @@
                                                 </td>
                                                 <td>
                                                     @php
-                                                        $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                        // Directorio donde se almacenan las fotos
+                                                        $baseDirectory = 'storage/admisiones/';
+                                                        $extensions = ['jpg', 'jpeg', 'png', 'gif']; // Extensiones posibles
                                                         $photoPath = null;
+                                                
+                                                        // Buscar archivo en las extensiones definidas
                                                         foreach ($extensions as $ext) {
-                                                            $path = 'fotos/' . $admisione->codigo . '.' . $ext;
+                                                            $path = $baseDirectory . $admisione->codigo . '.' . $ext;
                                                             if (file_exists(public_path($path))) {
-                                                                $photoPath = $path;
+                                                                $photoPath = $path; // Ruta encontrada
                                                                 break;
                                                             }
                                                         }
                                                     @endphp
-
+                                                
                                                     @if ($photoPath)
-                                                        <div
-                                                            style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                                                             <img src="{{ asset($photoPath) }}" alt="Foto de admisión"
-                                                                style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                                                                 style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
                                                         </div>
-                                                        <a href="{{ asset($photoPath) }}" download
-                                                            class="btn btn-sm btn-secondary">Descargar</a>
+                                                        <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
                                                     @else
                                                         <span>Sin foto</span>
                                                     @endif
                                                 </td>
+                                                
                                                 <td>
                                                     @if ($admisione->firma_entrega)
                                                         <div
