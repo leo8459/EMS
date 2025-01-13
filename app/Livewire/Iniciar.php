@@ -863,7 +863,7 @@ class Iniciar extends Component
         $cityCodes = [
             'LA PAZ' => '0',
             'COCHABAMBA' => '1',
-            'SANTA CRUZ' => '3',
+            'SANTA CRUZ' => '2',
             'ORURO' => '3',
             'POTOSI' => '4',
             'CHUQUISACA' => '5',
