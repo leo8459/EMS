@@ -134,7 +134,7 @@ class Iniciar extends Component
             'BENI' => '8',
 
         ];
-        
+
         $city = Auth::user()->city;
         $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
 
@@ -233,30 +233,30 @@ class Iniciar extends Component
         session()->flash('message', 'Admisión creada exitosamente.');
     }
 
-public function enviarMensajeWhatsApp($admisionId)
-{
-    $admision = Admision::findOrFail($admisionId);
+    public function enviarMensajeWhatsApp($admisionId)
+    {
+        $admision = Admision::findOrFail($admisionId);
 
-    // Limpia el número de teléfono de caracteres no numéricos
-    $telefono = preg_replace('/\D/', '', $admision->telefono_remitente);
+        // Limpia el número de teléfono de caracteres no numéricos
+        $telefono = preg_replace('/\D/', '', $admision->telefono_remitente);
 
-    // Crea el mensaje personalizado con el nombre del remitente
-    $mensaje = urlencode("Hola {$admision->nombre_remitente}, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: {$admision->codigo}.");
+        // Crea el mensaje personalizado con el nombre del remitente
+        $mensaje = urlencode("Hola {$admision->nombre_remitente}, este es un mensaje relacionado con tu envío. Tu código de seguimiento es: {$admision->codigo}.");
 
-    // Construir la URL de WhatsApp
-    $url = "https://web.whatsapp.com/send?phone={$telefono}&text={$mensaje}";
+        // Construir la URL de WhatsApp
+        $url = "https://web.whatsapp.com/send?phone={$telefono}&text={$mensaje}";
 
-    // Debug para verificar la URL generada
-    // \Log::debug("WhatsApp URL: $url"); // Revisa este log en `storage/logs/laravel.log`
+        // Debug para verificar la URL generada
+        // \Log::debug("WhatsApp URL: $url"); // Revisa este log en `storage/logs/laravel.log`
 
-    // Enviar la URL al frontend
-    $this->dispatch('abrir-whatsapp', ['url' => $url]);
-}
-
-
+        // Enviar la URL al frontend
+        $this->dispatch('abrir-whatsapp', ['url' => $url]);
+    }
 
 
-    
+
+
+
 
     public function edit($id)
     {
@@ -364,6 +364,30 @@ public function enviarMensajeWhatsApp($admisionId)
     public function getPriceByWeightAndDestination($peso, $destino)
     {
         $tarifas = [
+        'POSTPAGO' => [
+            [0.001, 0.250, 10],
+            [0.251, 0.500, 12],
+            [0.501, 1, 17],
+            [1.001, 2, 23],
+            [2.001, 3, 28],
+            [3.001, 4, 34],
+            [4.001, 5, 41],
+            [5.001, 6, 48],
+            [6.001, 7, 54],
+            [7.001, 8, 60],
+            [8.001, 9, 68],
+            [9.001, 10, 74],
+            [10.001, 11, 81],
+            [11.001, 12, 87],
+            [12.001, 13, 94],
+            [13.001, 14, 101],
+            [14.001, 15, 107],
+            [15.001, 16, 114],
+            [16.001, 17, 121],
+            [17.001, 18, 127],
+            [18.001, 19, 134],
+            [19.001, 20, 140],
+        ],
             'NACIONAL' => [
                 [0.001, 0.250, 10],
                 [0.251, 0.500, 12],
@@ -388,6 +412,57 @@ public function enviarMensajeWhatsApp($admisionId)
                 [18.001, 19, 134],
                 [19.001, 20, 140],
             ],
+            'DEVOLUCION' => [
+                [0.001, 0.250, 20],
+                [0.251, 0.500, 24],
+                [0.501, 1, 34],
+                [1.001, 2, 46],
+                [2.001, 3, 56],
+                [3.001, 4, 68],
+                [4.001, 5, 82],
+                [5.001, 6, 96],
+                [6.001, 7, 108],
+                [7.001, 8, 120],
+                [8.001, 9, 136],
+                [9.001, 10, 148],
+                [10.001, 11, 162],
+                [11.001, 12, 174],
+                [12.001, 13, 188],
+                [13.001, 14, 202],
+                [14.001, 15, 214],
+                [15.001, 16, 228],
+                [16.001, 17, 242],
+                [17.001, 18, 254],
+                [18.001, 19, 268],
+                [19.001, 20, 280],
+            ],
+
+            'SUPEREXPRESS' => [
+                [0.001, 0.250, 32],
+                [0.251, 0.500, 39],
+                [0.501, 1, 52],
+                [1.001, 2, 68],
+                [2.001, 3, 83],
+                [3.001, 4, 99],
+                [4.001, 5, 114],
+                [5.001, 6, 130],
+                [6.001, 7, 145],
+                [7.001, 8, 161],
+                [8.001, 9, 177],
+                [9.001, 10, 192],
+                [10.001, 11, 208],
+                [11.001, 12, 223],
+                [12.001, 13, 239],
+                [13.001, 14, 255],
+                [14.001, 15, 270],
+                [15.001, 16, 286],
+                [16.001, 17, 301],
+                [17.001, 18, 317],
+                [18.001, 19, 332],
+                [19.001, 20, 348],
+
+            ],
+
             'CIUDADES INTERMEDIAS' => [
                 [0.001, 0.250, 18],
                 [0.251, 0.500, 20],
@@ -780,7 +855,7 @@ public function enviarMensajeWhatsApp($admisionId)
         // Mapeo de servicios a prefijos
         $prefixes = [
             'EMS' => 'EN',
-            'ENCOMIENDA' => 'CN',
+            'SUPEREXPRESS' => 'EX',
             // Agrega otros servicios y prefijos según sea necesario
         ];
         $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
@@ -788,6 +863,13 @@ public function enviarMensajeWhatsApp($admisionId)
         $cityCodes = [
             'LA PAZ' => '0',
             'COCHABAMBA' => '1',
+            'SANTA CRUZ' => '3',
+            'ORURO' => '3',
+            'POTOSI' => '4',
+            'CHUQUISACA' => '5',
+            'TARIJA' => '6',
+            'PANDO' => '7',
+            'BENI' => '8',
             // Agrega más ciudades y sus códigos según sea necesario
         ];
         $city = Auth::user()->city;

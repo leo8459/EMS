@@ -189,6 +189,9 @@
                                         <option value="">Seleccione el servicio</option>
                                         <option value="EMS">EMS</option>
                                         <option value="SUPEREXPRESS">SUPEREXPRESS</option>
+                                        {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
+                                        <option value="EMS">POSTPAGO</option> --}}
+
                                         {{-- <option value="ENCOMIENDA">ENCOMIENDA</option>
                                         <option value="TRADICIONAL">TRADICIONAL</option>
                                         <option value="CERTIFICADA">CERTIFICADA</option>
@@ -238,7 +241,11 @@
                                     <select class="form-control" id="destino" wire:model="destino" wire:ignore
                                         wire:change="updatePrice">
                                         <option value="">Seleccione el destino</option>
-                                        <option value="NACIONAL">NACIONAL</option>
+                                        <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS</option>
+                                        <option value="DEVOLUCION">NACIONAL CON DEVOLUCION</option>
+                                        <option value="NACIONAL">NACIONAL EMS</option>
+                                        <option value="POSTPAGO">NACIONAL POSTPAGO</option>
+
                                         <option value="CIUDADES INTERMEDIAS">CIUDADES INTERMEDIAS</option>
                                         <option value="TRINIDAD COBIJA">TRINIDAD COBIJA</option>
                                         <option value="RIVERALTA GUAYARAMERIN">RIVERALTA GUAYARAMERIN</option>
