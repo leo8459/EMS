@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
         }
         abort(404);
     })->name('download.pdf');
+
+    
     Route::get('/tarifas', [TarifaController::class, 'obtenertarifas']);
 
 

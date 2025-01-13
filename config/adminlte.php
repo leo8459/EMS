@@ -366,6 +366,12 @@ return [
                     'can'  => 'generar.admision',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Tarifario',
+                    'url' => 'tarifas',
+                    'can'  => 'generar.admision',
+                    'icon' => 'fas fa-user',
+                ],
             ],
         ],
         [
