@@ -26,14 +26,14 @@
                                 <div class="float-left d-flex align-items-center">
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..."
                                         class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success"
+                                    <a href="{{ route('asignarcartero') }}" class="btn btn-success"
                                         style="margin-right: 10px;">
                                         Asignar Carteros
                                     </a>
-    
+
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 </div>
-                               
+
                             </div>
                         </div>
                         @if (session()->has('message'))
@@ -51,7 +51,6 @@
                                 <thead>
                                     <tr>
                                         <th><input type="checkbox" wire:model="selectAll" /></th>
-
                                         <th>#</th> <!-- Columna para el número de fila -->
                                         <th>Origen</th>
                                         <th>Servicio</th>
@@ -66,14 +65,31 @@
                                         <th class="d-none d-lg-table-cell">Ciudad</th>
                                         <th class="d-none d-lg-table-cell">País</th>
                                         <th>Fecha</th>
-                                        <th>Observacion</th>
-
+                                        <th>Observación</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($admisiones as $admisione)
-                                        <tr>
+                                        @php
+                                            $now = \Carbon\Carbon::now();
+                                            $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
+                                            $diffInHours = $now->diffInHours($fechaAdmision);
+                                            $rowClass = '';
+                                            $statusText = '';
+                                
+                                            if ($diffInHours <= 24) {
+                                                $rowClass = 'table-success'; // Verde
+                                                $statusText = 'DISPONIBLE';
+                                            } elseif ($diffInHours <= 48) {
+                                                $rowClass = 'table-warning'; // Amarillo
+                                                $statusText = 'RETRASO';
+                                            } else {
+                                                $rowClass = 'table-danger'; // Rojo
+                                                $statusText = 'DEVOLVER';
+                                            }
+                                        @endphp
+                                        <tr class="{{ $rowClass }}">
                                             <td>
                                                 <input type="checkbox" wire:model="selectedAdmisiones"
                                                     value="{{ $admisione->id }}" />
@@ -87,14 +103,15 @@
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
                                             <td>{{ $admisione->codigo }}</td>
-
                                             <td>{{ $admisione->direccion }}</td>
                                             <td>{{ $admisione->provincia }}</td>
-                                            <td>{{ $admisione->ciudad }}</td>
+                                            <!-- Mostrar reencaminamiento o ciudad -->
+                                            <td>{{ $admisione->reencaminamiento ?: $admisione->ciudad }}</td>
                                             <td>{{ $admisione->pais }}</td>
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion }}</td>
-
+                                            <!-- Nueva columna para estado -->
+                                            <td><strong>{{ $statusText }}</strong></td>
                                             <td>
                                                 <a href="{{ route('entregarenviosfirma', ['id' => $admisione->id]) }}" class="btn btn-primary">
                                                     Entregar Admision
@@ -103,11 +120,8 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                
                             </table>
-                           
-
-
-
                         </div>
                         <div class="card-footer">
                             {{ $admisiones->links() }}
@@ -117,5 +131,4 @@
             </div>
         </div>
     </section>
-
 </div>

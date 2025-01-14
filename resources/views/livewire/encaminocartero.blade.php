@@ -129,20 +129,24 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($admisiones as $admisione)
-                                        @php
-                                            $now = \Carbon\Carbon::now();
-                                            $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
-                                            $diffInHours = $now->diffInHours($fechaAdmision);
-                                            $rowClass = '';
-                                
-                                            if ($diffInHours <= 24) {
-                                                $rowClass = 'table-success'; // Verde: menos de 24 horas
-                                            } elseif ($diffInHours <= 48) {
-                                                $rowClass = 'table-warning'; // Amarillo: entre 24 y 48 horas
-                                            } else {
-                                                $rowClass = 'table-danger'; // Rojo: más de 48 horas
-                                            }
-                                        @endphp
+                                    @php
+                                        $now = \Carbon\Carbon::now();
+                                        $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
+                                        $diffInHours = $now->diffInHours($fechaAdmision);
+                                        $rowClass = '';
+                                        $statusText = '';
+
+                                        if ($diffInHours <= 24) {
+                                            $rowClass = 'table-success'; // Verde
+                                            $statusText = 'DISPONIBLE';
+                                        } elseif ($diffInHours <= 48) {
+                                            $rowClass = 'table-warning'; // Amarillo
+                                            $statusText = 'RETRASO';
+                                        } else {
+                                            $rowClass = 'table-danger'; // Rojo
+                                            $statusText = 'DEVOLVER';
+                                        }
+                                    @endphp
                                         <tr class="{{ $rowClass }}">
                                             <td>
                                                 <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
@@ -163,6 +167,8 @@
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion }}</td>
                                             <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
+                                            <td><strong>{{ $statusText }}</strong></td>
+
                                             <td>
                                                 <a href="{{ route('entregarenviosfirma', ['id' => $admisione->id]) }}" class="btn btn-primary">
                                                     Entregar Admision
