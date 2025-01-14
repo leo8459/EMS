@@ -108,53 +108,62 @@ class Entregadosemsjota extends Component
 
 
     public function exportNewReportToPDF()
-{
-    $query = Admision::query()
-        ->when($this->startDate && $this->endDate, function ($query) {
-            $start = Carbon::parse($this->startDate)->startOfDay();
-            $end = Carbon::parse($this->endDate)->endOfDay();
-            $query->whereBetween('updated_at', [$start, $end]);
-        })
-        ->when($this->selectedCartero, function ($query) {
-            $query->where('user_id', $this->selectedCartero);
-        });
-
-    // Filtro por reencaminamiento o ciudad
-    if ($this->department) {
-        $query->where(function ($query) {
-            $query->where('reencaminamiento', $this->department)
-                  ->orWhere(function ($q) {
-                      $q->whereNull('reencaminamiento')
-                        ->where('ciudad', $this->department);
-                  });
-        });
+    {
+        $query = Admision::query()
+            ->when($this->startDate && $this->endDate, function ($query) {
+                $start = Carbon::parse($this->startDate)->startOfDay();
+                $end = Carbon::parse($this->endDate)->endOfDay();
+                $query->whereBetween('updated_at', [$start, $end]);
+            })
+            ->when($this->selectedCartero, function ($query) {
+                $query->where('user_id', $this->selectedCartero);
+            });
+    
+        // Filtro por reencaminamiento o ciudad
+        if ($this->department) {
+            $query->where(function ($query) {
+                $query->where('reencaminamiento', $this->department)
+                      ->orWhere(function ($q) {
+                          $q->whereNull('reencaminamiento')
+                            ->where('ciudad', $this->department);
+                      });
+            });
+        }
+    
+        // Obtener totales
+        $totalEntregados = (clone $query)->where('estado', 5)->count();
+        $totalFaltantes = (clone $query)->whereIn('estado', [1, 2, 3, 4, 6, 7, 8, 9, 10])->count();
+        $totalVentanilla = (clone $query)->where('estado', 5)->where('direccion', 'VENTANILLA')->count();
+        $totalCartero = $totalEntregados - $totalVentanilla;
+    
+        // Obtener admisiones entregadas
+        $admisionesEntregados = (clone $query)->where('estado', 5)->orderBy('fecha', 'desc')->get();
+        $admisionesVentanilla = $admisionesEntregados->filter(fn($admision) => $admision->direccion === 'VENTANILLA');
+        $admisionesCartero = $admisionesEntregados->filter(fn($admision) => $admision->direccion !== 'VENTANILLA');
+    
+        // Obtener admisiones faltantes
+        $admisionesFaltantes = (clone $query)->whereIn('estado', [1, 2, 3, 4, 6, 7, 8, 9, 10])->orderBy('fecha', 'desc')->get();
+    
+        // Generar el PDF
+        $pdf = Pdf::loadView('pdfs.entregados_faltantes', [
+            'admisionesEntregados' => $admisionesEntregados,
+            'admisionesVentanilla' => $admisionesVentanilla,
+            'admisionesCartero' => $admisionesCartero,
+            'admisionesFaltantes' => $admisionesFaltantes,
+            'totalEntregados' => $totalEntregados,
+            'totalFaltantes' => $totalFaltantes,
+            'totalVentanilla' => $totalVentanilla,
+            'totalCartero' => $totalCartero,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
+            'department' => $this->department,
+        ]);
+    
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'Reporte_Entregados_Faltantes.pdf');
     }
-
-    // Obtener totales
-    $totalEntregados = (clone $query)->where('estado', 5)->count();
-    $totalFaltantes = (clone $query)->whereIn('estado', [1,2, 3, 4, 6, 7, 8, 9, 10])->count();
-
-    // Obtener admisiones entregadas
-    $admisionesEntregados = (clone $query)->where('estado', 5)->orderBy('fecha', 'desc')->get();
-
-    // Obtener admisiones faltantes
-    $admisionesFaltantes = (clone $query)->whereIn('estado', [1,2, 3, 4, 6, 7, 8, 9, 10])->orderBy('fecha', 'desc')->get();
-
-    // Generar el PDF
-    $pdf = Pdf::loadView('pdfs.entregados_faltantes', [
-        'admisionesEntregados' => $admisionesEntregados,
-        'admisionesFaltantes' => $admisionesFaltantes,
-        'totalEntregados' => $totalEntregados,
-        'totalFaltantes' => $totalFaltantes,
-        'startDate' => $this->startDate,
-        'endDate' => $this->endDate,
-        'department' => $this->department,
-    ]);
-
-    return response()->streamDownload(function () use ($pdf) {
-        echo $pdf->output();
-    }, 'Reporte_Entregados_Faltantes.pdf');
-}
+    
 
     
     

@@ -88,11 +88,13 @@
     <div class="header">
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/CABECERA.jpg'))) }}" alt="Cabecera Agencia Boliviana de Correos">
     </div>
-    <h2 class="title">Reporte de Envíos Entregados y Faltantes</h2>
+    <h2 class="title">Reporte de Envíos Entregados y Por Entregar</h2>
     <p class="generated">Generado el: {{ \Carbon\Carbon::now()->format('d/m/Y H:i:s') }}</p>
     <div class="summary">
         <p><strong>Total Entregados:</strong> {{ $totalEntregados }}</p>
-        <p><strong>Total Faltantes:</strong> {{ $totalFaltantes }}</p>
+        <p><strong>Total Entregados por Ventanilla:</strong> {{ $totalVentanilla }}</p>
+        <p><strong>Total Entregados por Cartero:</strong> {{ $totalCartero }}</p>
+        <p><strong>Total Por Entregar (Fecha establecida):</strong> {{ $totalFaltantes }}</p>
         <p><strong>Rango de Fechas:</strong> 
             @if($startDate && $endDate)
                 {{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('d/m/Y') }}
@@ -104,8 +106,8 @@
             <p><strong>Departamento:</strong> {{ $department }}</p>
         @endif
     </div>
-
-    <h3>Envíos Entregados</h3>
+    
+    <h3>Envíos Entregados por Ventanilla</h3>
     <table>
         <thead>
             <tr>
@@ -116,10 +118,11 @@
                 <th>Peso (kg)</th>
                 <th>Actualizado</th>
                 <th>Observación</th>
+                <th>Firma</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($admisionesEntregados as $index => $admision)
+            @foreach ($admisionesVentanilla as $index => $admision)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $admision->origen }}</td>
@@ -128,12 +131,24 @@
                     <td>{{ number_format($admision->peso_regional ?: ($admision->peso_ems ?: $admision->peso), 2) }}</td>
                     <td>{{ $admision->updated_at->format('d/m/Y H:i') }}</td>
                     <td>{{ $admision->observacion ?: '' }}</td>
+                    <td>
+                        @if ($admision->firma_entrega)
+                            <div
+                                style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                <img src="{{ $admision->firma_entrega }}"
+                                    alt="Firma de entrega"
+                                    style="max-width:100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                            </div>
+                        @else
+                            <span>Sin firma</span>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-
-    <h3>Envíos por Entregar</h3>
+    
+    <h3>Envíos Entregados por Cartero</h3>
     <table>
         <thead>
             <tr>
@@ -144,10 +159,11 @@
                 <th>Peso (kg)</th>
                 <th>Actualizado</th>
                 <th>Observación</th>
+                <th>Firma</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($admisionesFaltantes as $index => $admision)
+            @foreach ($admisionesCartero as $index => $admision)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $admision->origen }}</td>
@@ -156,13 +172,20 @@
                     <td>{{ number_format($admision->peso_regional ?: ($admision->peso_ems ?: $admision->peso), 2) }}</td>
                     <td>{{ $admision->updated_at->format('d/m/Y H:i') }}</td>
                     <td>{{ $admision->observacion ?: '' }}</td>
+                    <td>
+                        @if ($admision->firma_entrega)
+                            <div
+                                style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                <img src="{{ $admision->firma_entrega }}"
+                                    alt="Firma de entrega"
+                                    style="max-width:100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                            </div>
+                        @else
+                            <span>Sin firma</span>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    <div class="footer">
-        <p>Reporte generado automáticamente por el sistema de EMS.</p>
-        <p>© {{ date('Y') }} Agencia Boliviana de Correos. Todos los derechos reservados.</p>
-    </div>
-</body>
-</html>
+    

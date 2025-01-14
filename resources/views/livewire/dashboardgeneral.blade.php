@@ -106,7 +106,7 @@
         <div class="dashboard-card">
             <div class="card-content">
                 <p>Total Recaudado</p>
-                <h3>${{ number_format($totalRecaudado, 2) }}</h3>
+                <h3>Bs{{ number_format($totalRecaudado, 2) }}</h3>
             </div>
             <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
                 💰
@@ -166,7 +166,7 @@
                       <div class="dashboard-card">
                         <div class="card-content">
                             <p>Total Recaudado</p>
-                            <h3>${{ number_format($datos['totalRecaudado'], 2) }}</h3>
+                            <h3>Bs{{ number_format($datos['totalRecaudado'], 2) }}</h3>
                         </div>
                         <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
                             💰

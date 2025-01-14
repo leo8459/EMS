@@ -255,7 +255,7 @@
 
 
 
-    <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
+    {{-- <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
 
   <div class="page-break">
         <table style="width: 800px;">
@@ -456,7 +456,7 @@
                 </tr>
             </thead>
         </table>
-    </div>
+    </div> --}}
 
     {{-- <div class="page-break">
 
