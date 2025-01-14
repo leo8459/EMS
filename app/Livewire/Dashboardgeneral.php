@@ -18,7 +18,12 @@ class Dashboardgeneral extends Component
         'POTOSI', 'CHUQUISACA', 'BENI', 'PANDO', 'TARIJA'
     ];
     public $datosPorDepartamento = [];
+    public $estado7Data = [];
+    private $estadoComparativo = [];
 
+
+
+    
     public function mount()
     {
         $user = Auth::user();
@@ -27,6 +32,11 @@ class Dashboardgeneral extends Component
             // Mostrar todos los datos a los administradores
             $this->cargarDatosGenerales();
             $this->cargarDatosPorDepartamentos($this->departamentos);
+            $this->cargarEstado7Data($this->departamentos); // Llama al nuevo método
+            $this->cargarEstado5Data($this->departamentos); // Nuevo método
+            $this->cargarEstadoComparativo(); // Nuevo método
+
+
         } elseif ($user->hasRole('ADMISION')) {
             // Mostrar datos solo para el departamento asignado al usuario
             $departamentoUsuario = $user->city; // Asegúrate de que el modelo de usuario tenga este atributo
@@ -91,6 +101,45 @@ class Dashboardgeneral extends Component
             'totalRecaudado' => $this->totalRecaudado,
             'admisionesHoy' => $this->admisionesHoy,
             'datosPorDepartamento' => $this->datosPorDepartamento,
+            'estado7Data' => $this->estado7Data,
+            'estado5Data' => $this->estado5Data,
+            'estadoComparativo' => $this->estadoComparativo, // Enviar los datos comparativos
+
         ]);
     }
+    
+    
+    private function cargarEstado7Data(array $departamentos)
+{
+    $this->estado7Data = [];
+    foreach ($departamentos as $departamento) {
+        $this->estado7Data[$departamento] = Admision::where('origen', $departamento)->where('estado', 7)->count();
+    }
+}
+
+private function cargarEstado5Data(array $departamentos)
+{
+    $this->estado5Data = [];
+    foreach ($departamentos as $departamento) {
+        $this->estado5Data[$departamento] = Admision::where(function ($query) use ($departamento) {
+            $query->where('reencaminamiento', $departamento)
+                ->orWhere(function ($q) use ($departamento) {
+                    $q->whereNull('reencaminamiento')
+                      ->where('ciudad', $departamento);
+                });
+        })->where('estado', 5)->count();
+    }
+}
+private function cargarEstadoComparativo()
+{
+    $totalAdmisiones = Admision::count();
+    $entregados = Admision::where('estado', 5)->count();
+    $noEntregados = Admision::whereIn('estado', [1, 2, 3, 4, 6, 7, 8, 9, 10, 11])->count();
+
+    // Calcula los porcentajes
+    $this->estadoComparativo = [
+        'Entregados (Estado 5)' => $totalAdmisiones > 0 ? ($entregados / $totalAdmisiones) * 100 : 0,
+        'No Entregados (Otros Estados)' => $totalAdmisiones > 0 ? ($noEntregados / $totalAdmisiones) * 100 : 0,
+    ];
+}
 }

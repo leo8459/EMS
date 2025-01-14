@@ -120,9 +120,11 @@
             <div class="card-icon" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">
                 📅
             </div>
+            
         </div>
+        
     @endif
-
+ 
     <!-- Datos por Departamento -->
     @foreach ($datosPorDepartamento as $departamento => $datos)
         <div class="dashboard-department">
@@ -172,8 +174,167 @@
                             💰
                         </div>
                     </div>
-    
+                
             </div>
         </div>
     @endforeach
+    <div class="dashboard">
+        <canvas id="estado7Chart" width="400" height="400"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+const ctx = document.getElementById('estado7Chart').getContext('2d');
+const estado7Data = @json($estado7Data); // Datos enviados desde el backend
+
+const labels = Object.keys(estado7Data);
+const data = Object.values(estado7Data);
+
+new Chart(ctx, {
+type: 'pie',
+data: {
+labels: labels,
+datasets: [{
+    label: 'Envíos en Estado 7',
+    data: data,
+    backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF',
+        '#FF9F40',
+        '#66BB6A',
+        '#D32F2F',
+        '#FBC02D'
+    ],
+}]
+},
+options: {
+responsive: true,
+plugins: {
+    legend: {
+        position: 'top',
+    },
+    title: {
+        display: true,
+        text: 'Envíos en Estado 7 por Departamento'
+    }
+}
+}
+});
+});
+</script>
+<div class="dashboard">
+    <div class="chart-container">
+        <canvas id="estado5Chart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Gráfico de Estado 5
+        const canvasEstado5 = document.getElementById('estado5Chart');
+        if (canvasEstado5) {
+            const ctx5 = canvasEstado5.getContext('2d');
+            const estado5Data = @json($estado5Data); // Cambiar a estado5Data
+
+            const labels5 = Object.keys(estado5Data);
+            const data5 = Object.values(estado5Data);
+
+            if (data5.length > 0) {
+                new Chart(ctx5, {
+                    type: 'pie',
+                    data: {
+                        labels: labels5,
+                        datasets: [{
+                            label: 'Envíos en Estado 5',
+                            data: data5,
+                            backgroundColor: [
+                                '#4BC0C0',
+                                '#9966FF',
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#FF9F40',
+                                '#66BB6A',
+                                '#D32F2F',
+                                '#FBC02D'
+                            ],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Envíos en Estado 5 por Departamento'
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.log('No hay datos para el gráfico de Estado 5.');
+            }
+        } else {
+            console.log('Canvas para el gráfico de Estado 5 no encontrado.');
+        }
+    });
+</script>
+<div class="dashboard">
+    <div class="chart-container">
+        <canvas id="estadoComparativoChart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Gráfico Comparativo Estados
+        const canvasEstadoComparativo = document.getElementById('estadoComparativoChart');
+        if (canvasEstadoComparativo) {
+            const ctxComparativo = canvasEstadoComparativo.getContext('2d');
+            const estadoComparativoData = @json($estadoComparativo);
+
+            const labelsComparativo = Object.keys(estadoComparativoData);
+            const dataComparativo = Object.values(estadoComparativoData);
+
+            if (dataComparativo.length > 0) {
+                new Chart(ctxComparativo, {
+                    type: 'pie',
+                    data: {
+                        labels: labelsComparativo,
+                        datasets: [{
+                            label: 'Comparativa de Estados',
+                            data: dataComparativo,
+                            backgroundColor: [
+                                '#4CAF50', // Entregados
+                                '#F44336', // No Entregados
+                            ],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Comparativa: Entregados vs No Entregados (%)'
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.log('No hay datos para el gráfico comparativo.');
+            }
+        } else {
+            console.log('Canvas para el gráfico comparativo no encontrado.');
+        }
+    });
+</script>
+
 </div>
