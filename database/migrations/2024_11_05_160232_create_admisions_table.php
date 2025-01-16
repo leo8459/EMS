@@ -43,7 +43,8 @@ return new class extends Migration
             $table->string('contenido')->nullable();
             $table->string('reencaminamiento')->nullable();
             $table->string('recepcionado')->nullable();
-            
+            $table->string('manifiesto')->nullable();
+
             $table->string('observacion_entrega')->nullable();
 
             $table->string('creacionadmision')->nullable();

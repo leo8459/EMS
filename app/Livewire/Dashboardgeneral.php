@@ -20,6 +20,7 @@ class Dashboardgeneral extends Component
     public $datosPorDepartamento = [];
     public $estado7Data = [];
     private $estadoComparativo = [];
+    public $estado5Data = [];
 
 
 
