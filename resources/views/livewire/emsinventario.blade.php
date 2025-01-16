@@ -84,6 +84,7 @@
                                             <th>Código</th>
                                             <th>Fecha</th>
                                             <th>Observación</th>
+                                            <th>Estado</th>
                                             @hasrole('SuperAdmin|Administrador')
                                                 <th>Admision</th>
                                             @endhasrole
@@ -127,8 +128,8 @@
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
                                                 <td>{{ $admisione->observacion_entrega ?? '' }}</td>
-                                                <td>
                                                 <td><strong>{{ $statusText }}</strong></td>
+                                                <td>
 
                                                 <button class="btn btn-info btn-sm"
                                                     wire:click="abrirEditModal({{ $admisione->id }})">
