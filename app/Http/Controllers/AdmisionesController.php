@@ -64,15 +64,12 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.inventarioventanilla');
     }
-    public function entregarenvios($id)
+    public function crearoficiales ()
     {
-        // Buscar la admisión por ID
-        $admision = \App\Models\Admision::findOrFail($id); // Usa el modelo adecuado
-    
-        // Pasar la admisión a la vista
-        return view('admisiones.entregarenviosfirma', compact('admision'));
+        return view('admisiones.enviosoficiales');
     }
-
+  
+  
 
 
 
@@ -117,6 +114,14 @@ class AdmisionesController extends Controller
 }
 
     
+public function entregarenvios($id)
+{
+    // Buscar la admisión por ID
+    $admision = \App\Models\Admision::findOrFail($id); // Usa el modelo adecuado
+
+    // Pasar la admisión a la vista
+    return view('admisiones.entregarenviosfirma', compact('admision'));
+}
 
     
 }

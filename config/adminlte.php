@@ -404,11 +404,11 @@ return [
                     'url' => 'entregadosemsjota',
                     'icon' => 'fas fa-user',
                 ],
-                // [
-                //     'text' => 'Envios Encamino a Regional',
-                //     'url' => 'recibirregional',
-                //     'icon' => 'fas fa-user',
-                // ],
+                [
+                    'text' => 'Generar Envio Oficial',
+                    'url' => 'enviosoficiales',
+                    'icon' => 'fas fa-user',
+                ],
                 // [
                 //     'text' => 'Envios Entregados',
                 //     'url' => 'entregarcartero',

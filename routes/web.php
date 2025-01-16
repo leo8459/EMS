@@ -106,6 +106,7 @@ Route::middleware('auth')->group(function () {
     Route::get('encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero'])->name('reporte.servicio');
     Route::match(['GET', 'POST'], '/recibirregional', [AdmisionesController::class, 'regional'])->name('admisiones.pdf');
     Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla']);
+    Route::get('/enviosoficiales', [AdmisionesController::class, 'crearoficiales']);
 
     //carteros
     Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
