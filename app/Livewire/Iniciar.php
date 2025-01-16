@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 use App\Models\Tarifa;
+use Illuminate\Http\Request;
 
 class Iniciar extends Component
 {
@@ -124,8 +125,8 @@ class Iniciar extends Component
 
         $cityCodes = [
             'LA PAZ' => '0',
-            'SANTA CRUZ' => '1',
-            'COCHABAMBA' => '2',
+            'COCHABAMBA' => '1',
+            'SANTA CRUZ' => '2',
             'ORURO' => '3',
             'POTOSI' => '4',
             'CHUQUISACA' => '5',

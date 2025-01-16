@@ -46,6 +46,7 @@ return new class extends Migration
             $table->string('manifiesto')->nullable();
 
             $table->string('observacion_entrega')->nullable();
+            $table->string('codigo_correlativo')->nullable();
 
             $table->string('creacionadmision')->nullable();
             $table->enum('notificacion', ['FALTANTE', 'SOBRANTE', 'MALENCAMINADO', 'DAÑADO'])->nullable();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Admision;
 
 class AdmisionesController extends Controller
 {
@@ -71,6 +72,51 @@ class AdmisionesController extends Controller
         // Pasar la admisión a la vista
         return view('admisiones.entregarenviosfirma', compact('admision'));
     }
+
+
+
+
+
+
+
+    public function getAdmisionesPorManifiesto(Request $request)
+{
+    // Validar que se envíe un manifiesto en la solicitud
+    $request->validate([
+        'manifiesto' => 'required|string',
+    ]);
+
+    // Obtener el manifiesto desde el request
+    $manifiesto = $request->input('manifiesto');
+
+    // Buscar admisiones que coincidan con el manifiesto proporcionado
+    $admisiones = Admision::where('manifiesto', $manifiesto)
+        ->select([
+            'codigo',
+            \DB::raw("CASE 
+                        WHEN reencaminamiento IS NOT NULL AND reencaminamiento != '' 
+                        THEN reencaminamiento 
+                        ELSE ciudad 
+                      END AS ubicacion"),
+            'manifiesto',
+        ])
+        ->get();
+
+    // Verificar si se encontraron registros
+    if ($admisiones->isEmpty()) {
+        return response()->json([
+            'message' => 'No se encontraron admisiones con el manifiesto especificado.',
+        ], 404);
+    }
+
+    // Retornar los registros en formato JSON
+    return response()->json([
+        'message' => 'Admisiones encontradas.',
+        'data' => $admisiones,
+    ]);
+}
+
     
+
     
 }

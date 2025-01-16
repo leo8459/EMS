@@ -121,10 +121,16 @@ Route::middleware('auth')->group(function () {
     //dashboard
     Route::get('/dashboardgeneral', [DashboardAdminController::class, 'dashboardadmin']);
 
+   
+
+
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
+ // SACAS
+ Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
+ ->name('api.admisiones.manifiesto');
 require __DIR__ . '/auth.php';
