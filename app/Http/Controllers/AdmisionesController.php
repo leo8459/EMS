@@ -77,41 +77,49 @@ class AdmisionesController extends Controller
 
 
     public function getAdmisionesPorManifiesto(Request $request)
-{
-    // Validar que se envíe un manifiesto en la solicitud
-    $request->validate([
-        'manifiesto' => 'required|string',
-    ]);
-
-    // Obtener el manifiesto desde el request
-    $manifiesto = $request->input('manifiesto');
-
-    // Buscar admisiones que coincidan con el manifiesto proporcionado
-    $admisiones = Admision::where('manifiesto', $manifiesto)
-        ->select([
-            'codigo',
-            \DB::raw("CASE 
-                        WHEN reencaminamiento IS NOT NULL AND reencaminamiento != '' 
-                        THEN reencaminamiento 
-                        ELSE ciudad 
-                      END AS ubicacion"),
-            'manifiesto',
-        ])
-        ->get();
-
-    // Verificar si se encontraron registros
-    if ($admisiones->isEmpty()) {
+    {
+        // Validar que se envíe un manifiesto en la solicitud
+        $request->validate([
+            'manifiesto' => 'required|string',
+        ]);
+    
+        // Obtener el manifiesto desde el request
+        $manifiesto = $request->input('manifiesto');
+    
+        // Buscar admisiones que coincidan con el manifiesto proporcionado
+        $admisiones = Admision::where('manifiesto', $manifiesto)
+            ->select([
+                'codigo',
+                \DB::raw("CASE 
+                            WHEN reencaminamiento IS NOT NULL AND reencaminamiento != '' 
+                            THEN reencaminamiento 
+                            ELSE ciudad 
+                          END AS ubicacion"),
+                \DB::raw("CASE 
+                            WHEN peso_regional IS NOT NULL AND peso_regional != 0 
+                            THEN peso_regional 
+                            WHEN peso_ems IS NOT NULL AND peso_ems != 0 
+                            THEN peso_ems 
+                            ELSE peso 
+                          END AS peso_final"),
+                'manifiesto',
+            ])
+            ->get();
+    
+        // Verificar si se encontraron registros
+        if ($admisiones->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron admisiones con el manifiesto especificado.',
+            ], 404);
+        }
+    
+        // Retornar los registros en formato JSON
         return response()->json([
-            'message' => 'No se encontraron admisiones con el manifiesto especificado.',
-        ], 404);
+            'message' => 'Admisiones encontradas.',
+            'data' => $admisiones,
+        ]);
     }
-
-    // Retornar los registros en formato JSON
-    return response()->json([
-        'message' => 'Admisiones encontradas.',
-        'data' => $admisiones,
-    ]);
-}
+    
 
     
 public function entregarenvios($id)

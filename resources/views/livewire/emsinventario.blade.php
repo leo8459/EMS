@@ -131,10 +131,10 @@
                                                 <td><strong>{{ $statusText }}</strong></td>
                                                 <td>
 
-                                                <button class="btn btn-info btn-sm"
-                                                    wire:click="abrirEditModal({{ $admisione->id }})">
-                                                    Cambiar Direccion
-                                                </button>
+                                                    <button class="btn btn-info btn-sm"
+                                                        wire:click="abrirEditModal({{ $admisione->id }})">
+                                                        Cambiar Direccion
+                                                    </button>
                                                 </td>
                                                 @hasrole('SuperAdmin|Administrador')
                                                     <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
@@ -164,16 +164,14 @@
                                             <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                                                 <p>Puede enviar las admisiones seleccionadas a la regional o
                                                     reencaminarlas a otro departamento.</p>
-
+                                            
                                                 <!-- Mostrar el número total de envíos seleccionados -->
                                                 <p><strong>Total de envíos seleccionados:</strong>
                                                     {{ count($selectedAdmisionesCodes) }}</p>
-
+                                            
                                                 <div class="form-group">
-                                                    <label for="selectedDepartment">Reencaminar al departamento
-                                                        (obligatorio):</label>
-                                                    <select wire:model="selectedDepartment" class="form-control"
-                                                        id="selectedDepartment">
+                                                    <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
+                                                    <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
                                                         <option value="">Seleccione un departamento</option>
                                                         <option value="LA PAZ">LA PAZ</option>
                                                         <option value="ORURO">ORURO</option>
@@ -186,11 +184,18 @@
                                                         <option value="TARIJA">TARIJA</option>
                                                     </select>
                                                     @if (!$selectedDepartment)
-                                                        <small class="text-danger">Debe seleccionar un
-                                                            departamento.</small>
+                                                        <small class="text-danger">Debe seleccionar un departamento.</small>
                                                     @endif
                                                 </div>
-
+                                            
+                                                <!-- NUEVO: Campo para ingresar el Manifiesto manual -->
+                                                <div class="form-group">
+                                                    <label for="manualManifiesto">Manifiesto (déjelo vacío para generar uno automáticamente):</label>
+                                                    <input type="text" wire:model="manualManifiesto" class="form-control" id="manualManifiesto"
+                                                           placeholder="Ej: BO0456789 (opcional)">
+                                                    <!-- No es necesario forzar validación, ya que si está vacío generará uno automático -->
+                                                </div>
+                                            
                                                 <!-- Mostrar los códigos de las admisiones seleccionadas -->
                                                 <ul>
                                                     @foreach ($selectedAdmisionesCodes as $codigo)
@@ -198,13 +203,13 @@
                                                     @endforeach
                                                 </ul>
                                             </div>
-                                            <!-- Pie -->
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary" wire:click="mandarARegional">Guardar y
-                                                    Generar Excel</button>
-                                                <button class="btn btn-secondary"
-                                                    wire:click="$set('showModal', false)">Cancelar</button>
+                                                <button class="btn btn-primary" wire:click="mandarARegional">
+                                                    Guardar y Generar Excel
+                                                </button>
+                                                <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
                                             </div>
+                                            
                                         </div>
                                     </div>
                                 </div>

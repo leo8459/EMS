@@ -38,6 +38,12 @@ class Emsinventario extends Component
     public $showEditModal = false; // Controla la visibilidad del modal de edición
     public $editAdmisionId = null; // Almacena el ID de la admisión que se está editando
     public $editDireccion = ''; // Dirección editable
+    public $manualManifiesto = '';   // Para el valor del Manifiesto ingresado manualmente
+    public $useManualManifiesto = false; // Checkbox que indica si se usará el Manifiesto manual
+    public $currentManifiesto = null; // Almacena el manifiesto actual
+
+
+
 
     public function updatedSelectedCity()
     {
@@ -192,14 +198,21 @@ class Emsinventario extends Component
 
     public function generarExcel()
     {
-        // Obtener todas las admisiones seleccionadas
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-
+        if (!empty($this->currentManifiesto)) {
+            // Generar el Excel para TODAS las admisiones que tengan este manifiesto
+            $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
+        } else {
+            // Comportamiento anterior
+            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        }
+    
         if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas seleccionadas para generar el Excel.');
+            session()->flash('error', 'No hay admisiones válidas para generar el Excel.');
             return;
         }
+        
 
+        
         // Crear el documento
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
@@ -459,51 +472,57 @@ class Emsinventario extends Component
             return;
         }
     
-        // Obtener la ciudad del usuario logueado
-        $userCity = Auth::user()->city;
+        // Verificar si el usuario introdujo un Manifiesto
+        if (!empty($this->manualManifiesto)) {
+            // Usar manifiesto manual
+            $this->currentManifiesto = $this->manualManifiesto;
+        } else {
+            // Generar un manifiesto automático
+            $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
+        }
     
-        // Generar un único manifiesto para esta ciudad
-        $manifiesto = $this->generarManifiesto($userCity);
-    
+        // Asignar el manifiesto a las admisiones seleccionadas
         foreach ($admisiones as $admision) {
-            // Asignar el manifiesto y actualizar el estado
-            $admision->estado = 6; // Cambiar el estado a "Mandado a regional"
-            $admision->manifiesto = $manifiesto;
+            $admision->estado = 6; // Cambiar estado a "Mandado a regional"
+            $admision->manifiesto = $this->currentManifiesto;
             $admision->save();
     
             // Registrar el evento
             Eventos::create([
                 'accion' => 'Mandar a regional',
-                'descripcion' => "La admisión fue enviada a la regional con el manifiesto $manifiesto.",
+                'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
             ]);
         }
     
-        // Generar el Excel y retornar la descarga
+        // Generar el Excel usando el manifiesto actual
         return $this->generarExcel();
     }
     
+    
+
+
 
     private function generarManifiesto($city)
     {
         return \DB::transaction(function () use ($city) {
             // Obtener el prefijo según la ciudad
             $prefix = $this->cityPrefixes[$city] ?? '9'; // Default a '9' si la ciudad no está en el mapeo
-    
+
             // Obtener el último manifiesto registrado para la ciudad
             $ultimoManifiesto = Admision::where('manifiesto', 'like', "BO$prefix%")
                 ->orderBy('manifiesto', 'desc')
                 ->value('manifiesto');
-    
+
             // Generar el nuevo manifiesto
             $nuevoNumero = $ultimoManifiesto ? (int) substr($ultimoManifiesto, 3) + 1 : 1;
-    
+
             // Formatear el nuevo manifiesto
             return 'BO' . $prefix . str_pad($nuevoNumero, 7, '0', STR_PAD_LEFT);
         });
     }
-    
+
 
     private $cityPrefixes = [
         'LA PAZ' => '0',

@@ -42,6 +42,7 @@ class Admision extends Model
         'user_id',
         'notificacion',
         'observacion',    // <= Asegúrate de que esté
+        'manifiesto',
 
 
     ];
