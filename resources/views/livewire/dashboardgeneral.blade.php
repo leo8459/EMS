@@ -195,7 +195,7 @@ type: 'pie',
 data: {
 labels: labels,
 datasets: [{
-    label: 'Envíos en Estado 7',
+    label: 'Envíos en Regional',
     data: data,
     backgroundColor: [
         '#FF6384',
@@ -248,7 +248,7 @@ plugins: {
                     data: {
                         labels: labels5,
                         datasets: [{
-                            label: 'Envíos en Estado 5',
+                            label: 'Envíos Entregados',
                             data: data5,
                             backgroundColor: [
                                 '#4BC0C0',
@@ -323,7 +323,7 @@ plugins: {
                             },
                             title: {
                                 display: true,
-                                text: 'Comparativa: Entregados vs No Entregados (%)'
+                                text: 'Comparativa: Entregados vs Por entregar (%)'
                             }
                         }
                     }
