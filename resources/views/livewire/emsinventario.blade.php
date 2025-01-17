@@ -53,6 +53,10 @@
                                 <button class="btn btn-secondary" wire:click="mandarAVentanilla">
                                     Mandar a Ventanilla
                                 </button>
+                                <button type="button" class="btn btn-success" data-toggle="modal"
+                                    data-target="#createPaqueteModal">
+                                    Nuevo Admision
+                                </button>
                             </div>
 
 
@@ -144,7 +148,294 @@
                                     </tbody>
                                 </table>
 
+                                <!-- Modal para Crear Nuevo Paquete -->
+                                <div wire:ignore.self class="modal fade" id="createPaqueteModal" tabindex="-1"
+                                    role="dialog" aria-labelledby="createPaqueteModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="createPaqueteModalLabel">Crear Nuevo
+                                                    Admision</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form wire:submit.prevent="store">
 
+                                                    <!-- Sección DATOS -->
+                                                    <h5 class="mt-3" style="color: #003366;">DATOS</h5>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="origen">Origen*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="origen" wire:model="origen" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="servicio">Tipo de Servicio*</label>
+                                                                <select class="form-control" id="servicio"
+                                                                    wire:model="servicio">
+                                                                    <option value="">Seleccione el servicio
+                                                                    </option>
+                                                                    {{-- <option value="EMS">EMS</option> --}}
+                                                                    <option value="OFICIAL">OFICIAL</option>
+                                                                    {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
+                                  <option value="EMS">POSTPAGO</option> --}}
+
+                                                                    {{-- <option value="ENCOMIENDA">ENCOMIENDA</option>
+                                  <option value="TRADICIONAL">TRADICIONAL</option>
+                                  <option value="CERTIFICADA">CERTIFICADA</option>
+                                  <option value="ORDINARIA">ORDINARIA</option>
+                                  <option value="EXPRESO">EXPRESO</option> --}}
+                                                                </select>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label
+                                                                    for="tipo_correspondencia">Correspondencia*</label>
+                                                                <select class="form-control" id="tipo_correspondencia"
+                                                                    wire:model="tipo_correspondencia" wire:ignore>
+                                                                    <option value="">Seleccione el tipo de
+                                                                        correspondencia</option>
+                                                                    <option value="CARTA">CARTA</option>
+                                                                    <option value="ENCOMIENDA">ENCOMIENDA</option>
+                                                                    <option value="DOCUMENTO">DOCUMENTO</option>
+                                                                    <option value="PAQUETE">PAQUETE</option>
+                                                                    <option value="SACA M">SACA M</option>
+                                                                    <option value="REVISTA">REVISTA</option>
+                                                                    <option value="IMPRESO">IMPRESO</option>
+                                                                    <option value="CECOGRAMA">CECOGRAMA</option>
+                                                                    <option value="PEQUEÑO PAQUETE">PEQUEÑO PAQUETE
+                                                                    </option>
+
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="contenido">Contenido</label>
+                                                        <textarea class="form-control" id="contenido" wire:model="contenido"></textarea>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="cantidad">Cantidad*</label>
+                                                                <input type="number" class="form-control"
+                                                                    id="cantidad" placeholder="Cantidad"
+                                                                    wire:model="cantidad" value="1" disabled>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="destino">Destino*</label>
+                                                                <select class="form-control" id="destino"
+                                                                    wire:model="destino" wire:ignore>
+                                                                    <option value="">Seleccione el destino
+                                                                    </option>
+                                                                   <option value="OFICIAL">OFICIAL
+                                                                    </option>
+                                                                    {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
+                                                                    </option>
+                                                                    <option value="DEVOLUCION">NACIONAL CON DEVOLUCION
+                                                                    </option>
+                                                                    <option value="NACIONAL">NACIONAL EMS</option>
+                                                                    <option value="POSTPAGO">NACIONAL POSTPAGO</option>
+
+                                                                    <option value="CIUDADES INTERMEDIAS">CIUDADES
+                                                                        INTERMEDIAS</option>
+                                                                    <option value="TRINIDAD COBIJA">TRINIDAD COBIJA
+                                                                    </option>
+                                                                    <option value="RIVERALTA GUAYARAMERIN">RIVERALTA
+                                                                        GUAYARAMERIN</option>
+                                                                    <option value="EMS COBERTURA 1">EMS COBERTURA 1
+                                                                    </option>
+                                                                    <option value="EMS COBERTURA 2">EMS COBERTURA 2
+                                                                    </option>
+                                                                    <option value="EMS COBERTURA 3">EMS COBERTURA 3
+                                                                    </option>
+                                                                    <option value="EMS COBERTURA 4">EMS COBERTURA 4
+                                                                    </option> --}}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="codigo">Código*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="codigo" wire:model="codigo"disabled>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="numero_factura">Número de Factura</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="numero_factura" wire:model="numero_factura">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="peso">Peso (Kg.)*</label>
+                                                                <input type="text" wire:model="peso">
+
+
+
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="precio">Precio*</label>
+                                                                <input type="number" class="form-control"
+                                                                    id="precio" wire:model="precio" value="0"
+                                                                    readonly>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <!-- Sección REMITENTE -->
+                                                    <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" style="position: relative;">
+                                                                <label for="nombre_remitente">Nombre Remitente*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="nombre_remitente"
+                                                                    wire:model="nombre_remitente"
+                                                                    oninput="showSuggestions(this.value)" wire:ignore>
+                                                                <!-- Contenedor para las sugerencias -->
+                                                                <div id="suggestions"
+                                                                    style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="nombre_envia">Nombre y Apellido del que
+                                                                    Envia</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="nombre_envia" wire:model="nombre_envia">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="carnet">Carnet*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="carnet" wire:model="carnet">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="telefono_remitente">Teléfono
+                                                                    Remitente*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="telefono_remitente"
+                                                                    wire:model="telefono_remitente">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Sección DESTINATARIO -->
+                                                    <h5 class="mt-3" style="color: #003366;">DESTINATARIO</h5>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="nombre_destinatario">Nombre
+                                                                    Destinatario*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="nombre_destinatario"
+                                                                    wire:model="nombre_destinatario">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="telefono_destinatario">Teléfono
+                                                                    Destinatario</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="telefono_destinatario"
+                                                                    wire:model="telefono_destinatario">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <!-- Cambiado a col-12 para ocupar todo el ancho -->
+                                                            <div class="form-group">
+                                                                <label for="direccion">Dirección*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="direccion" wire:model="direccion">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="ciudad">Ciudad*</label>
+                                                                <select class="form-control" id="ciudad"
+                                                                    wire:model="ciudad">
+                                                                    <option value="">Seleccione una ciudad
+                                                                    </option>
+                                                                    <option value="LA PAZ">LA PAZ</option>
+                                                                    <option value="POTOSI">POTOSI</option>
+                                                                    <option value="ORURO">ORURO</option>
+                                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                                                    <option value="BENI">BENI</option>
+                                                                    <option value="PANDO">PANDO</option>
+                                                                    <option value="TARIJA">TARIJA</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="provincia">Provincia</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="provincia" wire:model="provincia">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="pais">País*</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="pais" wire:model="pais">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-dismiss="modal">Cerrar</button>
+                                                        <button type="button" class="btn btn-secondary"
+                                                            onclick="saveFrequentSend()">Guardar
+                                                            como envío frecuente</button>
+
+
+                                                        <button type="submit"
+                                                            class="btn btn-primary">Guardar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- Botón para abrir el modal -->
                             </div>
                             @if ($showModal)
@@ -164,14 +455,16 @@
                                             <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                                                 <p>Puede enviar las admisiones seleccionadas a la regional o
                                                     reencaminarlas a otro departamento.</p>
-                                            
+
                                                 <!-- Mostrar el número total de envíos seleccionados -->
                                                 <p><strong>Total de envíos seleccionados:</strong>
                                                     {{ count($selectedAdmisionesCodes) }}</p>
-                                            
+
                                                 <div class="form-group">
-                                                    <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
-                                                    <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
+                                                    <label for="selectedDepartment">Reencaminar al departamento
+                                                        (obligatorio):</label>
+                                                    <select wire:model="selectedDepartment" class="form-control"
+                                                        id="selectedDepartment">
                                                         <option value="">Seleccione un departamento</option>
                                                         <option value="LA PAZ">LA PAZ</option>
                                                         <option value="ORURO">ORURO</option>
@@ -184,18 +477,21 @@
                                                         <option value="TARIJA">TARIJA</option>
                                                     </select>
                                                     @if (!$selectedDepartment)
-                                                        <small class="text-danger">Debe seleccionar un departamento.</small>
+                                                        <small class="text-danger">Debe seleccionar un
+                                                            departamento.</small>
                                                     @endif
                                                 </div>
-                                            
+
                                                 <!-- NUEVO: Campo para ingresar el Manifiesto manual -->
                                                 <div class="form-group">
-                                                    <label for="manualManifiesto">Manifiesto (déjelo vacío para generar uno automáticamente):</label>
-                                                    <input type="text" wire:model="manualManifiesto" class="form-control" id="manualManifiesto"
-                                                           placeholder="Ej: BO0456789 (opcional)">
+                                                    <label for="manualManifiesto">Manifiesto (déjelo vacío para generar
+                                                        uno automáticamente):</label>
+                                                    <input type="text" wire:model="manualManifiesto"
+                                                        class="form-control" id="manualManifiesto"
+                                                        placeholder="Ej: BO0456789 (opcional)">
                                                     <!-- No es necesario forzar validación, ya que si está vacío generará uno automático -->
                                                 </div>
-                                            
+
                                                 <!-- Mostrar los códigos de las admisiones seleccionadas -->
                                                 <ul>
                                                     @foreach ($selectedAdmisionesCodes as $codigo)
@@ -207,9 +503,10 @@
                                                 <button class="btn btn-primary" wire:click="mandarARegional">
                                                     Guardar y Generar Excel
                                                 </button>
-                                                <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showModal', false)">Cancelar</button>
                                             </div>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -325,3 +622,21 @@
     </section>
 
 </div>
+
+<script>
+    document.addEventListener('livewire:load', function() {
+        // Mostrar el modal
+        window.addEventListener('mostrar-modal-expedicion-hoy', function() {
+            $('#modalExpedicionHoy').modal('show');
+        });
+
+        // Ocultar el modal
+        window.addEventListener('ocultar-modal-expedicion-hoy', function() {
+            $('#modalExpedicionHoy').modal('hide');
+        });
+    });
+    window.addEventListener('page-reload', () => {
+        location.reload();
+    });
+    
+</script>

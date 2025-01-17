@@ -42,6 +42,7 @@ class Emsinventario extends Component
     public $useManualManifiesto = false; // Checkbox que indica si se usará el Manifiesto manual
     public $currentManifiesto = null; // Almacena el manifiesto actual
 
+    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
 
 
@@ -522,8 +523,94 @@ class Emsinventario extends Component
             return 'BO' . $prefix . str_pad($nuevoNumero, 7, '0', STR_PAD_LEFT);
         });
     }
-
-
+    public function mount()
+    {
+        $this->origen = Auth::user()->city; // Si tienes una ciudad por defecto
+        $this->ciudad = ""; // Cambia este valor si quieres que otra ciudad sea la predeterminada
+        $this->cantidad = 1; // Establece cantidad en 1
+    }
+    public function store()
+    {
+        // Establecer precio predeterminado en 0 si no está definido
+        $this->precio = $this->precio ?? 0;
+    
+        // Establecer la fecha actual
+        $this->fecha = now();
+    
+        // Generar el código dinámicamente
+        $prefixes = [
+            'EMS' => 'EN',
+            'OFICIAL' => 'RD',
+            // Otros prefijos si es necesario
+        ];
+        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
+    
+        $cityCodes = [
+            'LA PAZ' => '0',
+            'COCHABAMBA' => '1',
+            'SANTA CRUZ' => '2',
+            'ORURO' => '3',
+            'POTOSI' => '4',
+            'CHUQUISACA' => '5',
+            'TARIJA' => '6',
+            'PANDO' => '7',
+            'BENI' => '8',
+        ];
+    
+        $city = Auth::user()->city;
+        $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
+    
+        $yearSuffix = now()->format('y');
+        $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
+            ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
+            ->value('max_number');
+    
+        $newNumber = $lastNumber ? $lastNumber + 1 : 1;
+        $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
+    
+        $suffix = 'BO';
+        $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
+    
+        // Crear el registro
+        $admision = Admision::create([
+            'origen' => $this->origen,
+            'fecha' => $this->fecha,
+            'servicio' => $this->servicio,
+            'tipo_correspondencia' => $this->tipo_correspondencia,
+            'cantidad' => $this->cantidad,
+            'peso' => $this->peso,
+            'destino' => $this->destino,
+            'codigo' => $this->codigo,
+            'precio' => $this->precio,
+            'numero_factura' => $this->numero_factura,
+            'nombre_remitente' => $this->nombre_remitente,
+            'nombre_envia' => $this->nombre_envia,
+            'carnet' => $this->carnet,
+            'telefono_remitente' => $this->telefono_remitente,
+            'nombre_destinatario' => $this->nombre_destinatario,
+            'telefono_destinatario' => $this->telefono_destinatario,
+            'direccion' => $this->direccion,
+            'provincia' => $this->provincia,
+            'ciudad' => $this->ciudad,
+            'pais' => $this->pais,
+            'contenido' => $this->contenido,
+            'estado' => 3
+            
+            ,
+            'user_id' => Auth::id(),
+            'creacionadmision' => Auth::user()->name,
+        ]);
+    
+        Eventos::create([
+            'accion' => 'Crear',
+            'descripcion' => 'Creación de admisión Oficial',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+    
+        session()->flash('message', 'Admisión creada exitosamente.');
+    }
+    
     private $cityPrefixes = [
         'LA PAZ' => '0',
         'COCHABAMBA' => '1',
