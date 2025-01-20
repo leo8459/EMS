@@ -40,7 +40,8 @@
 
                                 <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                             </div>
-
+                            <!-- Botón para abrir el modal -->
+                           
                             <div class="d-flex justify-content-end align-items-center mt-3">
                                 <a href="{{ route('asignarcartero') }}" class="btn btn-success"
                                     style="margin-right: 10px;">
@@ -57,6 +58,8 @@
                                     data-target="#createPaqueteModal">
                                     Nuevo Admision
                                 </button>
+                                <button class="btn btn-info" wire:click="abrirModalReimprimir">Reimprimir CN-33</button>
+
                             </div>
 
 
@@ -161,6 +164,7 @@
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
+
                                             <div class="modal-body">
                                                 <form wire:submit.prevent="store">
 
@@ -240,7 +244,7 @@
                                                                     wire:model="destino" wire:ignore>
                                                                     <option value="">Seleccione el destino
                                                                     </option>
-                                                                   <option value="OFICIAL">OFICIAL
+                                                                    <option value="OFICIAL">OFICIAL
                                                                     </option>
                                                                     {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
                                                                     </option>
@@ -438,6 +442,33 @@
                                 </div>
                                 <!-- Botón para abrir el modal -->
                             </div>
+                            <!-- Modal para Reimprimir -->
+                            @if ($showReimprimirModal)
+                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Reimprimir Manifiesto</h5>
+                                            <button type="button" class="close" wire:click="$set('showReimprimirModal', false)">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="manifiestoInput">Ingrese el Manifiesto:</label>
+                                                <input type="text" id="manifiestoInput" class="form-control" wire:model="manifiestoInput">
+                                                @error('manifiestoInput') <span class="text-danger">{{ $message }}</span> @enderror
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" wire:click="$set('showReimprimirModal', false)">Cancelar</button>
+                                            <button class="btn btn-primary" wire:click="reimprimirManifiesto">Reimprimir</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                            
                             @if ($showModal)
                                 <div class="modal fade show d-block" tabindex="-1" role="dialog"
                                     style="background-color: rgba(0,0,0,0.5);">
@@ -638,5 +669,4 @@
     window.addEventListener('page-reload', () => {
         location.reload();
     });
-    
 </script>

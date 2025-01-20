@@ -44,7 +44,11 @@ class Emsinventario extends Component
 
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
-
+    public $showReprintModal = false; // Controla la visibilidad del modal de reimpresión
+    public $inputManifiesto = ''; // Almacena el manifiesto ingresado para la búsqueda
+    
+    public $showReimprimirModal = false;
+public $manifiestoInput = '';
 
     public function updatedSelectedCity()
     {
@@ -196,15 +200,19 @@ class Emsinventario extends Component
 
 
 
-
-    public function generarExcel()
+    public function abrirModalReimprimir()
     {
-        if (!empty($this->currentManifiesto)) {
-            // Generar el Excel para TODAS las admisiones que tengan este manifiesto
-            $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
-        } else {
-            // Comportamiento anterior
-            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        $this->showReimprimirModal = true;
+    }
+    public function generarExcel($admisiones = null)
+    {
+        // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
+        if ($admisiones === null) { // Reemplazamos `is_null($admisiones)` con esta verificación más clara
+            if (!empty($this->currentManifiesto)) {
+                $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
+            } else {
+                $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+            }
         }
     
         if ($admisiones->isEmpty()) {
@@ -610,6 +618,28 @@ class Emsinventario extends Component
     
         session()->flash('message', 'Admisión creada exitosamente.');
     }
+
+    public function reimprimirManifiesto()
+    {
+        $this->validate([
+            'manifiestoInput' => 'required|string'
+        ]);
+    
+        $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
+    
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
+            return;
+        }
+    
+        $this->currentManifiesto = $this->manifiestoInput;
+    
+        // Llama al método para generar el Excel con las admisiones
+        return $this->generarExcel($admisiones);
+    }
+    
+    
+
     
     private $cityPrefixes = [
         'LA PAZ' => '0',
