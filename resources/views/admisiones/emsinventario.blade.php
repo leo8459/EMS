@@ -10,5 +10,6 @@
 @endhasrole
 @hasrole ('EMS')
 @livewire('emsinventario')
-@endhasrole@include('footer')
+@endhasrole
+@include('footer')
 @endsection
