@@ -187,6 +187,8 @@
                                                                     </option>
                                                                     {{-- <option value="EMS">EMS</option> --}}
                                                                     <option value="OFICIAL">OFICIAL</option>
+                                                                    <option value="TRANSITO">TRANSITO</option>
+
                                                                     {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
                                   <option value="EMS">POSTPAGO</option> --}}
 
@@ -245,6 +247,10 @@
                                                                     <option value="">Seleccione el destino
                                                                     </option>
                                                                     <option value="OFICIAL">OFICIAL
+                                                                        
+                                                                    </option>
+                                                                    <option value="TRANSITO">TRANSITO
+                                                                        
                                                                     </option>
                                                                     {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
                                                                     </option>
@@ -274,7 +280,7 @@
                                                             <div class="form-group">
                                                                 <label for="codigo">Código*</label>
                                                                 <input type="text" class="form-control"
-                                                                    id="codigo" wire:model="codigo"disabled>
+                                                                    id="codigo" wire:model="codigo">
                                                             </div>
                                                         </div>
                                                     </div>

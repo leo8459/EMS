@@ -550,39 +550,41 @@ public $manifiestoInput = '';
         // Establecer la fecha actual
         $this->fecha = now();
     
-        // Generar el código dinámicamente
-        $prefixes = [
-            'EMS' => 'EN',
-            'OFICIAL' => 'RD',
-            // Otros prefijos si es necesario
-        ];
-        $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
+        // Solo generar un código si no se ha ingresado manualmente
+        if (empty($this->codigo)) {
+            // Generar el código dinámicamente
+            $prefixes = [
+                'EMS' => 'EN',
+                'OFICIAL' => 'RD',
+            ];
+            $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
     
-        $cityCodes = [
-            'LA PAZ' => '0',
-            'COCHABAMBA' => '1',
-            'SANTA CRUZ' => '2',
-            'ORURO' => '3',
-            'POTOSI' => '4',
-            'CHUQUISACA' => '5',
-            'TARIJA' => '6',
-            'PANDO' => '7',
-            'BENI' => '8',
-        ];
+            $cityCodes = [
+                'LA PAZ' => '0',
+                'COCHABAMBA' => '1',
+                'SANTA CRUZ' => '2',
+                'ORURO' => '3',
+                'POTOSI' => '4',
+                'CHUQUISACA' => '5',
+                'TARIJA' => '6',
+                'PANDO' => '7',
+                'BENI' => '8',
+            ];
     
-        $city = Auth::user()->city;
-        $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
+            $city = Auth::user()->city;
+            $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
     
-        $yearSuffix = now()->format('y');
-        $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
-            ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
-            ->value('max_number');
+            $yearSuffix = now()->format('y');
+            $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
+                ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
+                ->value('max_number');
     
-        $newNumber = $lastNumber ? $lastNumber + 1 : 1;
-        $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
+            $newNumber = $lastNumber ? $lastNumber + 1 : 1;
+            $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
     
-        $suffix = 'BO';
-        $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
+            $suffix = 'BO';
+            $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
+        }
     
         // Crear el registro
         $admision = Admision::create([
@@ -607,9 +609,7 @@ public $manifiestoInput = '';
             'ciudad' => $this->ciudad,
             'pais' => $this->pais,
             'contenido' => $this->contenido,
-            'estado' => 3
-            
-            ,
+            'estado' => 3,
             'user_id' => Auth::id(),
             'creacionadmision' => Auth::user()->name,
         ]);
@@ -620,9 +620,46 @@ public $manifiestoInput = '';
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
         ]);
-    
+        // Enlace QR fijo
+        $qrLink = 'https://correos.gob.bo:8000/';
+        // Preparar los datos para el PDF usando el registro recién creado
+        $data = [
+            'origen' => $admision->origen,
+            'fecha' => $admision->fecha,
+            'servicio' => $admision->servicio,
+            'tipo_correspondencia' => $admision->tipo_correspondencia,
+            'cantidad' => $admision->cantidad,
+            'peso' => $admision->peso,
+            'destino' => $admision->destino,
+            'codigo' => $admision->codigo,
+            'precio' => $admision->precio,
+            'numero_factura' => $admision->numero_factura,
+            'nombre_remitente' => $admision->nombre_remitente,
+            'nombre_envia' => $admision->nombre_envia,
+            'carnet' => $admision->carnet,
+            'telefono_remitente' => $admision->telefono_remitente,
+            'nombre_destinatario' => $admision->nombre_destinatario,
+            'telefono_destinatario' => $admision->telefono_destinatario,
+            'direccion' => $admision->direccion,
+            'provincia' => $admision->provincia,
+            'ciudad' => $admision->ciudad,
+            'pais' => $admision->pais,
+            'qrLink' => $qrLink, // Enlace QR fijo
+            'contenido' => $admision->contenido, // Agrega este campo
+
+        ];
+
+        // Renderizar la vista y generar el PDF
+        $pdf = Pdf::loadView('pdfs.admision', $data);
+
+        // Descargar automáticamente el PDF
+        return response()->streamDownload(
+            fn() => print($pdf->stream('admision.pdf')),
+            'admision.pdf'
+        );
         session()->flash('message', 'Admisión creada exitosamente.');
     }
+    
 
     public function reimprimirManifiesto()
     {
