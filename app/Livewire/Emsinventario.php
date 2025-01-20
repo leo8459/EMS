@@ -478,7 +478,6 @@ public $manifiestoInput = '';
             return;
         }
     
-        // Obtener las admisiones seleccionadas
         $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
     
         if ($admisiones->isEmpty()) {
@@ -486,32 +485,29 @@ public $manifiestoInput = '';
             return;
         }
     
-        // Verificar si el usuario introdujo un Manifiesto
+        // Verificamos si el usuario introdujo un Manifiesto
         if (!empty($this->manualManifiesto)) {
-            // Usar manifiesto manual
             $this->currentManifiesto = $this->manualManifiesto;
         } else {
-            // Generar un manifiesto automático
             $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
         }
     
-        // Asignar el manifiesto a las admisiones seleccionadas
+        // Asignar el manifiesto a las admisiones y cambiar estado
         foreach ($admisiones as $admision) {
-            $admision->estado = 6; // Cambiar estado a "Mandado a regional"
+            $admision->estado = 6; // Mandado a regional
             $admision->manifiesto = $this->currentManifiesto;
             $admision->save();
     
-            // Registrar el evento
             Eventos::create([
-                'accion' => 'Mandar a regional',
+                'accion'      => 'Mandar a regional',
                 'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
+                'codigo'      => $admision->codigo,
+                'user_id'     => Auth::id(),
             ]);
         }
     
-        // Generar el Excel usando el manifiesto actual
-        return $this->generarExcel();
+        // Generar el PDF (en lugar de Excel) y retornarlo
+        return $this->generarPdf();
     }
     
     
@@ -662,25 +658,73 @@ public $manifiestoInput = '';
     
 
     public function reimprimirManifiesto()
-    {
-        $this->validate([
-            'manifiestoInput' => 'required|string'
-        ]);
-    
-        $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
-    
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
-            return;
-        }
-    
-        $this->currentManifiesto = $this->manifiestoInput;
-    
-        // Llama al método para generar el Excel con las admisiones
-        return $this->generarExcel($admisiones);
+{
+    $this->validate([
+        'manifiestoInput' => 'required|string'
+    ]);
+
+    $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
+        return;
     }
+
+    $this->currentManifiesto = $this->manifiestoInput;
+
+    // Llama al método para generar el PDF con las admisiones
+    return $this->generarPdf($admisiones);
+}
+
     
+    public function generarPdf($admisiones = null)
+{
+    // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
+    if ($admisiones === null) {
+        if (!empty($this->currentManifiesto)) {
+            $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
+        } else {
+            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        }
+    }
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+        return;
+    }
+
+    // Prepara los datos para la vista
+    $currentDate = now()->format('d/m/Y');
+    $currentTime = now()->format('H:i');
+    $firstPackage = $admisiones->first();
     
+    // Nombre del usuario logueado
+    $loggedInUserCity = Auth::user()->city;
+    // El destino lo tomamos del reencaminamiento si existe, caso contrario de la ciudad del primer paquete
+    $destinationCity = $this->selectedDepartment 
+        ?? $firstPackage->reencaminamiento 
+        ?? $firstPackage->ciudad 
+        ?? '';
+
+    // Datos que enviamos a la vista
+    $data = [
+        'admisiones'        => $admisiones,
+        'currentDate'       => $currentDate,
+        'currentTime'       => $currentTime,
+        'currentManifiesto' => $this->currentManifiesto,
+        'loggedInUserCity'  => $loggedInUserCity,
+        'destinationCity'   => $destinationCity,
+    ];
+
+    // Generamos el PDF con DomPDF y la vista cn33
+    $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
+
+    // Descarga el PDF directamente
+    return response()->streamDownload(
+        fn() => print($pdf->stream('cn-33.pdf')),
+        'cn-33.pdf'
+    );
+}
 
     
     private $cityPrefixes = [
