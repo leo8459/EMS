@@ -69,7 +69,10 @@ class AdmisionesController extends Controller
         return view('admisiones.enviosoficiales');
     }
   
-  
+    public function verexpedicion ()
+    {
+        return view('admisiones.expedicion');
+    }
 
 
 

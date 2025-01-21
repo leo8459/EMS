@@ -90,7 +90,7 @@
                                 <td>{{ $admision->reencaminamiento ?? $admision->ciudad }}</td>
                                 <td>{{ $admision->codigo }}</td>
                                 <td>{{ $admision->fecha }}</td>
-                                <td>{{ $admision->observacion }}</td>
+                                <td>{{ $admision->observacion_entrega ?: $admision->observacion }}</td>
                                 {{-- <td>{{ $admision->reencaminamiento ?? $admisione->ciudad }}</td> --}}
                                 @hasrole('SuperAdmin|Administrador')
                                     <td>{{ $admision->user->name ?? 'No asignado' }}</td>

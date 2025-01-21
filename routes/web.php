@@ -107,6 +107,12 @@ Route::middleware('auth')->group(function () {
     Route::match(['GET', 'POST'], '/recibirregional', [AdmisionesController::class, 'regional'])->name('admisiones.pdf');
     Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla']);
     Route::get('/enviosoficiales', [AdmisionesController::class, 'crearoficiales']);
+    Route::get('/expedicion', [AdmisionesController::class, 'verexpedicion']);
+
+
+
+
+
 
     //carteros
     Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);

@@ -409,6 +409,11 @@ return [
                     'url' => 'enviosoficiales',
                     'icon' => 'fas fa-user',
                 ],
+                [
+                    'text' => 'Expedicion',
+                    'url' => 'expedicion',
+                    'icon' => 'fas fa-user',
+                ],
                 // [
                 //     'text' => 'Envios Entregados',
                 //     'url' => 'entregarcartero',
