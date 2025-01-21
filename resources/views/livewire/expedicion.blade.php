@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Expedicion <i class="el el-minus-sign"></i></h1>
+                    <h1>Expedición <i class="el el-minus-sign"></i></h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -22,11 +22,10 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="d-flex align-items-center">
-                                <div class="float-left d-flex align-items-center">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                        class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-                                    <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                                </div>
+                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                    class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
+                                <button type="button" class="btn btn-danger ml-3" wire:click="openRetenerModal">Retener Envío</button>
                             </div>
                         </div>
                         @if (session()->has('message'))
@@ -52,7 +51,7 @@
                                         <th>Código</th>
                                         <th>Manifiesto</th>
                                         <th>Fecha</th>
-                                        <th>Observacion</th>
+                                        <th>Observación</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -71,7 +70,6 @@
                                             <td>{{ $admisione->manifiesto }}</td>
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion_entrega ?: $admisione->observacion }}</td>
-                                          
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -85,4 +83,37 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal -->
+    <div class="modal fade @if($showModal) show d-block @endif" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Retener Envío</h5>
+                    <button type="button" class="close" wire:click="$set('showModal', false)">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Código(s):</label>
+                        <input type="text" class="form-control" value="{{ $codigoRetenido }}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Observación:</label>
+                        <input type="text" class="form-control" wire:model="observacionRetencion" placeholder="Añadir observación">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cerrar</button>
+                    <button type="button" class="btn btn-primary" wire:click="retenerEnvios">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    document.addEventListener('livewire:load', function () {
+        window.addEventListener('reloadPage', function () {
+            location.reload(); // Recarga la página completamente
+        });
+    });
+</script>
