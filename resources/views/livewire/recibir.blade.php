@@ -85,7 +85,6 @@
                                     <th>Tipo Correspondencia</th>
                                     <th class="d-none d-lg-table-cell">Cantidad</th>
                                     <th>Peso</th>
-                                    <th>Precio (Bs)</th>
                                     <th>Destino</th>
                                     <th>Código</th>
                                     <th class="d-none d-lg-table-cell">Dirección</th>
@@ -109,7 +108,6 @@
                                         <td>{{ $admisione->tipo_correspondencia }}</td>
                                         <td>{{ $admisione->cantidad }}</td>
                                         <td>{{ $admisione->peso }}</td>
-                                        <td>{{ $admisione->precio }}</td>
                                         <td>{{ $admisione->destino }}</td>
                                         <td>{{ $admisione->codigo }}</td>
 

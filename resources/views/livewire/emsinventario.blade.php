@@ -85,7 +85,6 @@
                                             <th>Tipo Correspondencia</th>
                                             <th>Cantidad</th>
                                             <th>Peso</th>
-                                            <th>Precio (Bs)</th>
                                             <th>Destino</th>
                                             <th>Envio</th>
                                             <th>Código</th>
@@ -129,7 +128,6 @@
                                                 <td>{{ $admisione->tipo_correspondencia }}</td>
                                                 <td>{{ $admisione->cantidad }}</td>
                                                 <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
-                                                <td>{{ $admisione->precio }}</td>
                                                 <td>{{ $admisione->reencaminamiento ?? $admisione->ciudad }}</td>
                                                 <td>{{ $admisione->destino }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
