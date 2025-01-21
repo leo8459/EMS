@@ -894,3 +894,8 @@
         location.reload();
     });
 </script>
+<script>
+    window.addEventListener('reload-page', () => {
+        location.reload();
+    });
+</script>

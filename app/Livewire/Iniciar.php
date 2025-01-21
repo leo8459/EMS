@@ -229,9 +229,11 @@ class Iniciar extends Component
             fn() => print($pdf->stream('admision.pdf')),
             'admision.pdf'
         );
+        return redirect()->to(request()->header('Referer'));
 
         // Mensaje de éxito
-        session()->flash('message', 'Admisión creada exitosamente.');
+        $this->dispatch('reload-page');
+
     }
 
     public function enviarMensajeWhatsApp($admisionId)

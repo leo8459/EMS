@@ -75,7 +75,12 @@ class Entregarenviosfirma extends Component
         ]);
 
         session()->flash('message', 'Admisión entregada correctamente.');
-        return redirect(request()->header('Referer'));
+         // Redirigir según el rol del usuario
+         if (auth()->user()->hasRole('VENTANILLA')) {
+            return redirect()->route('entregasventanilla'); // Ajusta el nombre de la ruta según corresponda
+        } else {
+            return redirect()->route('encaminocarteroentrega'); // Ajusta el nombre de la ruta según corresponda
+        }
     } else {
         session()->flash('message', 'Error al guardar la admisión.');
     }

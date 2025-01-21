@@ -139,7 +139,8 @@ class Recibir extends Component
         }
     
         session()->flash('message', 'Las admisiones seleccionadas han sido procesadas.');
-    
+    // Emitir evento para recargar la página
+    $this->dispatch('reload-page');
         // Resetear el estado del modal y los datos
         $this->reset(['selectedAdmisiones', 'admissionData', 'showModal']);
     }

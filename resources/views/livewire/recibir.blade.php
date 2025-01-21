@@ -196,3 +196,8 @@
 </div>
 </section>
 </div>
+<script>
+    window.addEventListener('reload-page', () => {
+        location.reload();
+    });
+</script>

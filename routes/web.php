@@ -105,18 +105,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/entregados', \App\Livewire\Entregadosemsjota::class)->name('entregados');
     Route::get('encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero'])->name('reporte.servicio');
     Route::match(['GET', 'POST'], '/recibirregional', [AdmisionesController::class, 'regional'])->name('admisiones.pdf');
-    Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla']);
+    Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla'])->name('entregasventanilla');
     Route::get('/enviosoficiales', [AdmisionesController::class, 'crearoficiales']);
     Route::get('/expedicion', [AdmisionesController::class, 'verexpedicion']);
 
-
+   
+    
 
 
 
 
     //carteros
     Route::get('/entregarcartero', [AdmisionesController::class, 'entregar']);
-    Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero']);
+    Route::get('/encaminocarteroentrega', [AdmisionesController::class, 'encaminocartero'])->name('encaminocarteroentrega');
     Route::get('/asignarsecartero', [AdmisionesController::class, 'asignarse'])->name('asignarsecartero');
 
     //eventos
