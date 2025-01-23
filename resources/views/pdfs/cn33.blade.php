@@ -98,9 +98,24 @@
             <tr>
                 <td class="field">PRIORITARIO:</td>
                 <td>X</td>
-                <td class="field">POR AÉREO:</td>
-                <td>X</td>
-                <td colspan="2">TRÁNSITO: {{ $destinationCity }}</td>
+                <td class="field" style="width: 120px;">MODO:</td>
+                <td colspan="3">
+                    {{ $selectedTransport }} {{-- “AEREO” o “TERRESTRE” --}}
+                </td>
+            </tr>
+            <tr>
+                <td class="field">N° de vuelo:</td>
+                <td colspan="5">
+                    @if($selectedTransport === 'AEREO')
+                        {{ $numeroVuelo }}
+                    @else
+                        {{-- Tal vez no muestres nada o pongas un guion en caso de Terrestre --}}
+                        -
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">TRÁNSITO: {{ $destinationCity }}</td>
             </tr>
         </table>
     </div>

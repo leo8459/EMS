@@ -41,7 +41,9 @@ class Emsinventario extends Component
     public $manualManifiesto = '';   // Para el valor del Manifiesto ingresado manualmente
     public $useManualManifiesto = false; // Checkbox que indica si se usará el Manifiesto manual
     public $currentManifiesto = null; // Almacena el manifiesto actual
-
+    public $selectedTransport = 'AEREO';  // Por defecto AÉREO
+    public $numeroVuelo = '';            // Campo para el número de vuelo
+    
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
     public $showReprintModal = false; // Controla la visibilidad del modal de reimpresión
@@ -477,38 +479,40 @@ class Emsinventario extends Component
             session()->flash('error', 'Debe seleccionar al menos una admisión.');
             return;
         }
-
+    
         $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-
+    
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
             return;
         }
-
-        // Verificamos si el usuario introdujo un Manifiesto
+    
+        // Si el usuario introdujo un Manifiesto manual
         if (!empty($this->manualManifiesto)) {
             $this->currentManifiesto = $this->manualManifiesto;
         } else {
+            // Generamos uno automáticamente
             $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
         }
-
+    
         // Asignar el manifiesto a las admisiones y cambiar estado
         foreach ($admisiones as $admision) {
             $admision->estado = 6; // Mandado a regional
             $admision->manifiesto = $this->currentManifiesto;
             $admision->save();
-
+    
             Eventos::create([
-                'accion'      => 'Mandar a regional',
+                'accion' => 'Mandar a regional',
                 'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
-                'codigo'      => $admision->codigo,
-                'user_id'     => Auth::id(),
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
             ]);
         }
-
-        // Generar el PDF (en lugar de Excel) y retornarlo
-        return $this->generarPdf();
+    
+        // Aquí pasamos $this->selectedTransport y $this->numeroVuelo
+        return $this->generarPdf($admisiones, $this->selectedTransport, $this->numeroVuelo);
     }
+    
 
 
 
@@ -678,9 +682,9 @@ class Emsinventario extends Component
     }
 
 
-    public function generarPdf($admisiones = null)
+    public function generarPdf($admisiones = null, $selectedTransport = null, $numeroVuelo = null)
     {
-        // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
+        // Si no se pasan $admisiones, buscamos por currentManifiesto o selectedAdmisiones
         if ($admisiones === null) {
             if (!empty($this->currentManifiesto)) {
                 $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
@@ -688,26 +692,23 @@ class Emsinventario extends Component
                 $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
             }
         }
-
+    
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
             return;
         }
-
-        // Prepara los datos para la vista
+    
+        // Prepara datos para la vista
         $currentDate = now()->format('d/m/Y');
         $currentTime = now()->format('H:i');
         $firstPackage = $admisiones->first();
-
-        // Nombre del usuario logueado
+    
         $loggedInUserCity = Auth::user()->city;
-        // El destino lo tomamos del reencaminamiento si existe, caso contrario de la ciudad del primer paquete
         $destinationCity = $this->selectedDepartment
             ?? $firstPackage->reencaminamiento
             ?? $firstPackage->ciudad
             ?? '';
-
-        // Datos que enviamos a la vista
+    
         $data = [
             'admisiones'        => $admisiones,
             'currentDate'       => $currentDate,
@@ -715,17 +716,20 @@ class Emsinventario extends Component
             'currentManifiesto' => $this->currentManifiesto,
             'loggedInUserCity'  => $loggedInUserCity,
             'destinationCity'   => $destinationCity,
+            'selectedTransport' => $selectedTransport, // Aéreo o Terrestre
+            'numeroVuelo'       => $numeroVuelo,       // Número de vuelo manual
         ];
-
-        // Generamos el PDF con DomPDF y la vista cn33
+    
+        // Generamos el PDF con DomPDF
         $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-
+    
         // Descarga el PDF directamente
         return response()->streamDownload(
             fn() => print($pdf->stream('cn-33.pdf')),
             'cn-33.pdf'
         );
     }
+    
 
 
     private $cityPrefixes = [

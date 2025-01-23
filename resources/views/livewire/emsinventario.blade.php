@@ -475,78 +475,88 @@
                             @endif
                             
                             @if ($showModal)
-                                <div class="modal fade show d-block" tabindex="-1" role="dialog"
-                                    style="background-color: rgba(0,0,0,0.5);">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content" style="max-height: 80vh; overflow: hidden;">
-                                            <!-- Encabezado -->
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Confirmar Envío</h5>
-                                                <button type="button" class="close"
-                                                    wire:click="$set('showModal', false)">
-                                                    <span>&times;</span>
-                                                </button>
+                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content" style="max-height: 80vh; overflow: hidden;">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar Envío</h5>
+                                            <button type="button" class="close" wire:click="$set('showModal', false)">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                                            <p>Puede enviar las admisiones seleccionadas a la regional o
+                                                reencaminarlas a otro departamento.</p>
+                        
+                                            <p><strong>Total de envíos seleccionados:</strong>
+                                                {{ count($selectedAdmisionesCodes) }}</p>
+                        
+                                            {{-- Departamento de destino --}}
+                                            <div class="form-group">
+                                                <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
+                                                <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
+                                                    <option value="">Seleccione un departamento</option>
+                                                    <option value="LA PAZ">LA PAZ</option>
+                                                    <option value="ORURO">ORURO</option>
+                                                    <option value="BENI">BENI</option>
+                                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                    <option value="POTOSI">POTOSI</option>
+                                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                                    <option value="PANDO">PANDO</option>
+                                                    <option value="TARIJA">TARIJA</option>
+                                                </select>
+                                                @if (!$selectedDepartment)
+                                                    <small class="text-danger">Debe seleccionar un departamento.</small>
+                                                @endif
                                             </div>
-                                            <!-- Cuerpo con scroll -->
-                                            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-                                                <p>Puede enviar las admisiones seleccionadas a la regional o
-                                                    reencaminarlas a otro departamento.</p>
-
-                                                <!-- Mostrar el número total de envíos seleccionados -->
-                                                <p><strong>Total de envíos seleccionados:</strong>
-                                                    {{ count($selectedAdmisionesCodes) }}</p>
-
-                                                <div class="form-group">
-                                                    <label for="selectedDepartment">Reencaminar al departamento
-                                                        (obligatorio):</label>
-                                                    <select wire:model="selectedDepartment" class="form-control"
-                                                        id="selectedDepartment">
-                                                        <option value="">Seleccione un departamento</option>
-                                                        <option value="LA PAZ">LA PAZ</option>
-                                                        <option value="ORURO">ORURO</option>
-                                                        <option value="BENI">BENI</option>
-                                                        <option value="COCHABAMBA">COCHABAMBA</option>
-                                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                                        <option value="POTOSI">POTOSI</option>
-                                                        <option value="CHUQUISACA">CHUQUISACA</option>
-                                                        <option value="PANDO">PANDO</option>
-                                                        <option value="TARIJA">TARIJA</option>
-                                                    </select>
-                                                    @if (!$selectedDepartment)
-                                                        <small class="text-danger">Debe seleccionar un
-                                                            departamento.</small>
-                                                    @endif
-                                                </div>
-
-                                                <!-- NUEVO: Campo para ingresar el Manifiesto manual -->
-                                                <div class="form-group">
-                                                    <label for="manualManifiesto">Manifiesto (déjelo vacío para generar
-                                                        uno automáticamente):</label>
-                                                    <input type="text" wire:model="manualManifiesto"
-                                                        class="form-control" id="manualManifiesto"
-                                                        placeholder="Ej: BO0456789 (opcional)">
-                                                    <!-- No es necesario forzar validación, ya que si está vacío generará uno automático -->
-                                                </div>
-
-                                                <!-- Mostrar los códigos de las admisiones seleccionadas -->
-                                                <ul>
-                                                    @foreach ($selectedAdmisionesCodes as $codigo)
-                                                        <li>Código: {{ $codigo }}</li>
-                                                    @endforeach
-                                                </ul>
+                        
+                                            {{-- Campo para Manifiesto manual --}}
+                                            <div class="form-group">
+                                                <label for="manualManifiesto">Manifiesto (déjelo vacío para generar uno automático):</label>
+                                                <input type="text" wire:model="manualManifiesto"
+                                                       class="form-control"
+                                                       id="manualManifiesto"
+                                                       placeholder="Ej: BO0456789 (opcional)">
                                             </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-primary" wire:click="mandarARegional">
-                                                    Guardar y Generar Excel
-                                                </button>
-                                                <button class="btn btn-secondary"
-                                                    wire:click="$set('showModal', false)">Cancelar</button>
+                        
+                                            {{-- NUEVO: Tipo de Transporte (AÉREO o TERRESTRE) --}}
+                                            <div class="form-group">
+                                                <label for="selectedTransport">Medio de Transporte:</label>
+                                                <select wire:model="selectedTransport" class="form-control" id="selectedTransport">
+                                                    <option value="AEREO">AÉREO</option>
+                                                    <option value="TERRESTRE">TERRESTRE</option>
+                                                </select>
                                             </div>
-
+                        
+                                            {{-- NUEVO: Campo para escribir manualmente el número de vuelo (opcional) --}}
+                                            <div class="form-group">
+                                                <label for="numeroVuelo">N° de vuelo (opcional):</label>
+                                                <input type="text" wire:model="numeroVuelo"
+                                                       class="form-control"
+                                                       id="numeroVuelo"
+                                                       placeholder="Ingrese el número de vuelo si aplica.">
+                                            </div>
+                        
+                                            <hr>
+                                            <!-- Mostrar los códigos de las admisiones seleccionadas -->
+                                            <ul>
+                                                @foreach ($selectedAdmisionesCodes as $codigo)
+                                                    <li>Código: {{ $codigo }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary" wire:click="mandarARegional">
+                                                Guardar y Generar PDF
+                                            </button>
+                                            <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
                                         </div>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
+                        @endif
+                        
 
 
 
