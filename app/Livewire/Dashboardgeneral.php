@@ -135,12 +135,13 @@ private function cargarEstadoComparativo()
 {
     $totalAdmisiones = Admision::count();
     $entregados = Admision::where('estado', 5)->count();
-    $noEntregados = Admision::whereIn('estado', [1, 2, 3, 4, 6, 7, 8, 9, 10, 11])->count();
+    $noEntregados = $totalAdmisiones - $entregados;
 
-    // Calcula los porcentajes
+    // Guardar los valores absolutos
     $this->estadoComparativo = [
-        'Entregados (Estado 5)' => $totalAdmisiones > 0 ? ($entregados / $totalAdmisiones) * 100 : 0,
-        'No Entregados (Otros Estados)' => $totalAdmisiones > 0 ? ($noEntregados / $totalAdmisiones) * 100 : 0,
+        'Entregados' => $entregados,
+        'No Entregados' => $noEntregados > 0 ? $noEntregados : 0,
     ];
 }
+
 }

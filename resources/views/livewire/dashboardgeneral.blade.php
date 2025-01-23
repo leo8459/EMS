@@ -218,7 +218,7 @@ plugins: {
     },
     title: {
         display: true,
-        text: 'Envíos en Estado 7 por Departamento'
+        text: 'Envíos Recibidos Departamento'
     }
 }
 }
@@ -271,16 +271,16 @@ plugins: {
                             },
                             title: {
                                 display: true,
-                                text: 'Envíos en Estado 5 por Departamento'
+                                text: 'Envíos Entregados por Departamento'
                             }
                         }
                     }
                 });
             } else {
-                console.log('No hay datos para el gráfico de Estado 5.');
+                console.log('No hay datos para el gráfico de .');
             }
         } else {
-            console.log('Canvas para el gráfico de Estado 5 no encontrado.');
+            console.log('Canvas para el gráfico de  no encontrado.');
         }
     });
 </script>
@@ -307,7 +307,7 @@ plugins: {
                     data: {
                         labels: labelsComparativo,
                         datasets: [{
-                            label: 'Comparativa de Estados',
+                            label: 'Entregados/No Entregados',
                             data: dataComparativo,
                             backgroundColor: [
                                 '#4CAF50', // Entregados
