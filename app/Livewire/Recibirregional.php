@@ -27,6 +27,7 @@ class Recibirregional extends Component
     public $startDate; // Agregado: para almacenar la fecha de inicio
     public $endDate; // Agregado: para almacenar la fecha de fin
     public $selectedDepartment; // Agregado: para el filtro de departamento
+    public $showNotifications = true; // Nuevo: controla si se muestran las alertas
 
 
     public function render()
@@ -53,64 +54,35 @@ class Recibirregional extends Component
             ->orderBy('fecha', 'desc')
             ->paginate($this->perPage);
 
-        
-            $notificacionesDañadas = Admision::where('notificacion', 'DAÑADO')
-            ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
-            ->where('origen', $userCity)
-            ->whereNotNull('notificacion') // Verificando que no sea nulo
-            ->get();
-        
-        if ($notificacionesDañadas->isEmpty()) {
-            toastr()->error('No se encontraron admisiones con notificaciones de tipo "DAÑADO".');
-        } else {
-            $detalleNotificaciones = $notificacionesDañadas->pluck('codigo')->implode(', ');
-            toastr()->error('Se encontraron admisiones con notificaciones de tipo "DAÑADO" en los siguientes registros: ' . $detalleNotificaciones);
+        // Mostrar notificaciones solo si $showNotifications es verdadero
+        if ($this->showNotifications) {
+            $this->handleNotifications($userCity);
+            $this->showNotifications = false; // Desactiva las alertas para siguientes renders
         }
-            $notificacionesMalencaminadas = Admision::where('notificacion', 'MALENCAMINADO')
-            ->whereIn('estado', [7, 3, 10]) // Agregando los estados
-            ->where('origen', $userCity)
-            ->whereNotNull('notificacion') // Verificando que no sea nulo
-            ->get();
-        
-        if ($notificacionesMalencaminadas->isEmpty()) {
-            toastr()->error('No se encontraron notificaciones mal encaminadas con los criterios especificados.');
-        } else {
-            $detalleNotificaciones = $notificacionesMalencaminadas->pluck('codigo')->implode(', ');
-            toastr()->error('Se encontraron notificaciones mal encaminadas en las siguientes admisiones: ' . $detalleNotificaciones);
-        }
-       
-
-        $notificacionesFaltantes = Admision::where('notificacion', 'FALTANTE')
-    ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
-    ->where('origen', $userCity)
-    ->whereNotNull('notificacion') // Verificando que no sea nulo
-    ->get();
-
-if ($notificacionesFaltantes->isEmpty()) {
-    toastr()->error('No se encontraron admisiones con notificaciones de tipo "FALTANTE".');
-} else {
-    $detalleNotificaciones = $notificacionesFaltantes->pluck('codigo')->implode(', ');
-    toastr()->error('Se encontraron admisiones con notificaciones de tipo "FALTANTE" en los siguientes registros: ' . $detalleNotificaciones);
-}
-
-$notificacionesSobrantes = Admision::where('notificacion', 'SOBRANTE')
-    ->whereIn('estado', [7, 3, 10]) // Agregando los estados específicos
-    ->where('origen', $userCity)
-    ->whereNotNull('notificacion') // Verificando que no sea nulo
-    ->get();
-
-if ($notificacionesSobrantes->isEmpty()) {
-    toastr()->error('No se encontraron admisiones con notificaciones de tipo "SOBRANTE".');
-} else {
-    $detalleNotificaciones = $notificacionesSobrantes->pluck('codigo')->implode(', ');
-    toastr()->error('Se encontraron admisiones con notificaciones de tipo "SOBRANTE" en los siguientes registros: ' . $detalleNotificaciones);
-}
 
         return view('livewire.recibirregional', [
             'admisiones' => $admisiones,
-            'notificacionesDañadas' => $notificacionesDañadas,
-            'notificacionesMalencaminadas' => $notificacionesMalencaminadas,
         ]);
+    }
+
+    private function handleNotifications($userCity)
+    {
+        $types = ['DAÑADO', 'MALENCAMINADO', 'FALTANTE', 'SOBRANTE'];
+
+        foreach ($types as $type) {
+            $notificaciones = Admision::where('notificacion', $type)
+                ->whereIn('estado', [7, 3, 10])
+                ->where('origen', $userCity)
+                ->whereNotNull('notificacion')
+                ->get();
+
+            if ($notificaciones->isEmpty()) {
+                toastr()->error("No se encontraron admisiones con notificaciones de tipo \"$type\".");
+            } else {
+                $detalleNotificaciones = $notificaciones->pluck('codigo')->implode(', ');
+                toastr()->error("Se encontraron admisiones con notificaciones de tipo \"$type\" en los siguientes registros: $detalleNotificaciones");
+            }
+        }
     }
 
 
@@ -125,6 +97,8 @@ if ($notificacionesSobrantes->isEmpty()) {
         $this->startDate = null; // Fecha de inicio vacía
         $this->endDate = null;   // Fecha de fin vacía
         $this->selectedDepartment = ''; // Sin departamento seleccionado por defecto
+        $this->showNotifications = true; // Muestra las alertas al cargar la vista
+
     }
     
 

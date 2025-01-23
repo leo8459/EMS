@@ -11,32 +11,30 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background: url('/images/LaPaz.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #f5f5f5;
         }
         .login-container {
             display: flex;
-            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .form-container {
+            flex: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            backdrop-filter: blur(3px);
+            padding: 40px;
         }
-        .logo {
-            margin-bottom: 30px;
-        }
-        .logo img {
-            max-width: 200px;
-        }
-        .login-box {
-            background-color: rgba(255, 255, 255, 0.1);
+        .form-container .login-box {
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 40px;
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-            color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            color: #000000;
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             text-align: center;
             animation: fadeIn 1s ease-in-out;
         }
@@ -50,12 +48,12 @@
                 transform: translateY(0);
             }
         }
-        .login-box h2 {
+        .form-container .login-box h2 {
             margin-bottom: 30px;
             font-weight: 500;
             font-size: 28px;
         }
-        .login-box input {
+        .form-container .login-box input {
             width: 100%;
             padding: 15px;
             margin: 15px 0;
@@ -64,11 +62,11 @@
             outline: none;
             font-size: 18px;
         }
-        .login-box input:focus {
+        .form-container .login-box input:focus {
             border-color: #34447C;
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
         }
-        .login-box button {
+        .form-container .login-box button {
             width: 100%;
             padding: 15px;
             background-color: #34447C;
@@ -80,16 +78,14 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .login-box button:hover {
-            background-color: #34447C;
+        .form-container .login-box button:hover {
+            background-color: #2a3568;
         }
-        .login-box a {
-            color: #34447C;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .login-box a:hover {
-            text-decoration: underline;
+        .image-container {
+            flex: 1;
+            height: 100%;
+            background: url('/images/LaPaz1.jpeg') no-repeat center center;
+            background-size: cover;
         }
         .popup {
             position: fixed;
@@ -115,7 +111,7 @@
             cursor: pointer;
         }
         .popup button:hover {
-            background-color: #34447C;
+            background-color: #2a3568;
         }
         .popup-overlay {
             position: fixed;
@@ -131,22 +127,21 @@
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">
-            <img src="/images/AGBClogo.png" alt="Logo">
+        <!-- Formulario -->
+        <div class="form-container">
+            <div class="login-box">
+                <form id="loginForm" method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <h2>INICIAR SESION</h2>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
+                    <button type="submit">INGRESAR</button>
+                </form>
+            </div>
         </div>
-        <div class="login-box">
-            <form id="loginForm" method="POST" action="{{ route('login') }}">
-                @csrf
-                <h2>INICIAR SESION</h2>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
-                <button type="submit">INGRESAR</button>
-                <div style="text-align: center; margin-top: 15px;">
-                    {{-- <a href="#">Forgot your password?</a> --}}
-                </div>
-            </form>
-        </div>
+        <!-- Imagen -->
+        <div class="image-container"></div>
     </div>
 
     <!-- Popup de Validación -->
