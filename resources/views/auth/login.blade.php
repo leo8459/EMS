@@ -24,20 +24,8 @@
             position: relative;
         }
 
-        .logo {
-            position: absolute;
-            top: 10%;
-            left: 15%;
-            transform: translateX(-50%);
-        }
-
-        .logo img {
-            width: 120px;
-            height: auto;
-        }
-
         .card-view {
-            background: #0056B3; /* Fondo naranja EMS */
+            background: #0056B3; /* Fondo azul EMS */
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
@@ -45,11 +33,11 @@
             width: 100%;
             max-width: 450px;
             height: auto;
-            min-height: 400px; /* CardView más alto */
+            min-height: 450px; /* CardView más alto */
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-left: -1%; /* Mueve el CardView a la derecha */
+            margin-left: -1%;
         }
 
         .card-view h2 {
@@ -67,7 +55,7 @@
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            color: #0056B3; /* Azul EMS */
+            color: #000000; /* Azul EMS */
             background-color: #f9f9f9;
         }
 
@@ -75,6 +63,26 @@
             outline: none;
             box-shadow: 0 0 8px rgba(243, 156, 18, 0.8); /* Naranja brillante al enfocar */
         }
+
+        .password-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-container input {
+        width: 100%;
+        padding-right: 10px; /* Espacio reservado para el ojo */
+    }
+
+    .password-container .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: -10px; /* Ajusta la posición horizontal */
+        transform: translateY(-50%);
+        font-size: 20px; /* Tamaño del icono del ojo */
+        color: #0056B3; /* Azul EMS */
+        cursor: pointer;
+    }
 
         .card-view button {
             width: 100%;
@@ -84,14 +92,14 @@
             font-size: 16px;
             font-weight: bold;
             color: white;
-            background: #F39C12; /* Botón azul EMS */
+            background: #F39C12; /* Botón naranja EMS */
             cursor: pointer;
             margin-top: 20px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .card-view button:hover {
-            background-color: #003d80; /* Azul más oscuro al hover */
+            background-color: #D8870F; /* Naranja más oscuro al hover */
             transform: translateY(-3px);
         }
 
@@ -106,11 +114,6 @@
                 justify-content: center;
                 align-items: center;
                 padding: 20px;
-            }
-
-            .logo {
-                top: 5%;
-                left: 50%;
             }
 
             .card-view {
@@ -133,18 +136,16 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Logo -->
-        {{-- <div class="logo">
-            <img src="/images/AGBCLOGO.png" alt="Logo">
-        </div> --}}
-
         <!-- Formulario -->
         <div class="card-view">
             <h2>INICIAR SESIÓN</h2>
             <form id="loginForm" method="POST" action="{{ route('login') }}">
                 @csrf
                 <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <div class="password-container">
+                    <input type="password" name="password" id="password" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePasswordVisibility()">👁️</span>
+                </div>
                 <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
                 <button type="submit">INGRESAR</button>
             </form>
@@ -152,6 +153,17 @@
     </div>
 
     <script>
+          function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.querySelector('.toggle-password');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.textContent = '🙈'; // Cambia al icono de ocultar
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.textContent = '👁️'; // Cambia al icono de mostrar
+        }
+    }
         const loginForm = document.getElementById('loginForm');
         loginForm.addEventListener('submit', function(event) {
             const recaptchaResponse = document.querySelector('.g-recaptcha-response').value;
