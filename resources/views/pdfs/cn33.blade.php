@@ -58,7 +58,7 @@
         <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
         <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
             <tr>
-                <td colspan="4" class="title" style="text-align: center;">POSTAL DESIGNATED OPERATOR - EMS</td>
+                <td colspan="4" class="title" style="text-align: center;">OPERADOR POSTAL DESIGNADO - EMS</td>
                 <td rowspan="3" style="text-align: center; vertical-align: middle; width: 25%;">
                     @if (!empty($currentManifiesto))
                         {{-- Genera el código de barras con tamaño personalizado y centrado --}}
@@ -67,7 +67,7 @@
                             <p>{{ $currentManifiesto }}</p>
                         </div>
                     @else
-                        <p>No Manifiesto</p>
+                        <p>Sin Manifiesto</p>
                     @endif
                 </td>
             </tr>
@@ -76,9 +76,9 @@
                 <td colspan="2" class="sub-header" style="text-align: center;">CN-33</td>
             </tr>
             <tr>
-                <td class="field" style="width: 15%;">Office of Origin:</td>
+                <td class="field" style="width: 15%;">Oficina de Origen:</td>
                 <td style="width: 25%;">{{ $loggedInUserCity }}</td>
-                <td class="field" style="width: 15%;">Office of Destination:</td>
+                <td class="field" style="width: 15%;">Oficina de Destino:</td>
                 <td style="width: 25%;">
                     @if (!empty($reencaminamiento))
                         {{ $reencaminamiento }}
@@ -111,25 +111,19 @@
                     @else
                         {{-- Tal vez no muestres nada o pongas un guion en caso de Terrestre --}}
                         {{ $numeroVuelo }}
-
                     @endif
                 </td>
             </tr>
-            {{-- <tr>
-                <td colspan="6">TRÁNSITO: {{ $destinationCity }}</td>
-            </tr> --}}
         </table>
     </div>
     
-    
-
     <table class="table">
         <thead>
             <tr>
-                <th>ENVIO</th>
-                <th>ORIG</th>
-                <th>DEST</th>
-                <th>CANT</th>
+                <th>ENVÍO</th>
+                <th>ORIG.</th>
+                <th>DEST.</th>
+                <th>CANT.</th>
                 <th>COR</th>
                 <th>PESO</th>
                 <th>REMITENTE</th>
@@ -146,10 +140,10 @@
         
             @foreach ($admisiones as $admision)
                 @php
-                    $peso = $admision->peso_ems ?: $admision->peso; // Usar peso_ems si está definido, de lo contrario usar peso
+                    $peso = $admision->peso_ems ?: $admision->peso; 
                     $totalCantidad += 1;
                     $totalPeso += $peso;
-        
+
                     // Determinar dónde colocar la "X" basado en el campo destino
                     $endasX = ($admision->destino === 'ENDAS') ? 'X' : '';
                     $corX = ($admision->destino === 'COR') ? 'X' : '';
@@ -165,7 +159,7 @@
                         @endif
                     </td>
                     <td>1</td>
-                    <td>{{ $corX }}</td> <!-- Columna COR -->
+                    <td>{{ $corX }}</td>
                     <td>
                         @if (!empty($admision->peso_regional))
                             {{ $admision->peso_regional }}
@@ -176,14 +170,12 @@
                         @endif
                     </td>
                     <td>{{ $admision->nombre_remitente }}</td>
-                    <td>{{ $endasX }}</td> <!-- Columna ENDAS -->
+                    <td>{{ $endasX }}</td>
                     <td></td>
                     <td>{{ $admision->observacion }}</td>
                 </tr>
             @endforeach
         </tbody>
-        
-        
         
         <tfoot>
             <tr>
@@ -202,23 +194,22 @@
         <table style="width: 100%; margin-top: 50px; text-align: center; border-collapse: collapse;">
             <tr>
                 <td style="border: 1px solid #333; padding: 10px; text-align: left; width: 30%;">
-                    <strong>Dispatching office of exchange</strong><br>
+                    <strong>Oficina de intercambio de despacho</strong><br>
                     {{ $loggedInUserCity }}<br>
-                    <strong>Signature</strong><br>
+                    <strong>Firma</strong><br>
                     {{ Auth::user()->name }}<br>
                     Salidas Internacionales
                 </td>
                 <td style="border: 1px solid #333; padding: 10px; width: 30%;">
-                    <strong>The official of the carrier of airport</strong><br>
-                    Date and signature
+                    <strong>El funcionario del transportista del aeropuerto</strong><br>
+                    <strong>Fecha y firma</strong>
                 </td>
                 <td style="border: 1px solid #333; padding: 10px; width: 30%;">
-                    <strong>Office of exchange of destination</strong><br>
-                    Date and signature
+                    <strong>Oficina de intercambio de destino</strong><br>
+                    <strong>Fecha y firma</strong>
                 </td>
             </tr>
         </table>
     </div>
 </body>
 </html>
-
