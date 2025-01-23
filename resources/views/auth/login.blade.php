@@ -11,117 +11,153 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background-color: #f5f5f5;
+            background: url('/images/EMSLOGIN.jpeg') no-repeat center center fixed;
+            background-size: cover;
         }
+
         .login-container {
             display: flex;
             height: 100vh;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            padding: 0 5%;
         }
+
         .form-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-        .form-container .login-box {
-            background-color: rgba(255, 255, 255, 0.9);
+            width: 35%;
+            min-width: 350px;
+            background: rgba(255, 255, 255, 0.85);
             padding: 40px;
             border-radius: 15px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            color: #000000;
-            width: 100%;
-            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-container .logo img {
+            max-width: 120px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .form-container h2 {
             text-align: center;
-            animation: fadeIn 1s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .form-container .login-box h2 {
-            margin-bottom: 30px;
-            font-weight: 500;
             font-size: 28px;
+            font-weight: bold;
+            color: #34447C;
+            margin-bottom: 30px;
         }
-        .form-container .login-box input {
+
+        .form-container input {
             width: 100%;
             padding: 15px;
             margin: 15px 0;
-            border: 1px solid #B99C46;
-            border-radius: 10px;
-            outline: none;
-            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f9f9f9;
         }
-        .form-container .login-box input:focus {
+
+        .form-container input:focus {
             border-color: #34447C;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
+            box-shadow: 0 0 8px rgba(52, 68, 124, 0.5);
         }
-        .form-container .login-box button {
+
+        .form-container button {
             width: 100%;
             padding: 15px;
             background-color: #34447C;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
             font-size: 18px;
-            font-weight: 500;
+            font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .form-container .login-box button:hover {
+
+        .form-container button:hover {
             background-color: #2a3568;
         }
-        .image-container {
-            flex: 1;
-            height: 100%;
-            background: url('/images/LaPaz1.jpeg') no-repeat center center;
-            background-size: cover;
+
+        .form-container .g-recaptcha {
+            margin: 20px 0;
         }
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #B99C46;
-            padding: 20px;
-            border-radius: 10px;
+
+        .form-container a {
+            display: block;
             text-align: center;
-            display: none;
-            z-index: 1000;
-        }
-        .popup button {
             margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #34447C;
-            border: none;
-            border-radius: 5px;
-            color: #B99C46;
-            font-size: 16px;
-            cursor: pointer;
+            color: #34447C;
+            font-size: 14px;
+            text-decoration: none;
         }
-        .popup button:hover {
-            background-color: #2a3568;
+
+        .form-container a:hover {
+            text-decoration: underline;
         }
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 999;
+
+        /* Responsividad para tablets y celulares */
+        @media (max-width: 1024px) {
+            .login-container {
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .form-container {
+                width: 70%;
+                max-width: 400px;
+                padding: 30px;
+            }
+
+            .form-container h2 {
+                font-size: 24px;
+            }
+
+            .form-container input,
+            .form-container button {
+                font-size: 16px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+                padding: 20px;
+                box-shadow: none;
+            }
+
+            .form-container h2 {
+                font-size: 22px;
+            }
+
+            .form-container .logo img {
+                max-width: 100px;
+            }
+
+            .form-container input,
+            .form-container button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 15px;
+                width: 100%;
+            }
+
+            .form-container h2 {
+                font-size: 20px;
+            }
+
+            .form-container input,
+            .form-container button {
+                font-size: 14px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -129,50 +165,29 @@
     <div class="login-container">
         <!-- Formulario -->
         <div class="form-container">
-            <div class="login-box">
-                <form id="loginForm" method="POST" action="{{ route('login') }}">
-                    @csrf
-                    <h2>INICIAR SESION</h2>
-                    <input type="email" name="email" placeholder="Email" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
-                    <button type="submit">INGRESAR</button>
-                </form>
+            <div class="logo">
+                <img src="/images/AGBClogo.png" alt="Logo">
             </div>
+            <form id="loginForm" method="POST" action="{{ route('login') }}">
+                @csrf
+                <h2>INICIAR SESIÓN</h2>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
+                <button type="submit">INGRESAR</button>
+            </form>
         </div>
-        <!-- Imagen -->
-        <div class="image-container"></div>
-    </div>
-
-    <!-- Popup de Validación -->
-    <div class="popup-overlay" id="popupOverlay"></div>
-    <div class="popup" id="popup">
-        <p>Por favor completa el Captcha.</p>
-        <button onclick="closePopup()">OK</button>
     </div>
 
     <script>
         const loginForm = document.getElementById('loginForm');
-        const popup = document.getElementById('popup');
-        const popupOverlay = document.getElementById('popupOverlay');
-
-        loginForm.addEventListener('submit', function (event) {
+        loginForm.addEventListener('submit', function(event) {
             const recaptchaResponse = document.querySelector('.g-recaptcha-response').value;
             if (!recaptchaResponse) {
                 event.preventDefault();
-                showPopup();
+                alert("Por favor completa el Captcha.");
             }
         });
-
-        function showPopup() {
-            popup.style.display = 'block';
-            popupOverlay.style.display = 'block';
-        }
-
-        function closePopup() {
-            popup.style.display = 'none';
-            popupOverlay.style.display = 'none';
-        }
     </script>
 </body>
 </html>
