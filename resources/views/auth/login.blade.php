@@ -20,83 +20,87 @@
             height: 100vh;
             align-items: center;
             justify-content: flex-start;
-            padding: 0 5%;
+            padding: 0 10%;
+            position: relative;
         }
 
-        .form-container {
-            width: 35%;
-            min-width: 350px;
-            background: rgba(255, 255, 255, 0.85);
+        .logo {
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            transform: translateX(-50%);
+        }
+
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+
+        .card-view {
+            background: #0056B3; /* Fondo naranja EMS */
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .form-container .logo img {
-            max-width: 120px;
-            display: block;
-            margin: 0 auto 20px;
-        }
-
-        .form-container h2 {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #34447C;
-            margin-bottom: 30px;
-        }
-
-        .form-container input {
+            color: white;
             width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid #ccc;
+            max-width: 450px;
+            height: auto;
+            min-height: 400px; /* CardView más alto */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: -1%; /* Mueve el CardView a la derecha */
+        }
+
+        .card-view h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .card-view input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
             border-radius: 8px;
             font-size: 16px;
+            color: #0056B3; /* Azul EMS */
             background-color: #f9f9f9;
         }
 
-        .form-container input:focus {
-            border-color: #34447C;
-            box-shadow: 0 0 8px rgba(52, 68, 124, 0.5);
+        .card-view input:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.8); /* Naranja brillante al enfocar */
         }
 
-        .form-container button {
+        .card-view button {
             width: 100%;
-            padding: 15px;
-            background-color: #34447C;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
+            color: white;
+            background: #F39C12; /* Botón azul EMS */
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .form-container button:hover {
-            background-color: #2a3568;
+        .card-view button:hover {
+            background-color: #003d80; /* Azul más oscuro al hover */
+            transform: translateY(-3px);
         }
 
-        .form-container .g-recaptcha {
+        .g-recaptcha {
             margin: 20px 0;
         }
 
-        .form-container a {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: #34447C;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .form-container a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsividad para tablets y celulares */
-        @media (max-width: 1024px) {
+        /* Responsividad */
+        @media (max-width: 768px) {
             .login-container {
                 flex-direction: column;
                 justify-content: center;
@@ -104,73 +108,41 @@
                 padding: 20px;
             }
 
-            .form-container {
-                width: 70%;
-                max-width: 400px;
-                padding: 30px;
+            .logo {
+                top: 5%;
+                left: 50%;
             }
 
-            .form-container h2 {
-                font-size: 24px;
-            }
-
-            .form-container input,
-            .form-container button {
-                font-size: 16px;
-                padding: 12px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .form-container {
-                width: 90%;
+            .card-view {
+                max-width: 90%;
                 padding: 20px;
-                box-shadow: none;
+                margin-left: 0;
             }
 
-            .form-container h2 {
+            .card-view h2 {
                 font-size: 22px;
             }
 
-            .form-container .logo img {
-                max-width: 100px;
-            }
-
-            .form-container input,
-            .form-container button {
+            .card-view input,
+            .card-view button {
                 font-size: 14px;
                 padding: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .form-container {
-                padding: 15px;
-                width: 100%;
-            }
-
-            .form-container h2 {
-                font-size: 20px;
-            }
-
-            .form-container input,
-            .form-container button {
-                font-size: 14px;
-                padding: 8px;
             }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <!-- Logo -->
+        {{-- <div class="logo">
+            <img src="/images/AGBCLOGO.png" alt="Logo">
+        </div> --}}
+
         <!-- Formulario -->
-        <div class="form-container">
-            <div class="logo">
-                <img src="/images/AGBClogo.png" alt="Logo">
-            </div>
+        <div class="card-view">
+            <h2>INICIAR SESIÓN</h2>
             <form id="loginForm" method="POST" action="{{ route('login') }}">
                 @csrf
-                <h2>INICIAR SESIÓN</h2>
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <div class="g-recaptcha" data-sitekey="6Leg8LEqAAAAAIl35EcAbLmLidB3fDsrzgTQv-Fl"></div>
