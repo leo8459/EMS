@@ -127,12 +127,16 @@
                 $totalCantidad = 0;
                 $totalPeso = 0;
             @endphp
-
+        
             @foreach ($admisiones as $admision)
                 @php
-                    $peso = $admision->peso_ems ?: $admision->peso;
+                    $peso = $admision->peso_ems ?: $admision->peso; // Usar peso_ems si está definido, de lo contrario usar peso
                     $totalCantidad += 1;
                     $totalPeso += $peso;
+        
+                    // Determinar dónde colocar la "X" basado en el campo destino
+                    $endasX = ($admision->destino === 'ENDAS') ? 'X' : '';
+                    $corX = ($admision->destino === 'COR') ? 'X' : '';
                 @endphp
                 <tr>
                     <td>{{ $admision->codigo }}</td>
@@ -145,7 +149,7 @@
                         @endif
                     </td>
                     <td>1</td>
-                    <td></td>
+                    <td>{{ $corX }}</td> <!-- Columna COR -->
                     <td>
                         @if (!empty($admision->peso_regional))
                             {{ $admision->peso_regional }}
@@ -156,13 +160,15 @@
                         @endif
                     </td>
                     <td>{{ $admision->nombre_remitente }}</td>
-                    <td></td>
+                    <td>{{ $endasX }}</td> <!-- Columna ENDAS -->
                     <td></td>
                     <td>{{ $admision->observacion }}</td>
                 </tr>
-                
             @endforeach
         </tbody>
+        
+        
+        
         <tfoot>
             <tr>
                 <td><strong>TOTAL</strong></td>
