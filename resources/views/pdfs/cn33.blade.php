@@ -110,13 +110,14 @@
                         {{ $numeroVuelo }}
                     @else
                         {{-- Tal vez no muestres nada o pongas un guion en caso de Terrestre --}}
-                        -
+                        {{ $numeroVuelo }}
+
                     @endif
                 </td>
             </tr>
-            <tr>
+            {{-- <tr>
                 <td colspan="6">TRÁNSITO: {{ $destinationCity }}</td>
-            </tr>
+            </tr> --}}
         </table>
     </div>
     
