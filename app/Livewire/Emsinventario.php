@@ -46,9 +46,9 @@ class Emsinventario extends Component
 
     public $showReprintModal = false; // Controla la visibilidad del modal de reimpresión
     public $inputManifiesto = ''; // Almacena el manifiesto ingresado para la búsqueda
-    
+
     public $showReimprimirModal = false;
-public $manifiestoInput = '';
+    public $manifiestoInput = '';
 
     public function updatedSelectedCity()
     {
@@ -204,205 +204,205 @@ public $manifiestoInput = '';
     {
         $this->showReimprimirModal = true;
     }
-   public function generarExcel($admisiones = null)
-{
-    // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
-    if ($admisiones === null) {
-        if (!empty($this->currentManifiesto)) {
-            $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
-        } else {
-            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+    public function generarExcel($admisiones = null)
+    {
+        // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
+        if ($admisiones === null) {
+            if (!empty($this->currentManifiesto)) {
+                $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
+            } else {
+                $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+            }
         }
-    }
 
-    if ($admisiones->isEmpty()) {
-        session()->flash('error', 'No hay admisiones válidas para generar el Excel.');
-        return;
-    }
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas para generar el Excel.');
+            return;
+        }
 
-    // Crear el documento
-    $spreadsheet = new Spreadsheet();
-    $worksheet = $spreadsheet->getActiveSheet();
-    $worksheet->setTitle('Designado Operador Postal');
+        // Crear el documento
+        $spreadsheet = new Spreadsheet();
+        $worksheet = $spreadsheet->getActiveSheet();
+        $worksheet->setTitle('Designado Operador Postal');
 
-    // Fecha y hora actual
-    $currentDate = now()->format('d/m/Y');
-    $currentTime = now()->format('H:i');
-    $firstPackage = $admisiones->first();
+        // Fecha y hora actual
+        $currentDate = now()->format('d/m/Y');
+        $currentTime = now()->format('H:i');
+        $firstPackage = $admisiones->first();
 
-    // Nombre del usuario logueado
-    $loggedInUserCity = Auth::user()->city;
+        // Nombre del usuario logueado
+        $loggedInUserCity = Auth::user()->city;
 
-    // Estilo para encabezado
-    $headerStyle = [
-        'font' => ['bold' => true],
-        'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
-        'borders' => [
-            'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
-        ],
-    ];
+        // Estilo para encabezado
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
+            'borders' => [
+                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+            ],
+        ];
 
-    // Configurar el ancho de las columnas
-    $worksheet->getColumnDimension('A')->setWidth(20); 
-    $worksheet->getColumnDimension('B')->setWidth(10); 
-    $worksheet->getColumnDimension('C')->setWidth(10); 
-    $worksheet->getColumnDimension('D')->setWidth(15); 
-    $worksheet->getColumnDimension('E')->setWidth(25); 
-    $worksheet->getColumnDimension('F')->setWidth(20); 
-    $worksheet->getColumnDimension('G')->setWidth(30); 
-    $worksheet->getColumnDimension('H')->setWidth(30); 
+        // Configurar el ancho de las columnas
+        $worksheet->getColumnDimension('A')->setWidth(20);
+        $worksheet->getColumnDimension('B')->setWidth(10);
+        $worksheet->getColumnDimension('C')->setWidth(10);
+        $worksheet->getColumnDimension('D')->setWidth(15);
+        $worksheet->getColumnDimension('E')->setWidth(25);
+        $worksheet->getColumnDimension('F')->setWidth(20);
+        $worksheet->getColumnDimension('G')->setWidth(30);
+        $worksheet->getColumnDimension('H')->setWidth(30);
 
-    // Fila 1: Título
-    $worksheet->mergeCells('A1:C2');
-    $worksheet->setCellValue('A1', 'Postal designated operator');
-    $worksheet->getStyle('A1')->applyFromArray($headerStyle);
+        // Fila 1: Título
+        $worksheet->mergeCells('A1:C2');
+        $worksheet->setCellValue('A1', 'Postal designated operator');
+        $worksheet->getStyle('A1')->applyFromArray($headerStyle);
 
-      // Añadir la imagen EMS en lugar del texto "EMS"
-      $drawing = new Drawing();
-      $drawing->setName('EMS Image');
-      $drawing->setDescription('EMS Logo');
-      $drawing->setPath(public_path('images/EMS1.png')); // Ruta de la imagen
-      $drawing->setCoordinates('D1'); // Celda de inicio
-      $drawing->setHeight(80); // Altura de la imagen
-      $drawing->setWorksheet($worksheet);
+        // Añadir la imagen EMS en lugar del texto "EMS"
+        $drawing = new Drawing();
+        $drawing->setName('EMS Image');
+        $drawing->setDescription('EMS Logo');
+        $drawing->setPath(public_path('images/EMS1.png')); // Ruta de la imagen
+        $drawing->setCoordinates('D1'); // Celda de inicio
+        $drawing->setHeight(80); // Altura de la imagen
+        $drawing->setWorksheet($worksheet);
 
-    $worksheet->mergeCells('H1:M2');
-    $worksheet->setCellValue('H1', 'LISTA CN-33');
-    $worksheet->getStyle('H1')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H1:M2');
+        $worksheet->setCellValue('H1', 'LISTA CN-33');
+        $worksheet->getStyle('H1')->applyFromArray($headerStyle);
 
-    // Fila 3: BO-BOLIVIA y Airmails
-    $worksheet->mergeCells('A3:C3');
-    $worksheet->setCellValue('A3', 'BO-BOLIVIA');
-    $worksheet->getStyle('A3')->applyFromArray($headerStyle);
+        // Fila 3: BO-BOLIVIA y Airmails
+        $worksheet->mergeCells('A3:C3');
+        $worksheet->setCellValue('A3', 'BO-BOLIVIA');
+        $worksheet->getStyle('A3')->applyFromArray($headerStyle);
 
-    $worksheet->mergeCells('H3:M3');
-    $worksheet->setCellValue('H3', 'Airmails');
-    $worksheet->getStyle('H3')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H3:M3');
+        $worksheet->setCellValue('H3', 'Airmails');
+        $worksheet->getStyle('H3')->applyFromArray($headerStyle);
 
-    // Fila 4: Office of origin y DIA
-    $worksheet->mergeCells('A4:C4');
-    $worksheet->setCellValue('A4', 'Office of origin');
-    $worksheet->getStyle('A4')->applyFromArray($headerStyle);
+        // Fila 4: Office of origin y DIA
+        $worksheet->mergeCells('A4:C4');
+        $worksheet->setCellValue('A4', 'Office of origin');
+        $worksheet->getStyle('A4')->applyFromArray($headerStyle);
 
-    $worksheet->mergeCells('H4:M4');
-    $worksheet->setCellValue('H4', 'DIA');
-    $worksheet->getStyle('H4')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H4:M4');
+        $worksheet->setCellValue('H4', 'DIA');
+        $worksheet->getStyle('H4')->applyFromArray($headerStyle);
 
-    // Fila 5: Origen y Fecha actual
-    $worksheet->mergeCells('A5:C5');
-    $worksheet->setCellValue('A5', $loggedInUserCity);
-    $worksheet->getStyle('A5')->applyFromArray($headerStyle);
+        // Fila 5: Origen y Fecha actual
+        $worksheet->mergeCells('A5:C5');
+        $worksheet->setCellValue('A5', $loggedInUserCity);
+        $worksheet->getStyle('A5')->applyFromArray($headerStyle);
 
-    $worksheet->mergeCells('H5:M5');
-    $worksheet->setCellValue('H5', $currentDate);
-    $worksheet->getStyle('H5')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H5:M5');
+        $worksheet->setCellValue('H5', $currentDate);
+        $worksheet->getStyle('H5')->applyFromArray($headerStyle);
 
-    // Fila 6: Office of destination y HORA
-    $worksheet->mergeCells('A6:C6');
-    $worksheet->setCellValue('A6', 'Office of destination');
-    $worksheet->getStyle('A6')->applyFromArray($headerStyle);
+        // Fila 6: Office of destination y HORA
+        $worksheet->mergeCells('A6:C6');
+        $worksheet->setCellValue('A6', 'Office of destination');
+        $worksheet->getStyle('A6')->applyFromArray($headerStyle);
 
-    $worksheet->mergeCells('H6:M6');
-    $worksheet->setCellValue('H6', 'HORA');
-    $worksheet->getStyle('H6')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H6:M6');
+        $worksheet->setCellValue('H6', 'HORA');
+        $worksheet->getStyle('H6')->applyFromArray($headerStyle);
 
-    // Fila 7: Destino y Hora actual
-    $destinationCity = $this->selectedDepartment ?? $firstPackage->reencaminamiento ?? $firstPackage->ciudad ?? '';
-    $worksheet->mergeCells('A7:C7');
-    $worksheet->setCellValue('A7', $destinationCity);
-    $worksheet->getStyle('A7')->applyFromArray($headerStyle);
+        // Fila 7: Destino y Hora actual
+        $destinationCity = $this->selectedDepartment ?? $firstPackage->reencaminamiento ?? $firstPackage->ciudad ?? '';
+        $worksheet->mergeCells('A7:C7');
+        $worksheet->setCellValue('A7', $destinationCity);
+        $worksheet->getStyle('A7')->applyFromArray($headerStyle);
 
-    $worksheet->mergeCells('H7:M7');
-    $worksheet->setCellValue('H7', $currentTime);
-    $worksheet->getStyle('H7')->applyFromArray($headerStyle);
+        $worksheet->mergeCells('H7:M7');
+        $worksheet->setCellValue('H7', $currentTime);
+        $worksheet->getStyle('H7')->applyFromArray($headerStyle);
 
-    // Fila 8: DESPACHO - Manifiesto
-    $worksheet->mergeCells('A8:M8');
-    $worksheet->setCellValue('A8', 'DESPACHO - ' . $this->currentManifiesto);
-    $worksheet->getStyle('A8')->applyFromArray($headerStyle);
+        // Fila 8: DESPACHO - Manifiesto
+        $worksheet->mergeCells('A8:M8');
+        $worksheet->setCellValue('A8', 'DESPACHO - ' . $this->currentManifiesto);
+        $worksheet->getStyle('A8')->applyFromArray($headerStyle);
 
-    // Fila 9: NUMERO DE VUELO - 1
-    $worksheet->mergeCells('A9:M9');
-    $worksheet->setCellValue('A9', 'NUMERO DE VUELO - 1');
-    $worksheet->getStyle('A9')->applyFromArray($headerStyle);
+        // Fila 9: NUMERO DE VUELO - 1
+        $worksheet->mergeCells('A9:M9');
+        $worksheet->setCellValue('A9', 'NUMERO DE VUELO - 1');
+        $worksheet->getStyle('A9')->applyFromArray($headerStyle);
 
-    // Fila 11: Encabezado de columnas
-    $worksheet->setCellValue('A11', 'ENVIO');
-    $worksheet->setCellValue('B11', 'CAN');
-    $worksheet->setCellValue('C11', 'COR');
-    $worksheet->setCellValue('D11', 'EMS');
-    $worksheet->setCellValue('E11', 'CLIENTE');
-    $worksheet->setCellValue('F11', 'ENDAS');
-    $worksheet->setCellValue('G11', 'OFICIAL');
-    $worksheet->setCellValue('H11', 'OBSERVACION');
-    $worksheet->getStyle('A11:H11')->applyFromArray($headerStyle);
+        // Fila 11: Encabezado de columnas
+        $worksheet->setCellValue('A11', 'ENVIO');
+        $worksheet->setCellValue('B11', 'CAN');
+        $worksheet->setCellValue('C11', 'COR');
+        $worksheet->setCellValue('D11', 'EMS');
+        $worksheet->setCellValue('E11', 'CLIENTE');
+        $worksheet->setCellValue('F11', 'ENDAS');
+        $worksheet->setCellValue('G11', 'OFICIAL');
+        $worksheet->setCellValue('H11', 'OBSERVACION');
+        $worksheet->getStyle('A11:H11')->applyFromArray($headerStyle);
 
-    // Agregar los datos de admisiones seleccionadas
-    $currentRow = 12;
-    $totalCantidad = 0;
-    $totalPeso = 0;
+        // Agregar los datos de admisiones seleccionadas
+        $currentRow = 12;
+        $totalCantidad = 0;
+        $totalPeso = 0;
 
-    foreach ($admisiones as $admision) {
-        $peso = $admision->peso_ems ?: $admision->peso; // Usa peso_ems o peso si está vacío
+        foreach ($admisiones as $admision) {
+            $peso = $admision->peso_ems ?: $admision->peso; // Usa peso_ems o peso si está vacío
 
-        $worksheet->setCellValue("A$currentRow", $admision->codigo);
-        $worksheet->setCellValue("B$currentRow", 1);
-        $worksheet->setCellValue("C$currentRow", '');
-        $worksheet->setCellValue("D$currentRow", $peso);
-        $worksheet->setCellValue("E$currentRow", $admision->nombre_remitente);
-        $worksheet->setCellValue("F$currentRow", '');
-        $worksheet->setCellValue("G$currentRow", '');
-        $worksheet->setCellValue("H$currentRow", $admision->observacion);
+            $worksheet->setCellValue("A$currentRow", $admision->codigo);
+            $worksheet->setCellValue("B$currentRow", 1);
+            $worksheet->setCellValue("C$currentRow", '');
+            $worksheet->setCellValue("D$currentRow", $peso);
+            $worksheet->setCellValue("E$currentRow", $admision->nombre_remitente);
+            $worksheet->setCellValue("F$currentRow", '');
+            $worksheet->setCellValue("G$currentRow", '');
+            $worksheet->setCellValue("H$currentRow", $admision->observacion);
+            $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
+
+            $totalCantidad += 1;
+            $totalPeso += $peso;
+
+            $currentRow++;
+        }
+
+        // Fila de totales
+        $worksheet->setCellValue("A$currentRow", 'TOTAL');
+        $worksheet->setCellValue("B$currentRow", $totalCantidad);
+        $worksheet->setCellValue("D$currentRow", $totalPeso);
         $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
+        $currentRow += 2;
 
-        $totalCantidad += 1;
-        $totalPeso += $peso;
-
+        // Información adicional
+        $worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
         $currentRow++;
+
+        $worksheet->setCellValue("A$currentRow", $loggedInUserCity);
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
+
+        $worksheet->setCellValue("A$currentRow", 'Signature');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
+
+        $worksheet->setCellValue("A$currentRow", '______________________');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+        $currentRow++;
+
+        $worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
+        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
+
+        $worksheet->setCellValue("F" . ($currentRow - 2), 'Office of exchange of destination');
+        $worksheet->getStyle("F" . ($currentRow - 2))->applyFromArray($headerStyle);
+        $worksheet->setCellValue("F$currentRow", 'Date and signature');
+
+
+        // Guardar el archivo temporalmente
+        $fileName = 'designado_operador_postal.xlsx';
+        $filePath = storage_path("app/public/$fileName");
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        // Retornar la descarga del archivo
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
-
-    // Fila de totales
-    $worksheet->setCellValue("A$currentRow", 'TOTAL');
-    $worksheet->setCellValue("B$currentRow", $totalCantidad);
-    $worksheet->setCellValue("D$currentRow", $totalPeso);
-    $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
-    $currentRow += 2;
-
-    // Información adicional
-    $worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
-    $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-    $currentRow++;
-
-    $worksheet->setCellValue("A$currentRow", $loggedInUserCity);
-    $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-    $currentRow++;
-
-    $worksheet->setCellValue("A$currentRow", 'Signature');
-    $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-    $currentRow++;
-
-    $worksheet->setCellValue("A$currentRow", '______________________');
-    $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-    $currentRow++;
-
-    $worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
-    $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-
-    $worksheet->setCellValue("F" . ($currentRow - 2), 'Office of exchange of destination');
-    $worksheet->getStyle("F" . ($currentRow - 2))->applyFromArray($headerStyle);
-    $worksheet->setCellValue("F$currentRow", 'Date and signature');
-
-  
-    // Guardar el archivo temporalmente
-    $fileName = 'designado_operador_postal.xlsx';
-    $filePath = storage_path("app/public/$fileName");
-
-    $writer = new Xlsx($spreadsheet);
-    $writer->save($filePath);
-
-    // Retornar la descarga del archivo
-    return response()->download($filePath)->deleteFileAfterSend(true);
-}
 
 
 
@@ -477,27 +477,27 @@ public $manifiestoInput = '';
             session()->flash('error', 'Debe seleccionar al menos una admisión.');
             return;
         }
-    
+
         $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-    
+
         if ($admisiones->isEmpty()) {
             session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
             return;
         }
-    
+
         // Verificamos si el usuario introdujo un Manifiesto
         if (!empty($this->manualManifiesto)) {
             $this->currentManifiesto = $this->manualManifiesto;
         } else {
             $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
         }
-    
+
         // Asignar el manifiesto a las admisiones y cambiar estado
         foreach ($admisiones as $admision) {
             $admision->estado = 6; // Mandado a regional
             $admision->manifiesto = $this->currentManifiesto;
             $admision->save();
-    
+
             Eventos::create([
                 'accion'      => 'Mandar a regional',
                 'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
@@ -505,12 +505,12 @@ public $manifiestoInput = '';
                 'user_id'     => Auth::id(),
             ]);
         }
-    
+
         // Generar el PDF (en lugar de Excel) y retornarlo
         return $this->generarPdf();
     }
-    
-    
+
+
 
 
 
@@ -542,19 +542,20 @@ public $manifiestoInput = '';
     {
         // Establecer precio predeterminado en 0 si no está definido
         $this->precio = $this->precio ?? 0;
-    
+
         // Establecer la fecha actual
         $this->fecha = now();
-    
+
         // Solo generar un código si no se ha ingresado manualmente
         if (empty($this->codigo)) {
             // Generar el código dinámicamente
             $prefixes = [
                 'EMS' => 'EN',
                 'OFICIAL' => 'RD',
+                'CRIAS' => 'DE',
             ];
             $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
-    
+
             $cityCodes = [
                 'LA PAZ' => '0',
                 'COCHABAMBA' => '1',
@@ -566,22 +567,22 @@ public $manifiestoInput = '';
                 'PANDO' => '7',
                 'BENI' => '8',
             ];
-    
+
             $city = Auth::user()->city;
             $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
-    
+
             $yearSuffix = now()->format('y');
             $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
                 ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
                 ->value('max_number');
-    
+
             $newNumber = $lastNumber ? $lastNumber + 1 : 1;
             $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
-    
+
             $suffix = 'BO';
             $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
         }
-    
+
         // Crear el registro
         $admision = Admision::create([
             'origen' => $this->origen,
@@ -609,7 +610,7 @@ public $manifiestoInput = '';
             'user_id' => Auth::id(),
             'creacionadmision' => Auth::user()->name,
         ]);
-    
+
         Eventos::create([
             'accion' => 'Crear',
             'descripcion' => 'Creación de admisión Oficial',
@@ -655,78 +656,78 @@ public $manifiestoInput = '';
         );
         session()->flash('message', 'Admisión creada exitosamente.');
     }
-    
+
 
     public function reimprimirManifiesto()
-{
-    $this->validate([
-        'manifiestoInput' => 'required|string'
-    ]);
+    {
+        $this->validate([
+            'manifiestoInput' => 'required|string'
+        ]);
 
-    $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
+        $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
 
-    if ($admisiones->isEmpty()) {
-        session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
-        return;
-    }
-
-    $this->currentManifiesto = $this->manifiestoInput;
-
-    // Llama al método para generar el PDF con las admisiones
-    return $this->generarPdf($admisiones);
-}
-
-    
-    public function generarPdf($admisiones = null)
-{
-    // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
-    if ($admisiones === null) {
-        if (!empty($this->currentManifiesto)) {
-            $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
-        } else {
-            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
+            return;
         }
+
+        $this->currentManifiesto = $this->manifiestoInput;
+
+        // Llama al método para generar el PDF con las admisiones
+        return $this->generarPdf($admisiones);
     }
 
-    if ($admisiones->isEmpty()) {
-        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-        return;
+
+    public function generarPdf($admisiones = null)
+    {
+        // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
+        if ($admisiones === null) {
+            if (!empty($this->currentManifiesto)) {
+                $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
+            } else {
+                $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+            }
+        }
+
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+            return;
+        }
+
+        // Prepara los datos para la vista
+        $currentDate = now()->format('d/m/Y');
+        $currentTime = now()->format('H:i');
+        $firstPackage = $admisiones->first();
+
+        // Nombre del usuario logueado
+        $loggedInUserCity = Auth::user()->city;
+        // El destino lo tomamos del reencaminamiento si existe, caso contrario de la ciudad del primer paquete
+        $destinationCity = $this->selectedDepartment
+            ?? $firstPackage->reencaminamiento
+            ?? $firstPackage->ciudad
+            ?? '';
+
+        // Datos que enviamos a la vista
+        $data = [
+            'admisiones'        => $admisiones,
+            'currentDate'       => $currentDate,
+            'currentTime'       => $currentTime,
+            'currentManifiesto' => $this->currentManifiesto,
+            'loggedInUserCity'  => $loggedInUserCity,
+            'destinationCity'   => $destinationCity,
+        ];
+
+        // Generamos el PDF con DomPDF y la vista cn33
+        $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
+
+        // Descarga el PDF directamente
+        return response()->streamDownload(
+            fn() => print($pdf->stream('cn-33.pdf')),
+            'cn-33.pdf'
+        );
     }
 
-    // Prepara los datos para la vista
-    $currentDate = now()->format('d/m/Y');
-    $currentTime = now()->format('H:i');
-    $firstPackage = $admisiones->first();
-    
-    // Nombre del usuario logueado
-    $loggedInUserCity = Auth::user()->city;
-    // El destino lo tomamos del reencaminamiento si existe, caso contrario de la ciudad del primer paquete
-    $destinationCity = $this->selectedDepartment 
-        ?? $firstPackage->reencaminamiento 
-        ?? $firstPackage->ciudad 
-        ?? '';
 
-    // Datos que enviamos a la vista
-    $data = [
-        'admisiones'        => $admisiones,
-        'currentDate'       => $currentDate,
-        'currentTime'       => $currentTime,
-        'currentManifiesto' => $this->currentManifiesto,
-        'loggedInUserCity'  => $loggedInUserCity,
-        'destinationCity'   => $destinationCity,
-    ];
-
-    // Generamos el PDF con DomPDF y la vista cn33
-    $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-
-    // Descarga el PDF directamente
-    return response()->streamDownload(
-        fn() => print($pdf->stream('cn-33.pdf')),
-        'cn-33.pdf'
-    );
-}
-
-    
     private $cityPrefixes = [
         'LA PAZ' => '0',
         'COCHABAMBA' => '1',

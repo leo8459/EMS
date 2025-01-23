@@ -186,6 +186,7 @@
                                                                     {{-- <option value="EMS">EMS</option> --}}
                                                                     <option value="OFICIAL">OFICIAL</option>
                                                                     <option value="TRANSITO">INTERNACIONAL</option>
+                                                                    <option value="CRIAS">CRIAS</option>
 
                                                                     {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
                                   <option value="EMS">POSTPAGO</option> --}}
@@ -239,16 +240,16 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
-                                                                <label for="destino">Destino*</label>
+                                                                <label for="destino">Reexpedicion*</label>
                                                                 <select class="form-control" id="destino"
                                                                     wire:model="destino" wire:ignore>
                                                                     <option value="">Seleccione el destino
                                                                     </option>
-                                                                    <option value="OFICIAL">OFICIAL
-                                                                        
-                                                                    </option>
+                                                                    <option value="OFICIAL">OFICIAL</option>
                                                                     <option value="TRANSITO">TRANSITO
-                                                                        
+                                                                        <option value="ENDAS">ENCOMIENDA</option>
+                                                                        <option value="COR">CORREO TRADICIONAL</option>
+
                                                                     </option>
                                                                     {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
                                                                     </option>
