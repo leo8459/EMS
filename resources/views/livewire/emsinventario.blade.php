@@ -493,7 +493,7 @@
                         
                                             {{-- Departamento de destino --}}
                                             <div class="form-group">
-                                                <label for="selectedDepartment">Reencaminar al departamento (obligatorio):</label>
+                                                <label for="selectedDepartment">Enviar al departamento (obligatorio):</label>
                                                 <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
                                                     <option value="">Seleccione un departamento</option>
                                                     <option value="LA PAZ">LA PAZ</option>

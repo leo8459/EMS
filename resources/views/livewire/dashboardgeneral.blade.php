@@ -92,6 +92,7 @@
 
         /* Ajustes para teléfonos o pantallas pequeñas */
         @media (max-width: 576px) {
+
             /* Las tarjetas ocupan todo el ancho en una sola columna */
             .department-cards {
                 grid-template-columns: 1fr;
@@ -126,25 +127,36 @@
     @if (Auth::user()->hasRole('ADMINISTRADOR'))
         <div class="dashboard-title">Resumen Nivel Nacional</div>
 
+       
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Por Entregar</p>
+                <h3>{{ $porEntregar }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #FF9800, #FFC107);">
+                🚛
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <div class="card-content">
+                <p>Entregados Hoy</p>
+                <h3>{{ $totalEntregadosHoy }}</h3>
+            </div>
+            <div class="card-icon" style="background: linear-gradient(45deg, #03A9F4, #0288D1);">
+                🚚
+            </div>
+        </div>
         <!-- Datos Generales -->
         <div class="dashboard-card">
             <div class="card-content">
                 <p>Total Admisiones</p>
                 <h3>{{ $totalAdmisiones }}</h3>
             </div>
-            <div class="card-icon" style="background: linear-gradient(45deg, #FF5722, #FFC107);">
+            <div class="card-icon" style="background: linear-gradient(45deg, #6a11cb, #2575fc);">
                 📋
             </div>
         </div>
-        <div class="dashboard-card">
-            <div class="card-content">
-                <p>Total Entregados</p>
-                <h3>{{ $totalEntregados }}</h3>
-            </div>
-            <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
-                ✅
-            </div>
-        </div>
+       
         <div class="dashboard-card">
             <div class="card-content">
                 <p>Total Recaudado</p>
@@ -154,17 +166,8 @@
                 💰
             </div>
         </div>
-        <div class="dashboard-card">
-            <div class="card-content">
-                <p>Admisiones Generadas Hoy</p>
-                <h3>{{ $admisionesHoy }}</h3>
-            </div>
-            <div class="card-icon" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">
-                📅
-            </div>
-
-        </div>
-
+        
+        
     @endif
 
     <!-- Datos por Departamento -->
@@ -172,6 +175,41 @@
         <div class="dashboard-department">
             <div class="department-title">{{ $departamento }}</div>
             <div class="department-cards">
+               
+
+                <!-- Admisiones en Regional -->
+                <div class="dashboard-card">
+                    <div class="card-content">
+                        <p>Por entregar</p>
+                        <h3>{{ $datos['enRegional'] }}</h3>
+                    </div>
+                    <div class="card-icon" style="background: linear-gradient(45deg, #FF9800, #FFC107);">
+                        🚛
+                    </div>
+                </div>
+                <!-- Admisiones Generadas Hoy -->
+                <div class="dashboard-card">
+                    <div class="card-content">
+                        <p>Entregados Hoy</p>
+                        <h3>{{ $datos['admisionesHoy'] }}</h3>
+                    </div>
+                    <div class="card-icon" style="background: linear-gradient(45deg, #03A9F4, #0288D1);">
+                        🚚
+                    </div>
+                </div>
+
+
+                {{-- <!-- Total Entregados -->
+                <div class="dashboard-card">
+                    <div class="card-content">
+                        <p>Total Entregados</p>
+                        <h3>{{ $datos['totalEntregados'] }}</h3>
+                    </div>
+                    <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
+                        ✅
+                    </div>
+                </div> --}}
+                
                 <!-- Total Admisiones -->
                 <div class="dashboard-card">
                     <div class="card-content">
@@ -182,29 +220,6 @@
                         📋
                     </div>
                 </div>
-
-                <!-- Admisiones Generadas Hoy -->
-                <div class="dashboard-card">
-                    <div class="card-content">
-                        <p>Admisiones Generadas Hoy</p>
-                        <h3>{{ $datos['admisionesHoy'] }}</h3>
-                    </div>
-                    <div class="card-icon" style="background: linear-gradient(45deg, #9C27B0, #E91E63);">
-                        📅
-                    </div>
-                </div>
-
-                <!-- Total Entregados -->
-                <div class="dashboard-card">
-                    <div class="card-content">
-                        <p>Total Entregados</p>
-                        <h3>{{ $datos['totalEntregados'] }}</h3>
-                    </div>
-                    <div class="card-icon" style="background: linear-gradient(45deg, #4CAF50, #8BC34A);">
-                        ✅
-                    </div>
-                </div>
-
                 <!-- Total Recaudado -->
                 <div class="dashboard-card">
                     <div class="card-content">
@@ -214,8 +229,12 @@
                     <div class="card-icon" style="background: linear-gradient(45deg, #3F51B5, #2196F3);">
                         💰
                     </div>
+
+
                 </div>
+
             </div>
+
         </div>
     @endforeach
 
@@ -225,7 +244,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('estado7Chart').getContext('2d');
             const estado7Data = @json($estado7Data); // Datos enviados desde el backend
 
@@ -275,7 +294,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Gráfico de Estado 5
             const canvasEstado5 = document.getElementById('estado5Chart');
             if (canvasEstado5) {
@@ -335,7 +354,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Gráfico Comparativo Estados
             const canvasEstadoComparativo = document.getElementById('estadoComparativoChart');
             if (canvasEstadoComparativo) {

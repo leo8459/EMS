@@ -474,44 +474,51 @@ class Emsinventario extends Component
     }
 
     public function mandarARegional()
-    {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
-            return;
-        }
-    
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-    
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
-            return;
-        }
-    
-        // Si el usuario introdujo un Manifiesto manual
-        if (!empty($this->manualManifiesto)) {
-            $this->currentManifiesto = $this->manualManifiesto;
-        } else {
-            // Generamos uno automáticamente
-            $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
-        }
-    
-        // Asignar el manifiesto a las admisiones y cambiar estado
-        foreach ($admisiones as $admision) {
-            $admision->estado = 6; // Mandado a regional
-            $admision->manifiesto = $this->currentManifiesto;
-            $admision->save();
-    
-            Eventos::create([
-                'accion' => 'Mandar a regional',
-                'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
-        }
-    
-        // Aquí pasamos $this->selectedTransport y $this->numeroVuelo
-        return $this->generarPdf($admisiones, $this->selectedTransport, $this->numeroVuelo);
+{
+    if (empty($this->selectedAdmisiones)) {
+        session()->flash('error', 'Debe seleccionar al menos una admisión.');
+        return;
     }
+
+    if (empty($this->selectedDepartment)) {
+        session()->flash('error', 'Debe seleccionar un departamento para reencaminar.');
+        return;
+    }
+
+    $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
+        return;
+    }
+
+    // Si el usuario introdujo un Manifiesto manual
+    if (!empty($this->manualManifiesto)) {
+        $this->currentManifiesto = $this->manualManifiesto;
+    } else {
+        // Generamos uno automáticamente
+        $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
+    }
+
+    // Actualizar el manifiesto y reencaminamiento en la base de datos
+    foreach ($admisiones as $admision) {
+        $admision->estado = 6; // Mandado a regional
+        $admision->manifiesto = $this->currentManifiesto;
+        $admision->reencaminamiento = $this->selectedDepartment; // Guardar el departamento seleccionado
+        $admision->save();
+
+        Eventos::create([
+            'accion' => 'Mandar a regional',
+            'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto} y reencaminamiento a {$this->selectedDepartment}.",
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+    }
+
+    // Aquí pasamos $this->selectedTransport y $this->numeroVuelo
+    return $this->generarPdf($admisiones, $this->selectedTransport, $this->numeroVuelo);
+}
+
     
 
 
