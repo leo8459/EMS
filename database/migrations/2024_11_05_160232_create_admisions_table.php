@@ -50,7 +50,8 @@ return new class extends Migration
 
             $table->string('creacionadmision')->nullable();
             $table->enum('notificacion', ['FALTANTE', 'SOBRANTE', 'MALENCAMINADO', 'DAÑADO'])->nullable();
-
+            $table->string('tipo_transporte')->nullable(); // Campo para tipo de transporte
+            $table->string('numero_vuelo')->nullable(); // Campo para el número de vuelo
             $table->integer('estado')->default(1);
             $table->timestamps();
 

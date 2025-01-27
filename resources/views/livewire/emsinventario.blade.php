@@ -669,12 +669,13 @@
 
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        window.addEventListener('reloadPage', function() {
-            // Esto hace un F5 en la ventana actual
-            window.location.reload();
+    document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('reloadPage', function () {
+            // Recargar la página
+            location.reload();
         });
     });
-    </script>
+</script>
+
     
     

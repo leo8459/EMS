@@ -485,39 +485,43 @@ class Emsinventario extends Component
         return;
     }
 
-    $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+    // Obtener las admisiones existentes en el manifiesto (si ya existe)
+    $admisionesExistentes = Admision::where('manifiesto', $this->manualManifiesto)->get();
 
-    if ($admisiones->isEmpty()) {
-        session()->flash('error', 'No se encontraron admisiones válidas seleccionadas.');
-        return;
-    }
-
-    // Si el usuario introdujo un Manifiesto manual
+    // Si se proporciona un manifiesto manual, usarlo; de lo contrario, generar uno nuevo
     if (!empty($this->manualManifiesto)) {
         $this->currentManifiesto = $this->manualManifiesto;
     } else {
-        // Generamos uno automáticamente
         $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
     }
 
-    // Actualizar el manifiesto y reencaminamiento en la base de datos
-    foreach ($admisiones as $admision) {
+    // Actualizar las admisiones seleccionadas para asignarlas al manifiesto
+    $admisionesNuevas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+    foreach ($admisionesNuevas as $admision) {
         $admision->estado = 6; // Mandado a regional
         $admision->manifiesto = $this->currentManifiesto;
-        $admision->reencaminamiento = $this->selectedDepartment; // Guardar el departamento seleccionado
+        $admision->reencaminamiento = $this->selectedDepartment;
+        $admision->tipo_transporte = $this->selectedTransport; // Guardar el modo de transporte
+        $admision->numero_vuelo = $this->numeroVuelo; // Guardar el número de vuelo
         $admision->save();
 
         Eventos::create([
             'accion' => 'Mandar a regional',
-            'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto} y reencaminamiento a {$this->selectedDepartment}.",
+            'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
         ]);
     }
+    $this->dispatch('reloadPage');
 
-    // Aquí pasamos $this->selectedTransport y $this->numeroVuelo
-    return $this->generarPdf($admisiones, $this->selectedTransport, $this->numeroVuelo);
+    // Combinar las admisiones nuevas con las existentes
+    $todasAdmisiones = $admisionesExistentes->merge($admisionesNuevas);
+
+    // Generar el PDF con todas las admisiones asociadas al manifiesto
+    return $this->generarPdf($todasAdmisiones);
 }
+
+    
 
     
 
@@ -630,73 +634,89 @@ class Emsinventario extends Component
     
 
 
-    public function reimprimirManifiesto()
-    {
-        $this->validate([
-            'manifiestoInput' => 'required|string'
-        ]);
+public function reimprimirManifiesto()
+{
+    // Validar que el manifiesto haya sido ingresado
+    $this->validate([
+        'manifiestoInput' => 'required|string'
+    ]);
 
-        $admisiones = Admision::where('manifiesto', $this->manifiestoInput)->get();
+    // Buscar todas las admisiones asociadas al manifiesto
+    $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
 
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
-            return;
-        }
-
-        $this->currentManifiesto = $this->manifiestoInput;
-
-        // Llama al método para generar el PDF con las admisiones
-        return $this->generarPdf($admisiones);
+    if ($admisionesExistentes->isEmpty()) {
+        session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
+        return;
     }
 
+    // Verificar si hay admisiones seleccionadas para agregar al manifiesto
+    if (!empty($this->selectedAdmisiones)) {
+        $admisionesNuevas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
-    public function generarPdf($admisiones = null, $selectedTransport = null, $numeroVuelo = null)
-    {
-        // Si no se pasan $admisiones, buscamos por currentManifiesto o selectedAdmisiones
-        if ($admisiones === null) {
-            if (!empty($this->currentManifiesto)) {
-                $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
-            } else {
-                $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-            }
+        // Actualizar el manifiesto de las admisiones seleccionadas
+        foreach ($admisionesNuevas as $admision) {
+            $admision->manifiesto = $this->manifiestoInput;
+            $admision->save();
+
+            // Registrar evento
+            Eventos::create([
+                'accion' => 'Agregar al manifiesto',
+                'descripcion' => "Se agregó el envío al manifiesto {$this->manifiestoInput}.",
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
         }
-    
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-            return;
-        }
-    
-        // Prepara datos para la vista
-        $currentDate = now()->format('d/m/Y');
-        $currentTime = now()->format('H:i');
-        $firstPackage = $admisiones->first();
-    
-        $loggedInUserCity = Auth::user()->city;
-        $destinationCity = $this->selectedDepartment
-            ?? $firstPackage->reencaminamiento
-            ?? $firstPackage->ciudad
-            ?? '';
-    
-        $data = [
-            'admisiones'        => $admisiones,
-            'currentDate'       => $currentDate,
-            'currentTime'       => $currentTime,
-            'currentManifiesto' => $this->currentManifiesto,
-            'loggedInUserCity'  => $loggedInUserCity,
-            'destinationCity'   => $destinationCity,
-            'selectedTransport' => $selectedTransport, // Aéreo o Terrestre
-            'numeroVuelo'       => $numeroVuelo,       // Número de vuelo manual
-        ];
-    
-        // Generamos el PDF con DomPDF
-        $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-    
-        // Descarga el PDF directamente
-        return response()->streamDownload(
-            fn() => print($pdf->stream('cn-33.pdf')),
-            'cn-33.pdf'
-        );
+
+        // Combinar las admisiones existentes con las nuevas
+        $admisionesExistentes = $admisionesExistentes->merge($admisionesNuevas);
     }
+
+    // Generar el PDF con todas las admisiones del manifiesto
+    $this->currentManifiesto = $this->manifiestoInput;
+    return $this->generarPdf($admisionesExistentes);
+}
+
+
+
+public function generarPdf($admisiones)
+{
+    if ($admisiones->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+        return;
+    }
+
+    // Prepara datos para la vista
+    $currentDate = now()->format('d/m/Y');
+    $currentTime = now()->format('H:i');
+    $firstPackage = $admisiones->first();
+
+    $loggedInUserCity = Auth::user()->city;
+    $destinationCity = $this->selectedDepartment
+        ?? $firstPackage->reencaminamiento
+        ?? $firstPackage->ciudad
+        ?? '';
+
+    $data = [
+        'admisiones'        => $admisiones,
+        'currentDate'       => $currentDate,
+        'currentTime'       => $currentTime,
+        'currentManifiesto' => $this->currentManifiesto,
+        'loggedInUserCity'  => $loggedInUserCity,
+        'destinationCity'   => $destinationCity,
+        'selectedTransport' => $firstPackage->tipo_transporte, // Medio de transporte desde la BD
+        'numeroVuelo'       => $firstPackage->numero_vuelo,     // Número de vuelo desde la BD
+    ];
+
+    // Generar el PDF con DomPDF
+    $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
+
+    // Descargar el PDF directamente
+    return response()->streamDownload(
+        fn() => print($pdf->stream('cn-33.pdf')),
+        'cn-33.pdf'
+    );
+}
+
     
 
 

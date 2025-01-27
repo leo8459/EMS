@@ -43,7 +43,8 @@ class Admision extends Model
         'notificacion',
         'observacion',    // <= Asegúrate de que esté
         'manifiesto',
-
+        'tipo_transporte',
+        'numero_vuelo',
 
     ];
     public function user()
