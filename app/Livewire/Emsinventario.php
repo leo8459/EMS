@@ -550,123 +550,84 @@ class Emsinventario extends Component
         $this->cantidad = 1; // Establece cantidad en 1
     }
     public function store()
-    {
-        // Establecer precio predeterminado en 0 si no está definido
-        $this->precio = $this->precio ?? 0;
+{
+    // Establecer precio predeterminado en 0 si no está definido
+    $this->precio = $this->precio ?? 0;
 
-        // Establecer la fecha actual
-        $this->fecha = now();
+    // Establecer la fecha actual
+    $this->fecha = now();
 
-        // Solo generar un código si no se ha ingresado manualmente
-        if (empty($this->codigo)) {
-            // Generar el código dinámicamente
-            $prefixes = [
-                'EMS' => 'EN',
-                'OFICIAL' => 'RD',
-                'CRIAS' => 'DE',
-            ];
-            $prefix = isset($prefixes[$this->servicio]) ? $prefixes[$this->servicio] : 'XX';
+    // Solo generar un código si no se ha ingresado manualmente
+    if (empty($this->codigo)) {
+        // Generar el código dinámicamente
+        $prefixes = [
+            'EMS' => 'EN',
+            'OFICIAL' => 'RD',
+            'CRIAS' => 'DE',
+        ];
+        $prefix = $prefixes[$this->servicio] ?? 'XX';
 
-            $cityCodes = [
-                'LA PAZ' => '0',
-                'COCHABAMBA' => '1',
-                'SANTA CRUZ' => '2',
-                'ORURO' => '3',
-                'POTOSI' => '4',
-                'CHUQUISACA' => '5',
-                'TARIJA' => '6',
-                'PANDO' => '7',
-                'BENI' => '8',
-            ];
-
-            $city = Auth::user()->city;
-            $cityCode = isset($cityCodes[$city]) ? $cityCodes[$city] : '0';
-
-            $yearSuffix = now()->format('y');
-            $lastNumber = Admision::where('codigo', 'like', $prefix . $cityCode . $yearSuffix . '%')
-                ->selectRaw("MAX(CAST(REGEXP_REPLACE(SUBSTRING(codigo FROM 6), '[^0-9]', '', 'g') AS INTEGER)) as max_number")
-                ->value('max_number');
-
-            $newNumber = $lastNumber ? $lastNumber + 1 : 1;
-            $numberPart = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
-
-            $suffix = 'BO';
-            $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
-        }
-
-        // Crear el registro
-        $admision = Admision::create([
-            'origen' => $this->origen,
-            'fecha' => $this->fecha,
-            'servicio' => $this->servicio,
-            'tipo_correspondencia' => $this->tipo_correspondencia,
-            'cantidad' => $this->cantidad,
-            'peso' => $this->peso,
-            'destino' => $this->destino,
-            'codigo' => $this->codigo,
-            'precio' => $this->precio,
-            'numero_factura' => $this->numero_factura,
-            'nombre_remitente' => $this->nombre_remitente,
-            'nombre_envia' => $this->nombre_envia,
-            'carnet' => $this->carnet,
-            'telefono_remitente' => $this->telefono_remitente,
-            'nombre_destinatario' => $this->nombre_destinatario,
-            'telefono_destinatario' => $this->telefono_destinatario,
-            'direccion' => $this->direccion,
-            'provincia' => $this->provincia,
-            'ciudad' => $this->ciudad,
-            'pais' => $this->pais,
-            'contenido' => $this->contenido,
-            'estado' => 3,
-            'user_id' => Auth::id(),
-            'creacionadmision' => Auth::user()->name,
-        ]);
-
-        Eventos::create([
-            'accion' => 'Crear',
-            'descripcion' => 'Creación de admisión Oficial',
-            'codigo' => $admision->codigo,
-            'user_id' => Auth::id(),
-        ]);
-        // Enlace QR fijo
-        $qrLink = 'https://correos.gob.bo:8000/';
-        // Preparar los datos para el PDF usando el registro recién creado
-        $data = [
-            'origen' => $admision->origen,
-            'fecha' => $admision->fecha,
-            'servicio' => $admision->servicio,
-            'tipo_correspondencia' => $admision->tipo_correspondencia,
-            'cantidad' => $admision->cantidad,
-            'peso' => $admision->peso,
-            'destino' => $admision->destino,
-            'codigo' => $admision->codigo,
-            'precio' => $admision->precio,
-            'numero_factura' => $admision->numero_factura,
-            'nombre_remitente' => $admision->nombre_remitente,
-            'nombre_envia' => $admision->nombre_envia,
-            'carnet' => $admision->carnet,
-            'telefono_remitente' => $admision->telefono_remitente,
-            'nombre_destinatario' => $admision->nombre_destinatario,
-            'telefono_destinatario' => $admision->telefono_destinatario,
-            'direccion' => $admision->direccion,
-            'provincia' => $admision->provincia,
-            'ciudad' => $admision->ciudad,
-            'pais' => $admision->pais,
-            'qrLink' => $qrLink, // Enlace QR fijo
-            'contenido' => $admision->contenido, // Agrega este campo
-
+        $cityCodes = [
+            'LA PAZ' => '0',
+            'COCHABAMBA' => '1',
+            'SANTA CRUZ' => '2',
+            'ORURO' => '3',
+            'POTOSI' => '4',
+            'CHUQUISACA' => '5',
+            'TARIJA' => '6',
+            'PANDO' => '7',
+            'BENI' => '8',
         ];
 
-        // Renderizar la vista y generar el PDF
-        $pdf = Pdf::loadView('pdfs.admision', $data);
+        $cityCode = $cityCodes[Auth::user()->city] ?? '0';
+        $yearSuffix = now()->format('y');
+        $lastNumber = Admision::where('codigo', 'like', "$prefix$cityCode$yearSuffix%")
+        // En Postgres se usa substring(codigo from 6)
+        // y CAST(... as INT) en lugar de "AS UNSIGNED"
+        ->selectRaw("MAX(CAST(substring(codigo from 6) AS INT)) as max_number")
+        ->value('max_number');
+    
 
-        // Descargar automáticamente el PDF
-        return response()->streamDownload(
-            fn() => print($pdf->stream('admision.pdf')),
-            'admision.pdf'
-        );
-        session()->flash('message', 'Admisión creada exitosamente.');
+        $newNumber = ($lastNumber ? $lastNumber + 1 : 1);
+        $this->codigo = $prefix . $cityCode . $yearSuffix . str_pad($newNumber, 6, '0', STR_PAD_LEFT) . 'BO';
     }
+
+    // Crear el registro
+    Admision::create([
+        'origen' => $this->origen,
+        'fecha' => $this->fecha,
+        'servicio' => $this->servicio,
+        'tipo_correspondencia' => $this->tipo_correspondencia,
+        'cantidad' => $this->cantidad,
+        'peso' => $this->peso,
+        'destino' => $this->destino,
+        'codigo' => $this->codigo,
+        'precio' => $this->precio,
+        'numero_factura' => $this->numero_factura,
+        'nombre_remitente' => $this->nombre_remitente,
+        'nombre_envia' => $this->nombre_envia,
+        'carnet' => $this->carnet,
+        'telefono_remitente' => $this->telefono_remitente,
+        'nombre_destinatario' => $this->nombre_destinatario,
+        'telefono_destinatario' => $this->telefono_destinatario,
+        'direccion' => $this->direccion,
+        'provincia' => $this->provincia,
+        'ciudad' => $this->ciudad,
+        'pais' => $this->pais,
+        'contenido' => $this->contenido,
+        'estado' => 3,
+        'user_id' => Auth::id(),
+    ]);
+
+    // Emitir un evento para recargar la página
+    $this->dispatch('reloadPage');
+
+    // $this->emit('reloadPage');
+
+    session()->flash('message', 'Admisión creada exitosamente.');
+}
+
+    
 
 
     public function reimprimirManifiesto()

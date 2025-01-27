@@ -432,9 +432,9 @@
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary"
                                                             data-dismiss="modal">Cerrar</button>
-                                                        <button type="button" class="btn btn-secondary"
+                                                        {{-- <button type="button" class="btn btn-secondary"
                                                             onclick="saveFrequentSend()">Guardar
-                                                            como envío frecuente</button>
+                                                            como envío frecuente</button> --}}
 
 
                                                         <button type="submit"
@@ -668,20 +668,13 @@
     </section>
 
 </div>
-
 <script>
-    document.addEventListener('livewire:load', function() {
-        // Mostrar el modal
-        window.addEventListener('mostrar-modal-expedicion-hoy', function() {
-            $('#modalExpedicionHoy').modal('show');
-        });
-
-        // Ocultar el modal
-        window.addEventListener('ocultar-modal-expedicion-hoy', function() {
-            $('#modalExpedicionHoy').modal('hide');
+    document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('reloadPage', function() {
+            // Esto hace un F5 en la ventana actual
+            window.location.reload();
         });
     });
-    window.addEventListener('page-reload', () => {
-        location.reload();
-    });
-</script>
+    </script>
+    
+    
