@@ -1,4 +1,47 @@
 <div class="container-fluid">
+    <style>
+        /* Ajustes personalizados para pantallas pequeñas */
+        @media (max-width: 768px) {
+            /* Ajustar márgenes y espaciamientos en la cabecera de la tarjeta */
+            .card-header .d-flex.align-items-center {
+                flex-wrap: wrap;
+            }
+
+            /* El input de búsqueda y el botón se apilan verticalmente en pantallas pequeñas */
+            .card-header .d-flex.align-items-center .form-control {
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100%;
+            }
+
+            /* Ajustar botón de búsqueda al 100% en pantallas muy pequeñas */
+            .card-header .d-flex.align-items-center button {
+                width: 100%;
+            }
+
+            /* Ajustar botón "Asignar Carteros" a ocupar todo el ancho en pantallas pequeñas */
+            .d-flex.justify-content-end.mt-3 a.btn.btn-success {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+
+        /* Ajustes adicionales para pantallas más pequeñas (teléfonos) */
+        @media (max-width: 576px) {
+            /* Disminuir el tamaño de texto de la tabla si se desea */
+            table.table-striped.table-hover tbody tr td,
+            table.table-striped.table-hover thead tr th {
+                font-size: 0.85rem;
+            }
+
+            /* Controlar la altura y el overflow para que no se descuadre */
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+    </style>
+
+    <!-- Encabezado/ Breadcrumb -->
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -15,24 +58,30 @@
         </div>
     </section>
 
+    <!-- Contenido principal -->
     <section class="content">
         <div class="container-fluid">
             <div class="row">
+                <!-- Columna principal -->
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
+                            <!-- Barra de búsqueda -->
                             <div class="d-flex align-items-center">
                                 <div class="float-left d-flex align-items-center">
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 </div>
+                                <!-- Botón Asignar Carteros -->
                                 <div class="container-fluid">
                                     <div class="d-flex justify-content-end mt-3">
-                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success">Asignar Carteros</a>
+                                        <a href="{{ route('asignarcartero') }}" class="btn btn-success">Asignar Envios</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Mensajes de sesión (alertas) -->
                         @if (session()->has('message'))
                             <div class="alert alert-success">
                                 {{ session('message') }}
@@ -43,7 +92,9 @@
                                 {{ session('error') }}
                             </div>
                         @endif
+
                         <div class="card-body">
+                            <!-- Tabla responsiva -->
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
                                     <thead>
@@ -53,6 +104,8 @@
                                             <th>Origen</th>
                                             <th>Servicio</th>
                                             <th>Tipo Correspondencia</th>
+                                            <!-- Columnas con clase d-none d-lg-table-cell 
+                                                 se ocultan en pantallas < lg -->
                                             <th class="d-none d-lg-table-cell">Cantidad</th>
                                             <th>Peso</th>
                                             <th>Precio (Bs)</th>
@@ -63,7 +116,7 @@
                                             <th class="d-none d-lg-table-cell">Ciudad</th>
                                             <th class="d-none d-lg-table-cell">País</th>
                                             <th>Entregado</th>
-                                            <th>Observacion</th>
+                                            <th>Observación</th>
                                             <th>Cartero</th>
                                             <th>Foto</th>
                                             <th>Firma</th>
@@ -126,6 +179,8 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- Paginación -->
                         <div class="card-footer">
                             {{ $admisiones->links() }}
                         </div>

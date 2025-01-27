@@ -104,7 +104,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="field">N° de vuelo:</td>
+                <td class="field">N° de vuelo/ Transporte:</td>
                 <td colspan="5">
                     @if($selectedTransport === 'AEREO')
                         {{ $numeroVuelo }}
