@@ -44,6 +44,7 @@
             justify-content: space-between;
             align-items: center;
             transition: transform 0.2s;
+            
         }
 
         .dashboard-card:hover {
@@ -78,6 +79,17 @@
             font-size: 1.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+        .dashboard-card.nivel-nacional {
+    width: 23%; /* Ocupa todo el ancho disponible */
+    margin-bottom: 5px; /* Espaciado entre tarjetas */
+    display: flex; /* Mantener el diseño interno */
+    justify-content: space-between; /* Espaciado entre contenido */
+    padding: 20px; /* Asegurar espacio interno */
+}
+
+.department-cards .nivel-nacional {
+    grid-column: 1 / -1; /* Si está dentro de un grid, ocupará todo el ancho */
+}
 
         /* =======================
            MEDIA QUERIES
@@ -128,7 +140,7 @@
         <div class="dashboard-title">Resumen Nivel Nacional</div>
 
        
-        <div class="dashboard-card">
+        <div class="dashboard-card nivel-nacional">
             <div class="card-content">
                 <p>Por Entregar</p>
                 <h3>{{ $porEntregar }}</h3>
@@ -137,7 +149,8 @@
                 🚛
             </div>
         </div>
-        <div class="dashboard-card">
+        
+        <div class="dashboard-card nivel-nacional">
             <div class="card-content">
                 <p>Entregados Hoy</p>
                 <h3>{{ $totalEntregadosHoy }}</h3>
@@ -147,7 +160,7 @@
             </div>
         </div>
         <!-- Datos Generales -->
-        <div class="dashboard-card">
+        <div class="dashboard-card nivel-nacional">
             <div class="card-content">
                 <p>Total Admisiones</p>
                 <h3>{{ $totalAdmisiones }}</h3>
@@ -157,7 +170,7 @@
             </div>
         </div>
        
-        <div class="dashboard-card">
+        <div class="dashboard-card nivel-nacional">
             <div class="card-content">
                 <p>Total Recaudado</p>
                 <h3>Bs{{ number_format($totalRecaudado, 2) }}</h3>
