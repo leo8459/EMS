@@ -584,7 +584,7 @@ class Emsinventario extends Component
         $lastNumber = Admision::where('codigo', 'like', "$prefix$cityCode$yearSuffix%")
         // En Postgres se usa substring(codigo from 6)
         // y CAST(... as INT) en lugar de "AS UNSIGNED"
-        ->selectRaw("MAX(CAST(substring(codigo from 6) AS INT)) as max_number")
+        ->selectRaw("MAX(CAST(substring(codigo from 6 for 6) AS INT)) as max_number")
         ->value('max_number');
     
 
