@@ -16,12 +16,7 @@
                 </button>
             </div>
 
-            <!-- FOOTER -->
-            <div class="card-footer">
-                <button class="btn btn-success" wire:click="openModal">
-                    Recibir Envíos
-                </button>
-            </div>
+           
             <div class="card-header">
                 <div class="d-flex align-items-center">
                     <div class="float-left d-flex align-items-center">
@@ -47,7 +42,10 @@
                     </div>
                     <div class="ml-auto">
                         <button type="button" class="btn btn-success" wire:click="downloadReport2">Descargar
-                            Reporte</button>
+                            Reporte Envios Recibidos</button>
+                            <button class="btn btn-success" wire:click="openModal">
+                                Recibir Envíos
+                            </button>
                     </div>
                 </div>
             </div>
@@ -199,5 +197,10 @@
                 alert.style.display = 'none';
             }, 5000); // Oculta la alerta a los 5 segundos
         }
+    });
+</script>
+<script>
+    window.addEventListener('reload-page', () => {
+        location.reload();
     });
 </script>

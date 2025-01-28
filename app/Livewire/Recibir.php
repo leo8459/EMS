@@ -132,7 +132,8 @@ class Recibir extends Component
                 $admisionesProcesadas[] = $admision;
             }
         }
-    
+        $this->dispatch('reload-page');
+
         // Descargar el reporte si se procesaron admisiones
         if (!empty($admisionesProcesadas)) {
             return $this->generateReportFromAdmisiones(collect($admisionesProcesadas));
@@ -140,7 +141,6 @@ class Recibir extends Component
     
         session()->flash('message', 'Las admisiones seleccionadas han sido procesadas.');
     // Emitir evento para recargar la página
-    $this->dispatch('reload-page');
         // Resetear el estado del modal y los datos
         $this->reset(['selectedAdmisiones', 'admissionData', 'showModal']);
     }

@@ -75,7 +75,7 @@ class Inventarioventanilla extends Component
             $this->selectedAdmisiones = []; // Limpiar selección tras aceptar
     
             // Recargar la página
-            return redirect(request()->header('Referer'));
+            $this->dispatch('reload-page');
         } else {
             session()->flash('error', 'No se seleccionó ningún envío.');
         }

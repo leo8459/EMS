@@ -822,6 +822,7 @@ class Iniciar extends Component
                 'user_id' => Auth::id(),
             ]);
         }
+        $this->dispatch('reload-page');
 
         // Generar y descargar el PDF
         return $this->generarReporte($admisiones);

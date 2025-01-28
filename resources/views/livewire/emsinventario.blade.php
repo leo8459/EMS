@@ -56,7 +56,7 @@
                                 </button>
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#createPaqueteModal">
-                                    Nuevo Admision
+                                    Generar Envio
                                 </button>
                                 <button class="btn btn-info" wire:click="abrirModalReimprimir">Reimprimir CN-33</button>
 
@@ -676,6 +676,10 @@
         });
     });
 </script>
-
+<script>
+    window.addEventListener('reload-page', () => {
+        location.reload();
+    });
+</script>
     
     

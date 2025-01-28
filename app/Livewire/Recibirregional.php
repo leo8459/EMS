@@ -224,7 +224,8 @@ class Recibirregional extends Component
                 ]);
             }
         }
-    
+        $this->dispatch('reload-page');
+
         // Generar el PDF con todas las admisiones que se acaban de recibir
         $admisiones = Admision::whereIn('id', array_column($this->selectedAdmisionesData, 'id'))->get();
         $pdf = \PDF::loadView('pdfs.recibidosregional', compact('admisiones'));
