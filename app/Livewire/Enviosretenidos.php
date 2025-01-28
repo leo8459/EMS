@@ -6,9 +6,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Eventos; // Asegúrate de importar el modelo Eventos
 
-class Expedicion extends Component
+class Enviosretenidos extends Component
 {
     use WithPagination;
 
@@ -40,26 +39,15 @@ class Expedicion extends Component
             return;
         }
 
-        // Actualizar estado de las admisiones seleccionadas
         Admision::whereIn('id', $this->selectedAdmisiones)->update([
             'estado' => 12,
             'manifiesto' => null,
         ]);
 
-        // Registrar eventos y actualizar observación por cada admisión
         foreach ($this->selectedAdmisiones as $id) {
             $admision = Admision::find($id);
-            if ($admision) {
-                $admision->observacion = $this->observacionRetencion;
-                $admision->save();
-
-                Eventos::create([
-                    'accion' => 'Retenido',
-                    'descripcion' => 'Envío retenido con código: ' . $admision->codigo,
-                    'codigo' => $admision->codigo,
-                    'user_id' => Auth::id(),
-                ]);
-            }
+            $admision->observacion = $this->observacionRetencion;
+            $admision->save();
         }
 
         $this->reset(['selectedAdmisiones', 'showModal', 'observacionRetencion', 'codigoRetenido']);
@@ -70,22 +58,20 @@ class Expedicion extends Component
     }
 
     public function render()
-    {
-        $userCity = Auth::user()->city;
+{
+    $admisiones = Admision::where('estado', 12)
+        ->where(function ($query) {
+            $query->where('codigo', 'like', '%' . $this->searchTerm . '%')
+                  ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
+        })
+        ->orderBy('manifiesto', 'desc')
+        ->paginate($this->perPage);
 
-        $admisiones = Admision::where('estado', 6)
-            ->where('origen', $userCity)
-            ->where(function ($query) {
-                $query->where('codigo', 'like', '%' . $this->searchTerm . '%')
-                      ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
-            })
-            ->orderBy('manifiesto', 'desc')
-            ->paginate($this->perPage);
+    $this->currentPageIds = $admisiones->pluck('id')->toArray();
 
-        $this->currentPageIds = $admisiones->pluck('id')->toArray();
+    return view('livewire.enviosretenidos', [
+        'admisiones' => $admisiones,
+    ]);
+}
 
-        return view('livewire.expedicion', [
-            'admisiones' => $admisiones,
-        ]);
-    }
 }

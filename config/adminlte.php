@@ -404,14 +404,15 @@ return [
                     'url' => 'entregadosemsjota',
                     'icon' => 'fas fa-user',
                 ],
-                [
-                    'text' => 'Generar Envio Oficial',
-                    'url' => 'enviosoficiales',
-                    'icon' => 'fas fa-user',
-                ],
+                
                 [
                     'text' => 'Expedicion',
                     'url' => 'expedicion',
+                    'icon' => 'fas fa-user',
+                ],
+                [
+                    'text' => 'Envios Retenidos',
+                    'url' => 'enviosretenidos',
                     'icon' => 'fas fa-user',
                 ],
                 // [

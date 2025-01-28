@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/entregasventanilla', [AdmisionesController::class, 'ventanilla'])->name('entregasventanilla');
     Route::get('/enviosoficiales', [AdmisionesController::class, 'crearoficiales']);
     Route::get('/expedicion', [AdmisionesController::class, 'verexpedicion']);
+    Route::get('/enviosretenidos', [AdmisionesController::class, 'verretenidos']);
 
    
     
