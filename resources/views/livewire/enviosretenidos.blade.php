@@ -57,8 +57,7 @@
                                     @foreach ($admisiones as $admisione)
                                         <tr>
                                             <td>
-                                                <input type="checkbox" wire:model="selectedAdmisiones"
-                                                    value="{{ $admisione->id }}" />
+                                                <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
                                             </td>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $admisione->origen }}</td>
@@ -69,9 +68,15 @@
                                             <td>{{ $admisione->manifiesto }}</td>
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion_entrega ?: $admisione->observacion }}</td>
+                                            <td>
+                                                <button class="btn btn-warning" wire:click="openRetenerModal({{ $admisione->id }})">
+                                                    Retener
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                
                             </table>
                         </div>
                         <div class="card-footer">
@@ -93,7 +98,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Código(s):</label>
+                        <label>Código:</label>
                         <input type="text" class="form-control" value="{{ $codigoRetenido }}" disabled>
                     </div>
                     <div class="form-group">
@@ -103,15 +108,15 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Cerrar</button>
-                    <button type="button" class="btn btn-primary" wire:click="retenerEnvios">Guardar</button>
+                    <button type="button" class="btn btn-primary" wire:click="guardarRetencion">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    
 <script>
-    document.addEventListener('livewire:load', function () {
-        window.addEventListener('reloadPage', function () {
+    document.addEventListener('livewire:load', function() {
+        window.addEventListener('reloadPage', function() {
             location.reload(); // Recarga la página completamente
         });
     });

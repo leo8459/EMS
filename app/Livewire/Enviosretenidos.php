@@ -5,7 +5,6 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
-use Illuminate\Support\Facades\Auth;
 
 class Enviosretenidos extends Component
 {
@@ -14,64 +13,66 @@ class Enviosretenidos extends Component
     public $currentPageIds = [];
     public $searchTerm = '';
     public $perPage = 10000000;
-    public $admisionId;
     public $selectedAdmisiones = [];
     public $selectAll = false;
     public $showModal = false;
     public $codigoRetenido;
     public $observacionRetencion;
+    public $admisionId;
 
-    public function openRetenerModal()
+    public function openRetenerModal($admisionId)
     {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Por favor, selecciona al menos un envío.');
-            return;
+        $this->admisionId = $admisionId;
+        $admision = Admision::find($admisionId);
+
+        if ($admision) {
+            $this->codigoRetenido = $admision->codigo;
+            $this->observacionRetencion = $admision->observacion_entrega;
         }
 
-        $this->codigoRetenido = Admision::whereIn('id', $this->selectedAdmisiones)->pluck('codigo')->implode(', ');
         $this->showModal = true;
     }
 
-    public function retenerEnvios()
+    public function guardarRetencion()
     {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Por favor, selecciona al menos un envío.');
-            return;
+        $admision = Admision::find($this->admisionId);
+
+        if ($admision) {
+            $admision->update([
+                'observacion_entrega' => $this->observacionRetencion,
+                'estado' => 3,
+            ]);
+
+            session()->flash('message', 'El envío ha sido actualizado correctamente.');
+        } else {
+            session()->flash('error', 'El envío no existe.');
         }
 
-        Admision::whereIn('id', $this->selectedAdmisiones)->update([
-            'estado' => 12,
-            'manifiesto' => null,
-        ]);
+        $this->resetModal();
+    }
 
-        foreach ($this->selectedAdmisiones as $id) {
-            $admision = Admision::find($id);
-            $admision->observacion = $this->observacionRetencion;
-            $admision->save();
-        }
-
-        $this->reset(['selectedAdmisiones', 'showModal', 'observacionRetencion', 'codigoRetenido']);
-        session()->flash('message', 'Los envíos seleccionados han sido retenidos.');
-
-        // Forzar recarga del navegador
-        $this->dispatch('reloadPage');
+    private function resetModal()
+    {
+        $this->showModal = false;
+        $this->admisionId = null;
+        $this->codigoRetenido = '';
+        $this->observacionRetencion = '';
     }
 
     public function render()
-{
-    $admisiones = Admision::where('estado', 12)
-        ->where(function ($query) {
-            $query->where('codigo', 'like', '%' . $this->searchTerm . '%')
-                  ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
-        })
-        ->orderBy('manifiesto', 'desc')
-        ->paginate($this->perPage);
+    {
+        $admisiones = Admision::where('estado', 12)
+            ->where(function ($query) {
+                $query->where('codigo', 'like', '%' . $this->searchTerm . '%')
+                      ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
+            })
+            ->orderBy('manifiesto', 'desc')
+            ->paginate($this->perPage);
 
-    $this->currentPageIds = $admisiones->pluck('id')->toArray();
+        $this->currentPageIds = $admisiones->pluck('id')->toArray();
 
-    return view('livewire.enviosretenidos', [
-        'admisiones' => $admisiones,
-    ]);
-}
-
+        return view('livewire.enviosretenidos', [
+            'admisiones' => $admisiones,
+        ]);
+    }
 }
