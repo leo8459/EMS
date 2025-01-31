@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use Illuminate\Support\Facades\Auth;
 
 class Enviosretenidos extends Component
 {
@@ -47,7 +49,13 @@ class Enviosretenidos extends Component
         } else {
             session()->flash('error', 'El envío no existe.');
         }
-
+        // Registrar el evento
+        Eventos::create([
+            'accion' => 'Devolver Envio Retenido',
+            'descripcion' => 'El Envio fue Devuelto a Inventario',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
         $this->resetModal();
     }
 
@@ -64,7 +72,7 @@ class Enviosretenidos extends Component
         $admisiones = Admision::where('estado', 12)
             ->where(function ($query) {
                 $query->where('codigo', 'like', '%' . $this->searchTerm . '%')
-                      ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
+                    ->orWhere('manifiesto', 'like', '%' . $this->searchTerm . '%');
             })
             ->orderBy('manifiesto', 'desc')
             ->paginate($this->perPage);

@@ -70,7 +70,7 @@
                                             <td>{{ $admisione->observacion_entrega ?: $admisione->observacion }}</td>
                                             <td>
                                                 <button class="btn btn-warning" wire:click="openRetenerModal({{ $admisione->id }})">
-                                                    Retener
+                                                    DEVOLVER
                                                 </button>
                                             </td>
                                         </tr>
