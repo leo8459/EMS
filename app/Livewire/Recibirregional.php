@@ -10,6 +10,7 @@ use App\Models\Eventos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache; // Asegúrate de incluir esto
 use Carbon\Carbon;
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 class Recibirregional extends Component
 {
@@ -221,6 +222,12 @@ class Recibirregional extends Component
                     'peso' => $admision->peso_ems ?? $admision->peso ?? 0.0,
                     'observacion' => $admision->observacion ?? 'Sin observación',
                     'fecha_recibido' => now(),
+                ]);
+                Historico::create([
+                    'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                    'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                    'id_estado_actualizacion' => 4, // Estado inicial: 1
+                    'estado_actualizacion' => ' "Operador" en posesión del envío', // Descripción del estado
                 ]);
             }
         }

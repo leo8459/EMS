@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 
 
@@ -119,6 +120,12 @@ class Recibir extends Component
                         'peso' => $admision->peso_ems ?? $admision->peso ?? 0.0,
                         'observacion' => $data['observacion'] ?? 'Sin observación', // Usa la observación del formulario
                         'fecha_recibido' => now(),
+                    ]);
+                    Historico::create([
+                        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                        'id_estado_actualizacion' => 4, // Estado inicial: 1
+                        'estado_actualizacion' => ' "Operador" en posesión del envío', // Descripción del estado
                     ]);
                 }
     

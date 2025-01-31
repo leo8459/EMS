@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Eventos;
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 class Inventarioventanilla extends Component
 {
@@ -67,6 +68,12 @@ class Inventarioventanilla extends Component
                         'descripcion' => 'El envio fue recibido por ventanilla.',
                         'codigo' => $admision->codigo,
                         'user_id' => Auth::id(),
+                    ]);
+                    Historico::create([
+                        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                        'id_estado_actualizacion' => 10, // Estado inicial: 1
+                        'estado_actualizacion' => 'Disponible para recogida', // Descripción del estado
                     ]);
                 }
             }

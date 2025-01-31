@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 
 
@@ -161,6 +162,12 @@ public function saveAssignments()
                 'descripcion' => "Envio con " . ($cartero ? $cartero->name : 'Desconocido'),
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
+            ]);
+            Historico::create([
+                'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                'id_estado_actualizacion' => 5, // Estado inicial: 1
+                'estado_actualizacion' => 'Fuera para entrega', // Descripción del estado
             ]);
         }
     }

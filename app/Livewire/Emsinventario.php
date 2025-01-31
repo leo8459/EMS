@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 use Livewire\WithFileDownloads; // Importar el trait
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 
 
@@ -444,6 +445,12 @@ class Emsinventario extends Component
                     'codigo' => $admision->codigo,
                     'user_id' => Auth::id(),
                 ]);
+                Historico::create([
+                    'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                    'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                    'id_estado_actualizacion' => 4, // Estado inicial: 1
+                    'estado_actualizacion' => '"Operador" en posesión del envío', // Descripción del estado
+                ]);
             }
     
             // Emitir evento para recargar la página
@@ -529,6 +536,12 @@ class Emsinventario extends Component
                 'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
+            ]);
+            Historico::create([
+                'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                'id_estado_actualizacion' => 2, // Estado inicial: 1
+                'estado_actualizacion' => 'En Transito', // Descripción del estado
             ]);
         }
         $this->dispatch('reloadPage');
@@ -728,6 +741,7 @@ class Emsinventario extends Component
                     'codigo' => $admision->codigo,
                     'user_id' => Auth::id(),
                 ]);
+                
             }
 
             // Combinar las admisiones existentes con las nuevas

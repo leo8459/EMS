@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Admision;
 use Livewire\WithFileUploads;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 
 
 
@@ -76,7 +77,13 @@ class Entregarenviosfirma extends Component
                 'codigo' => $this->admision->codigo,
                 'user_id' => auth()->id(),
             ]);
-    
+            Historico::create([
+                'numero_guia' => $this->admision->codigo, // Usar $this-> para acceder a la propiedad
+                'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                'id_estado_actualizacion' => 6, // Estado inicial: 7 (Sin acceso al lugar de entrega)
+                'estado_actualizacion' => 'Entregado al destinatario', // Descripción del estado
+            ]);
+            
             session()->flash('message', 'Admisión entregada correctamente.');
     
             // Redirigir según el rol del usuario
@@ -141,6 +148,12 @@ public function return()
         'descripcion' => 'La admisión fue marcada como Return y el usuario asignado fue eliminado.',
         'codigo' => $this->admision->codigo,
         'user_id' => auth()->id(),
+    ]);
+    Historico::create([
+        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+        'id_estado_actualizacion' => 7, // Estado inicial: 1
+        'estado_actualizacion' => ' Sin acceso al lugar de entrega', // Descripción del estado
     ]);
 
     session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
