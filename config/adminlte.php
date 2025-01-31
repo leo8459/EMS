@@ -345,35 +345,30 @@ return [
         ],
         [
             'text' => 'Admision',
-            'icon' => 'fas fa-users',
+            'icon' => 'fas fa-landmark',
             'can'  => 'generar.admision',
             'submenu' => [
                 [
                     'text' => 'Crear Admision',
                     'url' => 'iniciar',
                     'can'  => 'generar.admision',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-user-plus',
                 ],
                 [
                     'text' => 'Enviados Expedicion',
                     'url' => 'inventario',
                     'can'  => 'generar.admision',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-truck',
                 ],
                 [
                     'text' => 'Inventario Admision',
                     'url' => 'admisionesgeneradas',
                     'can'  => 'generar.admision',
-                    'icon' => 'fas fa-user',
-                ],
-                [
-                    'text' => 'Tarifario',
-                    'url' => 'tarifas',
-                    'can'  => 'generar.admision',
-                    'icon' => 'fas fa-user',
+                    'route' => 'inventario-admision',
                 ],
             ],
         ],
+        
         [
             'text' => 'EMS',
             'icon' => 'fas fa-users',
@@ -382,38 +377,38 @@ return [
                 [
                     'text' => 'Recibir Admision',
                     'url' => 'recibir',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-inbox',
                 ],
                 [
                     'text' => 'Inventario EMS',
                     'url' => 'emsinventario',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-boxes',
                 ],
                 [
                     'text' => 'Envios Encamino',
                     'url' => 'encaminocartero',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-truck',
                 ],
                 [
                     'text' => 'Envios Encamino a Regional',
                     'url' => 'recibirregional',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-route',
                 ],
                 [
                     'text' => 'Entregados',
                     'url' => 'entregadosemsjota',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-check-circle',
                 ],
                 
                 [
                     'text' => 'Expedicion',
                     'url' => 'expedicion',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-shipping-fast',
                 ],
                 [
                     'text' => 'Envios Retenidos',
                     'url' => 'enviosretenidos',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-exclamation-triangle',
                 ],
                 // [
                 //     'text' => 'Envios Entregados',
@@ -422,6 +417,7 @@ return [
                 // ],
             ],
         ],
+           
         [
             'text' => 'Carteros',
             'icon' => 'fas fa-users',
@@ -431,13 +427,13 @@ return [
                     'text' => 'Envios Entregados',
                     'url' => 'entregarcartero',
                     'can'  => 'ver.porentregar',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-check-circle',
                 ],
                 [
                     'text' => 'En camino',
                     'url' => 'encaminocarteroentrega',
                     'can'  => 'ver.encaminocarteros',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-truck',
                 ],
                 // [
                 //     'text' => 'Envios Encamino',
@@ -446,47 +442,39 @@ return [
                 // ],
             ],
         ],
+       
         [
             'text' => 'Ventanilla',
-            'icon' => 'fas fa-users',
+            'icon' => 'fas fa-landmark',
             'can'  => 'ver.ventanilla',
             'submenu' => [
                 [
                     'text' => 'Inventario',
                     'url' => 'entregasventanilla',
                     'can'  => 'ver.porentregar',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-boxes',
                 ],
                 [
                     'text' => 'Inventario Ventanilla',
                     'url' => 'inventarioventanilla',
                     'can'  => 'ver.inventario.ventanilla',
-                    'icon' => 'fas fa-user',
+                    'icon' => 'fas fa-clipboard-list',
                 ],
 
-                // [
-                //     'text' => 'En camino',
-                //     'url' => 'encaminocarteroentrega',
-                //     'can'  => 'ver.encaminocarteros',
-                //     'icon' => 'fas fa-user',
-                // ],
-                // [
-                //     'text' => 'Envios Encamino',
-                //     'url' => 'encaminocartero',
-                //     'icon' => 'fas fa-user',
-                // ],
+               
             ],
         ],
+              
         [
             'text' => 'Eventos',
             'url' => 'eventosregistro',
-            'icon' => 'fas fa-user',
+            'icon' => 'fas fa-calendar-alt',
         ],
-        [
-            'text' => 'ATT',
-            'url' => 'historicoatt',
-            'icon' => 'fas fa-user',
-        ],
+        // [
+        //     'text' => 'ATT',
+        //     'url' => 'historicoatt',
+        //     'icon' => 'fas fa-user',
+        // ],
         [
             'text' => 'Rendimiento',
             'url' => '/pulse',
