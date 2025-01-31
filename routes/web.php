@@ -150,3 +150,4 @@ Route::middleware('auth')->group(function () {
  ->name('api.admisiones.manifiesto');
 require __DIR__ . '/auth.php';
 Route::get('/busqueda/{numero_guia}', [HistoricoController::class, 'buscarPorNumeroGuia']);
+Route::get('/eventos/buscar/{codigo}', [EventosController::class, 'buscarPorCodigo']);
