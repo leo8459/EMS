@@ -147,20 +147,24 @@
                                                 </td>
                                                 <td>
                                                     @php
-                                                        // Directorio donde se almacenan las fotos
-                                                        $baseDirectory = 'storage/admisiones/';
-                                                        $extensions = ['jpg', 'jpeg', 'png', 'gif']; // Extensiones posibles
-                                                        $photoPath = null;
+                                                    $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                    $photoPath = null;
                                                 
-                                                        // Buscar archivo en las extensiones definidas
-                                                        foreach ($extensions as $ext) {
-                                                            $path = $baseDirectory . $admisione->codigo . '.' . $ext;
-                                                            if (file_exists(public_path($path))) {
-                                                                $photoPath = $path; // Ruta encontrada
-                                                                break;
-                                                            }
+                                                    foreach ($extensions as $ext) {
+                                                        // Esta es la ruta "web" (URL) para tu archivo:
+                                                        //  /storage/fotos/ELCODIGO.EXT
+                                                        $path = 'storage/fotos/' . $admisione->codigo . '.' . $ext;
+                                                
+                                                        // Físicamente el archivo está en: storage/app/public/fotos/...
+                                                        // Para validar su existencia, hacemos:
+                                                        $fullPathOnDisk = storage_path('app/public/fotos/' . $admisione->codigo . '.' . $ext);
+                                                
+                                                        if (file_exists($fullPathOnDisk)) {
+                                                            $photoPath = $path;
+                                                            break;
                                                         }
-                                                    @endphp
+                                                    }
+                                                @endphp
                                                 
                                                     @if ($photoPath)
                                                         <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">

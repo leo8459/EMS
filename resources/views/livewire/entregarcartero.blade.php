@@ -144,16 +144,25 @@
                                                 <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
                                                 <td>
                                                     @php
-                                                        $extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                                                        $photoPath = null;
-                                                        foreach ($extensions as $ext) {
-                                                            $path = 'fotos/' . $admisione->codigo . '.' . $ext;
-                                                            if (file_exists(public_path($path))) {
-                                                                $photoPath = $path;
-                                                                break;
-                                                            }
+                                                    $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                    $photoPath = null;
+                                                
+                                                    foreach ($extensions as $ext) {
+                                                        // Esta es la ruta "web" (URL) para tu archivo:
+                                                        //  /storage/fotos/ELCODIGO.EXT
+                                                        $path = 'storage/fotos/' . $admisione->codigo . '.' . $ext;
+                                                
+                                                        // Físicamente el archivo está en: storage/app/public/fotos/...
+                                                        // Para validar su existencia, hacemos:
+                                                        $fullPathOnDisk = storage_path('app/public/fotos/' . $admisione->codigo . '.' . $ext);
+                                                
+                                                        if (file_exists($fullPathOnDisk)) {
+                                                            $photoPath = $path;
+                                                            break;
                                                         }
-                                                    @endphp
+                                                    }
+                                                @endphp
+                                                
 
                                                     @if ($photoPath)
                                                         <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">

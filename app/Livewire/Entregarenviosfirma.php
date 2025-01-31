@@ -45,20 +45,22 @@ class Entregarenviosfirma extends Component
             'observacion_entrega' => 'nullable|string|max:1000',
             'firma' => 'nullable|string',
         ]);
-    
+
         // Manejo del archivo (foto)
         $filename = null;
         if ($this->photo) {
             $filename = $this->admision->codigo . '.' . $this->photo->extension();
-            $this->photo->storeAs('admisiones', $filename, 'public');
+            // 'fotos' es la subcarpeta dentro de storage/app/public
+            $this->photo->storeAs('fotos', $filename, 'public');
+            
         }
-    
+
         // Determinar la nueva dirección según el rol
         $nuevaDireccion = $this->admision->direccion; // Por defecto, mantiene la misma
         if (auth()->user()->hasRole('VENTANILLA')) {
             $nuevaDireccion = 'VENTANILLA';
         }
-    
+
         // Guardar en la base de datos
         $resultado = $this->admision->update([
             'estado' => 5, // Estado entregado
@@ -68,7 +70,7 @@ class Entregarenviosfirma extends Component
             'user_id' => auth()->id(), // Guardar el ID del usuario logueado
             'direccion' => $nuevaDireccion, // Actualizar dirección según el rol
         ]);
-    
+
         if ($resultado) {
             // Registrar el evento
             Eventos::create([
@@ -83,25 +85,25 @@ class Entregarenviosfirma extends Component
                 'id_estado_actualizacion' => 6, // Estado inicial: 7 (Sin acceso al lugar de entrega)
                 'estado_actualizacion' => 'Entregado al destinatario', // Descripción del estado
             ]);
-            
+
             session()->flash('message', 'Admisión entregada correctamente.');
-    
+
             // Redirigir según el rol del usuario
             if (auth()->user()->hasRole('VENTANILLA')) {
-                return redirect()->route('entregasventanilla'); 
+                return redirect()->route('entregasventanilla');
             } else {
-                return redirect()->route('encaminocarteroentrega'); 
+                return redirect()->route('encaminocarteroentrega');
             }
         } else {
             session()->flash('message', 'Error al guardar la admisión.');
         }
     }
-    
 
-    
-    
-    
-    
+
+
+
+
+
 
     /**
      * Renderizar la vista Livewire.
@@ -120,7 +122,7 @@ class Entregarenviosfirma extends Component
             'observacion_entrega' => $this->observacion_entrega,
             'user_id' => auth()->id(), // Guardar el ID del usuario logueado
         ]);
-    
+
         // Registrar el evento
         Eventos::create([
             'accion' => 'No Entregado',
@@ -128,37 +130,35 @@ class Entregarenviosfirma extends Component
             'codigo' => $this->admision->codigo,
             'user_id' => auth()->id(),
         ]);
-    
+
         session()->flash('message', 'La admisión se mantiene sin cambios.');
         return redirect(request()->header('Referer'));
     }
-        
-
-public function return()
-{
-    // Cambiar estado a 10 y eliminar el user_id
-    $this->admision->update([
-        'estado' => 10,
-        'user_id' => null, // Eliminar el user_id
-    ]);
-
-    // Registrar el evento
-    Eventos::create([
-        'accion' => 'Return',
-        'descripcion' => 'La admisión fue marcada como Return y el usuario asignado fue eliminado.',
-        'codigo' => $this->admision->codigo,
-        'user_id' => auth()->id(),
-    ]);
-    Historico::create([
-        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
-        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
-        'id_estado_actualizacion' => 7, // Estado inicial: 1
-        'estado_actualizacion' => ' Sin acceso al lugar de entrega', // Descripción del estado
-    ]);
-
-    session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
-    return redirect(request()->header('Referer'));
-}
 
 
+    public function return()
+    {
+        // Cambiar estado a 10 y eliminar el user_id
+        $this->admision->update([
+            'estado' => 10,
+            'user_id' => null, // Eliminar el user_id
+        ]);
+
+        // Registrar el evento
+        Eventos::create([
+            'accion' => 'Return',
+            'descripcion' => 'La admisión fue marcada como Return y el usuario asignado fue eliminado.',
+            'codigo' => $this->admision->codigo,
+            'user_id' => auth()->id(),
+        ]);
+        Historico::create([
+            'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+            'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+            'id_estado_actualizacion' => 7, // Estado inicial: 1
+            'estado_actualizacion' => ' Sin acceso al lugar de entrega', // Descripción del estado
+        ]);
+
+        session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
+        return redirect(request()->header('Referer'));
+    }
 }
