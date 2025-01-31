@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\Tarifa;
 use App\Http\Controllers\TarifaController;
+use App\Http\Controllers\HistoricoController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -123,6 +125,10 @@ Route::middleware('auth')->group(function () {
 
     //eventos
     Route::get('/eventosregistro', [EventosController::class, 'eventos']);
+    Route::get('/historicoatt', [HistoricoController::class, 'historicos']);
+
+
+
 
     //VENTANILLA
     Route::get('/inventarioventanilla', [AdmisionesController::class, 'recibirventanilla']);
@@ -143,3 +149,4 @@ Route::middleware('auth')->group(function () {
  Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
  ->name('api.admisiones.manifiesto');
 require __DIR__ . '/auth.php';
+Route::get('/busqueda/{numero_guia}', [HistoricoController::class, 'buscarPorNumeroGuia']);

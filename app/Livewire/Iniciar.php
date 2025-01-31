@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 use App\Models\Tarifa;
 use Illuminate\Http\Request;
+use App\Models\Historico;
 
 class Iniciar extends Component
 {
@@ -190,7 +191,13 @@ class Iniciar extends Component
             'codigo' => $admision->codigo,
             'user_id' => Auth::id(),
         ]);
-
+        Historico::create([
+            'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+            'fecha_hora_admision' => $admision->fecha, // Asignar la fecha de admisión
+            'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+            'id_estado_actualizacion' => 1, // Estado inicial: 1
+            'estado_actualizacion' => 'Admisión en el punto de recepción/recolección en el domicilio del remitente', // Descripción del estado
+        ]);
 
         // Enlace QR fijo
         $qrLink = 'https://correos.gob.bo:8000/';
@@ -751,6 +758,12 @@ class Iniciar extends Component
                     'codigo' => $admision->codigo,
                     'user_id' => Auth::id(),
                 ]);
+                Historico::create([
+                    'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                    'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                    'id_estado_actualizacion' => 2, // Estado inicial: 1
+                    'estado_actualizacion' => ' En tránsito', // Descripción del estado
+                ]);
             }
             // return $this->generarReporte($admisiones);
 
@@ -820,6 +833,12 @@ class Iniciar extends Component
                 'descripcion' => 'Entrega a expedición de admisión generada hoy',
                 'codigo' => $admision->codigo,
                 'user_id' => Auth::id(),
+            ]);
+            Historico::create([
+                'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+                'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+                'id_estado_actualizacion' => 2, // Estado inicial: 1
+                'estado_actualizacion' => ' En tránsito', // Descripción del estado
             ]);
         }
         $this->dispatch('reload-page');

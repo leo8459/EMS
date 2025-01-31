@@ -483,6 +483,11 @@ return [
             'icon' => 'fas fa-user',
         ],
         [
+            'text' => 'ATT',
+            'url' => 'historicoatt',
+            'icon' => 'fas fa-user',
+        ],
+        [
             'text' => 'Rendimiento',
             'url' => '/pulse',
             'can'  => 'ver.usuarios',
