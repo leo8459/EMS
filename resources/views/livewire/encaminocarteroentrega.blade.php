@@ -123,6 +123,7 @@
                                             <th>Fecha</th>
                                             <th>Observación</th>
                                             <th>Cartero</th>
+                                            <th>Imagen</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
@@ -170,6 +171,37 @@
                                                 <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
                                                 <td>
                                                     <strong>{{ $statusText }}</strong>
+                                                </td>
+                                                <td>
+                                                    @php
+                                                    $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                                                    $photoPath = null;
+                                                
+                                                    foreach ($extensions as $ext) {
+                                                        // Esta es la ruta "web" (URL) para tu archivo:
+                                                        //  /storage/fotos/ELCODIGO.EXT
+                                                        $path = 'storage/fotos/' . $admisione->codigo . '.' . $ext;
+                                                
+                                                        // Físicamente el archivo está en: storage/app/public/fotos/...
+                                                        // Para validar su existencia, hacemos:
+                                                        $fullPathOnDisk = storage_path('app/public/fotos/' . $admisione->codigo . '.' . $ext);
+                                                
+                                                        if (file_exists($fullPathOnDisk)) {
+                                                            $photoPath = $path;
+                                                            break;
+                                                        }
+                                                    }
+                                                @endphp
+                                                
+                                                    @if ($photoPath)
+                                                        <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                                                            <img src="{{ asset($photoPath) }}" alt="Foto de admisión"
+                                                                 style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                                                        </div>
+                                                        <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
+                                                    @else
+                                                        <span>Sin foto</span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('entregarenviosfirma', ['id' => $admisione->id]) }}"

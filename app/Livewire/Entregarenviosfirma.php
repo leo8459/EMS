@@ -116,24 +116,41 @@ class Entregarenviosfirma extends Component
     }
 
     public function noEntregado()
-    {
-        // Guardar sin cambiar el estado
-        $this->admision->update([
-            'observacion_entrega' => $this->observacion_entrega,
-            'user_id' => auth()->id(), // Guardar el ID del usuario logueado
-        ]);
+{
+    // Validar los datos, incluyendo la imagen (photo)
+    $this->validate([
+        'photo' => 'nullable|image|max:10240',
+        'observacion_entrega' => 'nullable|string|max:1000',
+    ]);
 
-        // Registrar el evento
-        Eventos::create([
-            'accion' => 'No Entregado',
-            'descripcion' => 'La admisión permanece en el estado actual.',
-            'codigo' => $this->admision->codigo,
-            'user_id' => auth()->id(),
-        ]);
-
-        session()->flash('message', 'La admisión se mantiene sin cambios.');
-        return redirect(request()->header('Referer'));
+    // Manejo del archivo (foto) de la misma manera que en guardarAdmision()
+    $filename = null;
+    if ($this->photo) {
+        $filename = $this->admision->codigo . '.' . $this->photo->extension();
+        // Se almacena la imagen en la subcarpeta 'fotos' dentro de storage/app/public
+        $this->photo->storeAs('fotos', $filename, 'public');
     }
+
+    // Actualizar la admisión, se mantiene el estado actual, pero se actualizan observaciones y se asigna el usuario
+    // Si deseas guardar el nombre del archivo en un campo (por ejemplo 'foto'), descomenta la siguiente línea y agrega el campo correspondiente:
+    // 'foto' => $filename,
+    $this->admision->update([
+        'observacion_entrega' => $this->observacion_entrega,
+        'user_id' => auth()->id(),
+    ]);
+
+    // Registrar el evento correspondiente
+    Eventos::create([
+        'accion' => 'No Entregado',
+        'descripcion' => 'La admisión permanece en el estado actual.',
+        'codigo' => $this->admision->codigo,
+        'user_id' => auth()->id(),
+    ]);
+
+    session()->flash('message', 'La admisión se mantiene sin cambios.');
+    return redirect(request()->header('Referer'));
+}
+
 
 
     public function return()
