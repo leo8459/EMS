@@ -5,6 +5,14 @@
 @endsection
 
 @section('content')
+
+@hasrole ('ADMINISTRADOR')
+@livewire('encaminocarteroentregaadmin')
+@endhasrole
+@hasrole ('CARTERO')
 @livewire('encaminocarteroentrega')
+@endhasrole
+
+
 @include('footer')
 @endsection

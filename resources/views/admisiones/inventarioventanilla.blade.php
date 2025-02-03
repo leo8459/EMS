@@ -6,7 +6,7 @@
 
 @section('content')
 @hasrole ('ADMINISTRADOR')
-@livewire('inventarioadmin')
+@livewire('inventarioventanillaadmin')
 @endhasrole
 @hasrole ('VENTANILLA')
 @livewire('inventarioventanilla')
