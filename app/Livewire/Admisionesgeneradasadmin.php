@@ -13,6 +13,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Session;
+
+
+
 class Admisionesgeneradasadmin extends Component
 {
     use WithPagination;
@@ -51,7 +56,19 @@ class Admisionesgeneradasadmin extends Component
             'admisiones' => $admisiones,
         ]);
     }
-    
+    public function generateBackup()
+{
+    try {
+        // Ejecutar el comando de backup
+        Artisan::call('backup:project');
+
+        // Mensaje de éxito
+        session()->flash('message', 'Backup generado exitosamente.');
+    } catch (\Exception $e) {
+        // Manejo de errores
+        session()->flash('error', 'Error al generar el backup: ' . $e->getMessage());
+    }
+}
 
 public function exportToExcel()
 {
