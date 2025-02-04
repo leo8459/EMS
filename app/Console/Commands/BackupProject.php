@@ -27,6 +27,11 @@ class BackupProject extends Command
      */
     public function handle()
     {
+        // Aumentar el tiempo máximo de ejecución a 10 minutos
+        ini_set('max_execution_time', 600);
+        // Alternativa:
+        // set_time_limit(600);
+
         // Crear la carpeta de backups si no existe
         $backupPath = storage_path('app/backups');
         if (!is_dir($backupPath)) {
@@ -53,7 +58,7 @@ class BackupProject extends Command
 
         // Generar el backup de la base de datos
         if ($isWindows) {
-            // Ruta de pg_dump en Windows (PostgreSQL 16)
+            // Ruta de pg_dump en Windows (PostgreSQL 16 por defecto)
             $pgDumpPath = '"C:\Program Files\PostgreSQL\15\bin\pg_dump.exe"';
             $pgDumpCommand = "{$pgDumpPath} -h \"{$dbHost}\" -p \"{$dbPort}\" -U \"{$dbUser}\" -F c -b -v -f \"{$dbBackupFile}\" \"{$dbName}\"";
         } else {
@@ -81,7 +86,9 @@ class BackupProject extends Command
 
         if ($isWindows) {
             // Windows - Usar WinRAR para comprimir
-            $rarCommand = "rar a -r \"{$rarFile}\" \"{$projectPath}\\*\"";
+            // -r para incluir subcarpetas
+            // -x para excluir la carpeta "storage\app\backups"
+            $rarCommand = "rar a -r \"{$rarFile}\" \"{$projectPath}\\*\" -x\"{$projectPath}\\storage\\app\\backups\\*\"";
             exec($rarCommand, $rarOutput, $rarReturnVar);
 
             if ($rarReturnVar !== 0) {
@@ -93,9 +100,11 @@ class BackupProject extends Command
             // Agregar la base de datos al RAR
             $addDbToRarCommand = "rar a \"{$rarFile}\" \"{$dbBackupFile}\"";
             exec($addDbToRarCommand);
+
         } else {
             // Linux - Usar ZIP
-            $zipCommand = "cd \"{$projectPath}\" && zip -r \"{$zipFile}\" . -x \"storage/app/backups/*.zip\"";
+            // Excluir la carpeta "storage/app/backups/*"
+            $zipCommand = "cd \"{$projectPath}\" && zip -r \"{$zipFile}\" . -x \"storage/app/backups/*\"";
             exec($zipCommand, $zipOutput, $zipReturnVar);
 
             if ($zipReturnVar !== 0) {

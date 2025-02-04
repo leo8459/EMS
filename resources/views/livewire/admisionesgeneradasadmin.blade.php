@@ -55,6 +55,19 @@
                             
                                 <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar PDF</button>
                                 <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar Excel</button>
+                                <!-- Botón para generar el backup -->
+<button type="button" class="btn btn-info mx-2" 
+wire:click="backupProject" 
+wire:loading.attr="disabled" 
+wire:target="backupProject">
+Generar Backup
+</button>
+
+<!-- Mensaje de "Espere por favor" -->
+<div wire:loading wire:target="backupProject" class="alert alert-info mt-2">
+<strong>Por favor espere</strong>, se está generando el backup...
+</div>
+
                             </div>
                             
                             
