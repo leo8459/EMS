@@ -41,6 +41,7 @@ class Admisionesgeneradasadmin extends Component
     public $endDate; // Fecha final
     public $department; // Departamento seleccionado (opcional)
 
+    public $isGeneratingBackup = false; // Para indicar si se está generando el backup
 
 
     public function render()
@@ -57,18 +58,25 @@ class Admisionesgeneradasadmin extends Component
         ]);
     }
     public function generateBackup()
-{
-    try {
-        // Ejecutar el comando de backup
-        Artisan::call('backup:project');
-
-        // Mensaje de éxito
-        session()->flash('message', 'Backup generado exitosamente.');
-    } catch (\Exception $e) {
-        // Manejo de errores
-        session()->flash('error', 'Error al generar el backup: ' . $e->getMessage());
+    {
+        $this->isGeneratingBackup = true; // Activar el indicador de carga
+        $this->dispatch('backup-started'); // Disparar evento para actualizar la vista
+    
+        try {
+            // Ejecutar el comando de backup
+            Artisan::call('backup:project');
+    
+            // Mensaje de éxito
+            session()->flash('message', 'Backup generado exitosamente.');
+        } catch (\Exception $e) {
+            // Manejo de errores
+            session()->flash('error', 'Error al generar el backup: ' . $e->getMessage());
+        }
+    
+        $this->isGeneratingBackup = false; // Desactivar el indicador de carga
+        $this->dispatch('backup-finished'); // Disparar evento para actualizar la vista
     }
-}
+    
 
 public function exportToExcel()
 {
