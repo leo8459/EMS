@@ -26,32 +26,9 @@
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                                    <div>
-                                        <!-- Botón para generar el backup -->
-                                        <button type="button" class="btn btn-primary" 
-                                            wire:click="generateBackup"
-                                            wire:loading.attr="disabled">
-                                            <span wire:loading.remove>Generar Backup</span>
-                                            <span wire:loading>Generando Backup...</span>
-                                        </button>
-                                    
-                                        <!-- Mostrar un mensaje de carga mientras el backup está en proceso -->
-                                        <div wire:loading>
-                                            <p class="text-warning">Por favor, espera... generando el backup.</p>
-                                        </div>
-                                    
-                                        <!-- Mensajes de éxito o error -->
-                                        @if (session()->has('message'))
-                                            <div class="alert alert-success">
-                                                {{ session('message') }}
-                                            </div>
-                                        @endif
-                                        @if (session()->has('error'))
-                                            <div class="alert alert-danger">
-                                                {{ session('error') }}
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <button type="button" class="btn btn-primary" wire:click="generateBackup">
+                                        Generar Backup
+                                    </button>
                                 </div>
                                 {{-- <button type="button" class="btn btn-success" wire:click="exportToExcel">Descargar Excel</button>
                                 <button type="button" class="btn btn-danger" wire:click="exportToPDF">Descargar PDF</button> --}}
