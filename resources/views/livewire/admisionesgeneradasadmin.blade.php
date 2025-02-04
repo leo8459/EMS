@@ -23,7 +23,8 @@
                         <div class="card-header">
                             <div class="d-flex align-items-center">
                                 <div class="float-left d-flex align-items-center">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                        class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
 
@@ -34,44 +35,121 @@
                             </div>
                             <div class="form-inline">
                                 <label for="department">Departamento:</label>
-    <select id="department" wire:model="department" class="form-control mx-2">
-        <option value="">Todos</option> <!-- Opción para incluir todos los departamentos -->
-        <option value="LA PAZ">LA PAZ</option>
-        <option value="COCHABAMBA">COCHABAMBA</option>
-        <option value="SANTA CRUZ">SANTA CRUZ</option>
-        <option value="ORURO">ORURO</option>
-        <option value="POTOSI">POTOSI</option>
-        <option value="CHUQUISACA">CHUQUISACA</option>
-        <option value="BENI">BENI</option>
-        <option value="PANDO">PANDO</option>
-        <option value="TARIJA">TARIJA</option>
-    </select>
+                                <select id="department" wire:model="department" class="form-control mx-2">
+                                    <option value="">Todos</option>
+                                    <!-- Opción para incluir todos los departamentos -->
+                                    <option value="LA PAZ">LA PAZ</option>
+                                    <option value="COCHABAMBA">COCHABAMBA</option>
+                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                    <option value="ORURO">ORURO</option>
+                                    <option value="POTOSI">POTOSI</option>
+                                    <option value="CHUQUISACA">CHUQUISACA</option>
+                                    <option value="BENI">BENI</option>
+                                    <option value="PANDO">PANDO</option>
+                                    <option value="TARIJA">TARIJA</option>
+                                </select>
 
                                 <label for="startDate">Desde:</label>
                                 <input type="date" id="startDate" wire:model="startDate" class="form-control mx-2">
-                            
+
                                 <label for="endDate">Hasta:</label>
                                 <input type="date" id="endDate" wire:model="endDate" class="form-control mx-2">
-                            
-                                <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar PDF</button>
-                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar Excel</button>
+
+                                <button type="button" class="btn btn-danger mx-2" wire:click="exportToPDF">Exportar
+                                    PDF</button>
+                                <button type="button" class="btn btn-success" wire:click="exportToExcel">Exportar
+                                    Excel</button>
                                 <!-- Botón para generar el backup -->
-<button type="button" class="btn btn-info mx-2" 
-wire:click="backupProject" 
-wire:loading.attr="disabled" 
-wire:target="backupProject">
-Generar Backup
-</button>
+                                <button type="button" class="btn btn-info mx-2" wire:click="backupProject"
+                                    wire:loading.attr="disabled" wire:target="backupProject">
+                                    Generar Backup
+                                </button>
 
-<!-- Mensaje de "Espere por favor" -->
-<div wire:loading wire:target="backupProject" class="alert alert-info mt-2">
-<strong>Por favor espere</strong>, se está generando el backup...
-</div>
+                                <!-- Mensaje de "Espere por favor" -->
+                             <!-- Overlay de carga: Se muestra mientras se ejecuta backupProject -->
+                             <div 
+                             x-data="{ progress: 0, interval: null }"
+                             x-on:livewire:loading.start="
+                                 progress = 0;
+                                 interval = setInterval(() => {
+                                     if(progress < 90) { 
+                                         progress += 1; 
+                                     }
+                                 }, 100);
+                             "
+                             x-on:livewire:loading.stop="
+                                 progress = 100;
+                                 clearInterval(interval);
+                             "
+                             wire:loading wire:target="backupProject"
+                             class="full-screen-overlay"
+                         >
+                             <div class="overlay-content">
+                                 <h3>Por favor espere</h3>
+                                 <p>Se está generando el backup...</p>
+                                 <div class="progress">
+                                     <div 
+                                         class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         :style="'width: ' + progress + '%'" 
+                                         :aria-valuenow="progress" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                         <span x-text="progress + '%'"></span>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+<script src="//unpkg.com/alpinejs" defer></script>
 
+<!-- Asegúrate de tener cargado Alpine.js, por ejemplo: -->
+<!-- <script src="//unpkg.com/alpinejs" defer></script> -->
+
+<style>
+    /* Overlay que ocupa toda la pantalla */
+    .full-screen-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+        display: flex;
+        justify-content: center; /* Centra horizontalmente */
+        align-items: center;     /* Centra verticalmente */
+        z-index: 9999;
+    }
+    .overlay-content {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        width: 300px;   /* Ancho fijo */
+        margin: auto;   /* Asegura que se centre */
+    }
+    /* Estilos para la barra de progreso */
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+    .progress-bar {
+        background-color: #007bff;
+        height: 20px;
+        line-height: 20px;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        transition: width 0.1s linear; /* Transición suave */
+    }
+</style>
+                                
                             </div>
-                            
-                            
-                            
+
+
+
                         </div>
                         @if (session()->has('message'))
                             <div class="alert alert-success">
@@ -104,7 +182,7 @@ Generar Backup
                                         <th class="d-none d-lg-table-cell">País</th>
                                         <th>Fecha</th>
                                         @hasrole('ADMINISTRADOR')
-                                        <th>Acciones</th>
+                                            <th>Acciones</th>
                                         @endhasrole
 
                                     </tr>
@@ -113,7 +191,8 @@ Generar Backup
                                     @foreach ($admisiones as $admisione)
                                         <tr>
                                             <td>
-                                                <input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}" />
+                                                <input type="checkbox" wire:model="selectedAdmisiones"
+                                                    value="{{ $admisione->id }}" />
                                             </td>
                                             <td>{{ $loop->iteration }}</td> <!-- Mostrar número de fila -->
                                             <td>{{ $admisione->origen }}</td>
@@ -124,7 +203,7 @@ Generar Backup
                                             <td>{{ $admisione->precio }}</td>
                                             <td>{{ $admisione->destino }}</td>
                                             <td>{{ $admisione->codigo }}</td>
-                                           
+
                                             <td>{{ $admisione->direccion }}</td>
                                             <td>{{ $admisione->provincia }}</td>
                                             <td>{{ $admisione->ciudad }}</td>
@@ -133,10 +212,11 @@ Generar Backup
 
                                             <td>
                                                 {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
- @hasrole('ADMINISTRADOR')
- <button type="button" class="btn btn-warning" wire:click="devolverAdmision({{ $admisione->id }})">Devolver a admisión</button>
-
-                                                    @endhasrole
+                                                @hasrole('ADMINISTRADOR')
+                                                    <button type="button" class="btn btn-warning"
+                                                        wire:click="devolverAdmision({{ $admisione->id }})">Devolver a
+                                                        admisión</button>
+                                                @endhasrole
                                             </td>
                                         </tr>
                                     @endforeach
@@ -152,3 +232,4 @@ Generar Backup
         </div>
     </section>
 </div>
+
