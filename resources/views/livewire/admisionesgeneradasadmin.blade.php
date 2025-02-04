@@ -26,9 +26,7 @@
                                     <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
 
                                     <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                                    <button type="button" class="btn btn-primary" wire:click="generateBackup">
-                                        Generar Backup
-                                    </button>
+
                                 </div>
                                 {{-- <button type="button" class="btn btn-success" wire:click="exportToExcel">Descargar Excel</button>
                                 <button type="button" class="btn btn-danger" wire:click="exportToPDF">Descargar PDF</button> --}}
