@@ -11,5 +11,8 @@
 @hasrole ('VENTANILLA')
 @livewire('inventarioventanilla')
 @endhasrole
+@hasrole ('EMS')
+@livewire('inventarioventanilla')
+@endhasrole
 @include('footer')
 @endsection
