@@ -72,24 +72,19 @@ class Recibirregional extends Component
         $hasNotifications = false; // Indicador de notificaciones
     
         foreach ($types as $type) {
-            $notificaciones = Admision::where('notificacion', $type)
+            $count = Admision::where('notificacion', $type)
                 ->whereIn('estado', [7, 3, 10])
                 ->where('origen', $userCity)
                 ->whereNotNull('notificacion')
-                ->get();
+                ->count(); // Contamos cuántos hay en total de este tipo
     
-            if ($notificaciones->isNotEmpty()) {
+            if ($count > 0) {
                 $hasNotifications = true; // Marca que hay notificaciones
-                $detalleNotificaciones = $notificaciones->pluck('codigo')->implode(', ');
-                toastr()->error("Se encontraron admisiones con notificaciones de tipo \"$type\" en los siguientes registros: $detalleNotificaciones");
+                toastr()->error("Se encontraron $count admisiones con notificación de tipo \"$type\".");
             }
         }
-    
-        // Si no hay notificaciones, evita mostrar mensajes
-        if (!$hasNotifications) {
-            // No se hace nada, ya que no hay advertencias que mostrar
-        }
     }
+    
     
 
 
