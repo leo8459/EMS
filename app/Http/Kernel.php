@@ -44,7 +44,11 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-
+    protected $routeMiddleware = [
+        // ...
+        'simple.token' => \App\Http\Middleware\CheckSimpleToken::class,
+    ];
+    
     /**
      * The application's middleware aliases.
      *

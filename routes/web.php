@@ -150,6 +150,9 @@ Route::middleware('auth')->group(function () {
  Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
  ->name('api.admisiones.manifiesto');
 require __DIR__ . '/auth.php';
-Route::get('/busqueda/{numero_guia}', [HistoricoController::class, 'buscarPorNumeroGuia']);
+Route::middleware(['simple.token'])->group(function() {
+    Route::get('/busqueda/{numero_guia}', [HistoricoController::class, 'buscarPorNumeroGuia']);
+});
+
 Route::get('/eventos/buscar/{codigo}', [EventosController::class, 'buscarPorCodigo']);
 Route::get('/eventos', [EventosController::class, 'listarEventos']);
