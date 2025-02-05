@@ -11,5 +11,8 @@
 @hasrole ('CARTERO')
 @livewire('entregarcartero')
 @endhasrole
+@hasrole ('EMS')
+@livewire('entregarcartero')
+@endhasrole
 @include('footer')
 @endsection

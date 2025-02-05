@@ -12,7 +12,9 @@
 @hasrole ('CARTERO')
 @livewire('encaminocarteroentrega')
 @endhasrole
-
+@hasrole ('EMS')
+@livewire('encaminocarteroentrega')
+@endhasrole
 
 @include('footer')
 @endsection
