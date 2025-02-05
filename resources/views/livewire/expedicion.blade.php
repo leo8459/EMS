@@ -22,12 +22,13 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                    class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                <input type="text" wire:model="searchTerm" placeholder="Buscar..." class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
                                 <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                                 <button type="button" class="btn btn-danger ml-3" wire:click="openRetenerModal">Retener Envío</button>
+                                <button type="button" class="btn btn-warning ml-3" wire:click="openDeleteModal">Eliminar Pre-Saca</button>
                             </div>
                         </div>
+                        
                         @if (session()->has('message'))
                             <div class="alert alert-success">
                                 {{ session('message') }}
@@ -38,6 +39,27 @@
                                 {{ session('error') }}
                             </div>
                         @endif
+                        
+                        <div class="modal fade @if($showDeleteModal) show d-block @endif" style="background-color: rgba(0, 0, 0, 0.5);">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Eliminar Pre-Saca</h5>
+                                        <button type="button" class="close" wire:click="$set('showDeleteModal', false)">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label>Ingrese el Manifiesto:</label>
+                                            <input type="text" class="form-control" wire:model="manifiestoEliminar" placeholder="Número de manifiesto">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" wire:click="$set('showDeleteModal', false)">Cerrar</button>
+                                        <button type="button" class="btn btn-danger" wire:click="eliminarPreSaca">Eliminar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <table class="table table-striped table-hover">
                                 <thead>
@@ -52,6 +74,8 @@
                                         <th>Manifiesto</th>
                                         <th>Fecha</th>
                                         <th>Observación</th>
+                                        <th>Acciones</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -70,6 +94,9 @@
                                             <td>{{ $admisione->manifiesto }}</td>
                                             <td>{{ $admisione->fecha }}</td>
                                             <td>{{ $admisione->observacion_entrega ?: $admisione->observacion }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" wire:click="eliminarManifiesto({{ $admisione->id }})">Eliminar Manifiesto</button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -83,7 +110,9 @@
             </div>
         </div>
     </section>
-
+   
+    
+    
     <!-- Modal -->
     <div class="modal fade @if($showModal) show d-block @endif" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">

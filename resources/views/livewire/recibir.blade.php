@@ -84,7 +84,7 @@
                                     <th>Servicio</th>
                                     <th>Tipo Correspondencia</th>
                                     <th class="d-none d-lg-table-cell">Cantidad</th>
-                                    <th>Peso</th>
+                                    <th>Peso (kg)</th>
                                     <th>Destino</th>
                                     <th>Código</th>
                                     <th class="d-none d-lg-table-cell">Dirección</th>
@@ -150,7 +150,7 @@
                                                             </button>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="peso_ems_{{ $id }}">Peso EMS</label>
+                                                            <label for="peso_ems_{{ $id }}">Peso (kg) EMS</label>
                                                             <input type="text" id="peso_ems_{{ $id }}"
                                                                 class="form-control"
                                                                 wire:model.defer="admissionData.{{ $id }}.peso_ems">

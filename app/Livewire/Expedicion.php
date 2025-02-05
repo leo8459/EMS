@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admision;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Eventos; // Asegúrate de importar el modelo Eventos
+use App\Models\Eventos;
 
 class Expedicion extends Component
 {
@@ -21,6 +21,8 @@ class Expedicion extends Component
     public $showModal = false;
     public $codigoRetenido;
     public $observacionRetencion;
+    public $manifiestoEliminar;
+    public $showDeleteModal;
 
     public function openRetenerModal()
     {
@@ -40,13 +42,11 @@ class Expedicion extends Component
             return;
         }
 
-        // Actualizar estado de las admisiones seleccionadas
         Admision::whereIn('id', $this->selectedAdmisiones)->update([
             'estado' => 12,
             'manifiesto' => null,
         ]);
 
-        // Registrar eventos y actualizar observación por cada admisión
         foreach ($this->selectedAdmisiones as $id) {
             $admision = Admision::find($id);
             if ($admision) {
@@ -65,7 +65,42 @@ class Expedicion extends Component
         $this->reset(['selectedAdmisiones', 'showModal', 'observacionRetencion', 'codigoRetenido']);
         session()->flash('message', 'Los envíos seleccionados han sido retenidos.');
 
-        // Forzar recarga del navegador
+        $this->dispatch('reloadPage');
+    }
+    public function eliminarManifiesto($id)
+    {
+        $admision = Admision::find($id);
+        
+        if (!$admision) {
+            session()->flash('error', 'No se encontró el envío.');
+            return;
+        }
+
+        $admision->update(['manifiesto' => null, 'estado' => 3]);
+        
+        session()->flash('message', 'El manifiesto del envío ha sido eliminado y cambiado a estado 3.');
+        $this->dispatch('reloadPage');
+    }
+      public function eliminarPreSaca()
+    {
+        if (empty($this->manifiestoEliminar)) {
+            session()->flash('error', 'Por favor, introduce un número de manifiesto.');
+            return;
+        }
+
+        $admisiones = Admision::where('manifiesto', $this->manifiestoEliminar)->get();
+        
+        if ($admisiones->isEmpty()) {
+            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
+            return;
+        }
+
+        foreach ($admisiones as $admision) {
+            $admision->update(['manifiesto' => null, 'estado' => 3]);
+        }
+
+        $this->showDeleteModal = false;
+        session()->flash('message', 'El manifiesto ha sido eliminado y los envíos han cambiado a estado 3.');
         $this->dispatch('reloadPage');
     }
 
@@ -89,3 +124,4 @@ class Expedicion extends Component
         ]);
     }
 }
+

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +29,12 @@
             text-transform: uppercase;
             color: #222;
             letter-spacing: 1px;
+        }
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 20px;
         }
         table {
             width: 100%;
@@ -75,7 +81,14 @@
     <div class="header">
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/CABECERA.jpg'))) }}" alt="Cabecera Agencia Boliviana de Correos">
     </div>
+    
+    <div class="user-info">
+        <strong>Usuario:</strong> {{ Auth::user()->name }}<br>
+        <strong>Fecha de generación:</strong> {{ now()->format('d/m/Y H:i') }}
+    </div>
+    
     <h1 class="titulo">Reporte de Admisiones</h1>
+    
     <table>
         <thead>
             <tr>
@@ -100,6 +113,7 @@
             @endforeach
         </tbody>
     </table>
+    
     <div class="footer">
         <p>Reporte generado automáticamente por el sistema de EMS.</p>
         <p>© {{ date('Y') }} Agencia Boliviana de Correos. Todos los derechos reservados.</p>

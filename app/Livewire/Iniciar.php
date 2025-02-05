@@ -916,4 +916,29 @@ class Iniciar extends Component
         // Generar el nuevo código
         $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
     }
+    public function deleteAdmision()
+{
+    if ($this->admisionId) {
+        $admision = Admision::findOrFail($this->admisionId);
+
+        // Cambiar el estado de la admisión a inactivo (soft delete)
+        $admision->update(['estado' => 0]);
+
+        // Registrar el evento de eliminación
+        Eventos::create([
+            'accion' => 'Baja',
+            'descripcion' => 'Se dio de baja a la admisión',
+            'codigo' => $admision->codigo,
+            'user_id' => Auth::id(),
+        ]);
+
+        // Mensaje de éxito y cerrar el modal
+        session()->flash('message', 'Admisión eliminada correctamente.');
+        $this->dispatch('close-edit-modal'); // Cierra el modal
+        $this->resetInputFields(); // Limpia los campos del formulario
+    } else {
+        session()->flash('error', 'No se pudo eliminar la admisión.');
+    }
+}
+
 }

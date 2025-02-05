@@ -22,9 +22,9 @@
                                     Nuevo Admision
                                 </button>
                                 <button type="button" class="btn btn-warning mt-2"
-                                    wire:click="entregarAExpedicion">Entregar a Expedición</button>
+                                    wire:click="entregarAExpedicion">Entregar solo seleccionadas a Expedición</button>
                                 <button type="button" class="btn btn-primary mt-2" wire:click="abrirModalEntregarHoy">
-                                    Entregar a Expedición Generado Hoy
+                                    Entregar todo a expedicion generado hoy
                                 </button>
 
 
@@ -126,7 +126,11 @@
                                                         onclick="abrirWhatsApp('{{ $admisione->telefono_remitente }}', '{{ $admisione->nombre_destinatario }}', '{{ $admisione->codigo }}')">
                                                         Mandar Mensaje
                                                     </button>
-
+                                                    <button type="button" class="btn btn-danger"
+                                                        wire:click="delete({{ $admisione->id }})"
+                                                        onclick="return confirm('¿Estás seguro de eliminar esta admisión?')">
+                                                        Eliminar
+                                                    </button>
 
                                                 </td>
                                             </tr>
@@ -456,7 +460,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form wire:submit.prevent="store">
+                    <form wire:submit.prevent="update">
 
                         <!-- Sección DATOS -->
                         <h5 class="mt-3" style="color: #003366;">DATOS</h5>
@@ -658,6 +662,11 @@
                                     <input type="text" class="form-control" id="pais" wire:model="pais">
                                 </div>
                             </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                <button type="submit" class="btn btn-primary" wire:click="update">Guardar</button>
+                            </div>
+
                         </div>
 
 
@@ -898,5 +907,9 @@
     window.addEventListener('reload-page', () => {
         location.reload();
     });
+    document.addEventListener('livewire:load', function() {
+        window.addEventListener('close-edit-modal', function() {
+            $('#updateDespachoModal').modal('hide');
+        });
+    });
 </script>
-
