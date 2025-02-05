@@ -410,11 +410,11 @@ return [
                     'url' => 'enviosretenidos',
                     'icon' => 'fas fa-exclamation-triangle',
                 ],
-                // [
-                //     'text' => 'Envios Entregados',
-                //     'url' => 'entregarcartero',
-                //     'icon' => 'fas fa-user',
-                // ],
+                [
+                    'text' => 'Envios Observados',
+                    'url' => 'admisionesobservadas',
+                    'icon' => 'fas fa-user',
+                ],
             ],
         ],
            

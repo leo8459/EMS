@@ -77,7 +77,10 @@ class AdmisionesController extends Controller
     {
         return view('admisiones.enviosretenidos');
     }
-
+    public function vernotificados ()
+    {
+        return view('admisiones.admisionesobservadas');
+    }
 
 
 

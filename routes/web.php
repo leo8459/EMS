@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/enviosoficiales', [AdmisionesController::class, 'crearoficiales']);
     Route::get('/expedicion', [AdmisionesController::class, 'verexpedicion']);
     Route::get('/enviosretenidos', [AdmisionesController::class, 'verretenidos']);
+    Route::get('/admisionesobservadas', [AdmisionesController::class, 'vernotificados']);
 
    
     
