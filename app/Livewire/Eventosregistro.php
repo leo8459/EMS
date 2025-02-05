@@ -4,9 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Admision;
-use Livewire\WithFileUploads;
 use App\Models\Eventos;
+use App\Models\User;
 
 class Eventosregistro extends Component
 {
@@ -14,26 +13,32 @@ class Eventosregistro extends Component
     
     public $currentPageIds = [];
     public $searchTerm = '';
+    public $searchUserId = ''; // Nuevo campo para búsqueda por usuario
     public $perPage = 10;
-    public $selectedAdmisiones = []; // Array para almacenar las admisiones seleccionadas
-    public $assignedAdmisiones = []; // Array para almacenar las admisiones asignadas temporalmente
-    public $selectedCarteroForAll; // Nuevo campo para seleccionar cartero para todas las admisiones
-
-
 
     public function render()
     {
-        // Obtener todos los registros de la tabla 'eventos', ordenados por 'created_at' de forma descendente
-        $admisiones = Eventos::where('codigo', 'like', '%' . $this->searchTerm . '%') // Filtrar por código si hay búsqueda
-            ->orderBy('created_at', 'desc') // Ordenar por 'created_at' de forma descendente
-            ->paginate($this->perPage); // Paginación
-    
-        // Almacena los IDs de la página actual
-        $this->currentPageIds = $admisiones->pluck('id')->toArray();
-    
+        $query = Eventos::query();
+
+        // Filtro por código
+        if (!empty($this->searchTerm)) {
+            $query->where('codigo', 'like', '%' . $this->searchTerm . '%');
+        }
+
+        // Filtro por usuario
+        if (!empty($this->searchUserId)) {
+            $query->where('user_id', $this->searchUserId);
+        }
+
+        // Ordenar y paginar los resultados
+        $admisiones = $query->orderBy('created_at', 'desc')->paginate($this->perPage);
+
+        // Obtener los usuarios para el select
+        $usuarios = User::all();
+
         return view('livewire.eventosregistro', [
             'admisiones' => $admisiones,
+            'usuarios' => $usuarios, // Pasar usuarios a la vista
         ]);
     }
-    
 }
