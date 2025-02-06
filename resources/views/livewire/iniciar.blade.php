@@ -12,24 +12,56 @@
                     <div class="card">
                         <div class="card-header">
                             <!-- Barra de búsqueda y botón Nuevo Despacho -->
-                            <div class="d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                    class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
-
-                                <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                                <button type="button" class="btn btn-success" data-toggle="modal"
-                                    data-target="#createPaqueteModal">
+                            <div class="d-flex flex-wrap align-items-center mb-3">
+                                <!-- Campo de búsqueda -->
+                                <div class="flex-grow-1 me-2 mb-2 mb-lg-0">
+                                    <input
+                                        type="text"
+                                        wire:model="searchTerm"
+                                        placeholder="Buscar..."
+                                        class="form-control"
+                                        wire:keydown.enter="$refresh"
+                                    >
+                                </div>
+                            
+                                <!-- Botón Buscar -->
+                                <button
+                                    type="button"
+                                    class="btn btn-primary me-2 mb-2 mb-lg-0"
+                                    wire:click="$refresh"
+                                >
+                                    Buscar
+                                </button>
+                            
+                                <!-- Botón Nuevo -->
+                                <button
+                                    type="button"
+                                    class="btn btn-success me-2 mb-2 mb-lg-0"
+                                    data-toggle="modal"
+                                    data-target="#createPaqueteModal"
+                                >
                                     Nuevo Admision
                                 </button>
-                                <button type="button" class="btn btn-warning mt-2"
-                                    wire:click="entregarAExpedicion">Entregar solo seleccionadas a Expedición</button>
-                                <button type="button" class="btn btn-primary mt-2" wire:click="abrirModalEntregarHoy">
+                            
+                                <!-- Botón Entregar seleccionadas -->
+                                <button
+                                    type="button"
+                                    class="btn btn-warning me-2 mb-2 mb-lg-0"
+                                    wire:click="entregarAExpedicion"
+                                >
+                                    Entregar solo seleccionadas a Expedición
+                                </button>
+                            
+                                <!-- Botón Entregar todo -->
+                                <button
+                                    type="button"
+                                    class="btn btn-primary mb-2 mb-lg-0"
+                                    wire:click="abrirModalEntregarHoy"
+                                >
                                     Entregar todo a expedicion generado hoy
                                 </button>
-
-
-
                             </div>
+                            
                         </div>
 
                         <!-- Mensajes de éxito o error -->
