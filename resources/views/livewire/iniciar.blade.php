@@ -15,53 +15,34 @@
                             <div class="d-flex flex-wrap align-items-center mb-3">
                                 <!-- Campo de búsqueda -->
                                 <div class="flex-grow-1 me-2 mb-2 mb-lg-0">
-                                    <input
-                                        type="text"
-                                        wire:model="searchTerm"
-                                        placeholder="Buscar..."
-                                        class="form-control"
-                                        wire:keydown.enter="$refresh"
-                                    >
+                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
+                                        class="form-control" wire:keydown.enter="$refresh">
                                 </div>
-                            
+
                                 <!-- Botón Buscar -->
-                                <button
-                                    type="button"
-                                    class="btn btn-primary me-2 mb-2 mb-lg-0"
-                                    wire:click="$refresh"
-                                >
+                                <button type="button" class="btn btn-primary me-2 mb-2 mb-lg-0" wire:click="$refresh">
                                     Buscar
                                 </button>
-                            
+
                                 <!-- Botón Nuevo -->
-                                <button
-                                    type="button"
-                                    class="btn btn-success me-2 mb-2 mb-lg-0"
-                                    data-toggle="modal"
-                                    data-target="#createPaqueteModal"
-                                >
+                                <button type="button" class="btn btn-success me-2 mb-2 mb-lg-0" data-toggle="modal"
+                                    data-target="#createPaqueteModal">
                                     Nuevo Admision
                                 </button>
-                            
+
                                 <!-- Botón Entregar seleccionadas -->
-                                <button
-                                    type="button"
-                                    class="btn btn-warning me-2 mb-2 mb-lg-0"
-                                    wire:click="entregarAExpedicion"
-                                >
+                                <button type="button" class="btn btn-warning me-2 mb-2 mb-lg-0"
+                                    wire:click="entregarAExpedicion">
                                     Entregar solo seleccionadas a Expedición
                                 </button>
-                            
+
                                 <!-- Botón Entregar todo -->
-                                <button
-                                    type="button"
-                                    class="btn btn-primary mb-2 mb-lg-0"
-                                    wire:click="abrirModalEntregarHoy"
-                                >
+                                <button type="button" class="btn btn-primary mb-2 mb-lg-0"
+                                    wire:click="abrirModalEntregarHoy">
                                     Entregar todo a expedicion generado hoy
                                 </button>
                             </div>
-                            
+
                         </div>
 
                         <!-- Mensajes de éxito o error -->
@@ -935,6 +916,16 @@
         location.reload();
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('peso').addEventListener('input', function(e) {
+            if (parseFloat(this.value) > 20) {
+                this.value = 20;
+            }
+        });
+    });
+</script>
+
 <script>
     window.addEventListener('reload-page', () => {
         location.reload();

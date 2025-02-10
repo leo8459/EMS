@@ -44,6 +44,8 @@ class Emsinventario extends Component
     public $currentManifiesto = null; // Almacena el manifiesto actual
     public $selectedTransport = 'AEREO';  // Por defecto AÉREO
     public $numeroVuelo = '';            // Campo para el número de vuelo
+    public $selectedAdmisionesList = []; // Lista de admisiones seleccionadas
+    public $showCN33Modal = false; // Controla la visibilidad del modal para CN-33
 
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
@@ -418,26 +420,26 @@ class Emsinventario extends Component
             $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
             $userCity = Auth::user()->city; // Ciudad del usuario logueado
             $admisionesInvalidas = [];
-    
+
             foreach ($admisiones as $admision) {
                 // Verificar si la ciudad o el reencaminamiento no coinciden con la ciudad del usuario logueado
                 if ($admision->reencaminamiento !== $userCity && $admision->ciudad !== $userCity) {
                     $admisionesInvalidas[] = $admision->codigo;
                 }
             }
-    
+
             if (!empty($admisionesInvalidas)) {
                 // Mostrar alerta con las admisiones que no cumplen la condición
                 $admisionesInvalidasStr = implode(', ', $admisionesInvalidas);
                 session()->flash('error', "Los siguientes envios no son de tu ciudad para mandarlo a ventanilla: {$admisionesInvalidasStr}");
                 return;
             }
-    
+
             // Continuar con el envío a ventanilla
             foreach ($admisiones as $admision) {
                 $admision->estado = 11; // Cambiar estado a 11 (ventanilla)
                 $admision->save();
-    
+
                 // Registrar el evento
                 Eventos::create([
                     'accion' => 'Mandar a ventanilla',
@@ -452,10 +454,10 @@ class Emsinventario extends Component
                     'estado_actualizacion' => '"Operador" en posesión del envío', // Descripción del estado
                 ]);
             }
-    
+
             // Emitir evento para recargar la página
             $this->dispatch('reload-page');
-    
+
             // Limpiar la selección después de procesar
             $this->selectedAdmisiones = [];
             session()->flash('message', 'Las admisiones seleccionadas se han enviado a la ventanilla.');
@@ -463,7 +465,7 @@ class Emsinventario extends Component
             session()->flash('error', 'Debe seleccionar al menos una admisión.');
         }
     }
-    
+
     public function abrirEditModal($admisionId)
     {
         $admision = Admision::find($admisionId);
@@ -741,7 +743,6 @@ class Emsinventario extends Component
                     'codigo' => $admision->codigo,
                     'user_id' => Auth::id(),
                 ]);
-                
             }
 
             // Combinar las admisiones existentes con las nuevas
@@ -793,8 +794,64 @@ class Emsinventario extends Component
             'cn-33.pdf'
         );
     }
+    public function updatedSelectedAdmisiones()
+    {
+        $this->selectedAdmisionesList = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+    }
+    public function removeFromSelection($admisionId)
+    {
+        $this->selectedAdmisiones = array_diff($this->selectedAdmisiones, [$admisionId]);
+        $this->updatedSelectedAdmisiones(); // Actualizar la lista
+    }
+    public function abrirModalCN33()
+    {
+        if (count($this->selectedAdmisiones) > 0) {
+            $this->showCN33Modal = true;
+        } else {
+            session()->flash('error', 'Debe seleccionar al menos una admisión.');
+        }
+    }
 
 
+    public function añadirACN33()
+    {
+        if (empty($this->selectedAdmisiones)) {
+            session()->flash('error', 'Debe seleccionar al menos una admisión.');
+            return;
+        }
+
+        // Validar que el usuario haya ingresado o generado un manifiesto
+        if (empty($this->manualManifiesto)) {
+            // Si no hay manifiesto manual, generar uno automáticamente
+            $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
+        }
+
+        // Obtener las admisiones seleccionadas y actualizar su estado y manifiesto
+        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+        foreach ($admisiones as $admision) {
+            $admision->estado = 6; // Cambiar al estado 6
+            $admision->manifiesto = $this->manualManifiesto;
+            $admision->save();
+
+            // Registrar el evento en la base de datos
+            Eventos::create([
+                'accion' => 'Añadir a CN-33',
+                'descripcion' => "Se añadió al manifiesto {$this->manualManifiesto}.",
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
+        }
+
+        // Limpiar selección después de procesar
+        $this->selectedAdmisiones = [];
+        $this->showManifiestoInput = false; // Ocultar el campo de manifiesto después de guardar
+
+        // Mostrar mensaje de éxito
+        session()->flash('message', 'Las admisiones seleccionadas han sido añadidas a CN-33 con éxito.');
+
+        // Opcional: Recargar la página para ver cambios
+        $this->dispatch('reloadPage');
+    }
 
 
     private $cityPrefixes = [

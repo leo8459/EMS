@@ -36,11 +36,11 @@
                                             <input type="date" wire:model="endDate" class="form-control"
                                                 style="margin-right: 10px;">
 
-                                          
+
 
 
                                         </div>
-                                       
+
                                         <div class="ml-auto">
 
                                             <button type="button" class="btn btn-warning"
@@ -150,7 +150,8 @@
                                                             </button>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="peso_ems_{{ $id }}">Peso (kg) EMS</label>
+                                                            <label for="peso_ems_{{ $id }}">Peso (kg)
+                                                                EMS</label>
                                                             <input type="text" id="peso_ems_{{ $id }}"
                                                                 class="form-control"
                                                                 wire:model.defer="admissionData.{{ $id }}.peso_ems">

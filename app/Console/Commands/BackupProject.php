@@ -59,7 +59,7 @@ class BackupProject extends Command
         // Generar el backup de la base de datos
         if ($isWindows) {
             // Ruta de pg_dump en Windows (PostgreSQL 16 por defecto)
-            $pgDumpPath = '"C:\Program Files\PostgreSQL\15\bin\pg_dump.exe"';
+            $pgDumpPath = '"C:\Program Files\PostgreSQL\16\bin\pg_dump.exe"';
             $pgDumpCommand = "{$pgDumpPath} -h \"{$dbHost}\" -p \"{$dbPort}\" -U \"{$dbUser}\" -F c -b -v -f \"{$dbBackupFile}\" \"{$dbName}\"";
         } else {
             // Comando en Linux

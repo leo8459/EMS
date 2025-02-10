@@ -35,7 +35,7 @@ class Iniciar extends Component
             'servicio' => 'required|string|max:255',
             'tipo_correspondencia' => 'required|string|max:255',
             'cantidad' => 'required|integer',
-            'peso' => ['required', 'regex:/^[0-9]*[.,]?[0-9]+$/', 'min:0', 'max:100'],
+            'peso' => ['required', 'regex:/^[0-9]*[.,]?[0-9]+$/', 'min:0', 'max:20'],
             'destino' => 'required|string|max:255',
             // 'codigo' => 'string|unique:admisions,codigo' . ($this->admisionId ? ',' . $this->admisionId : ''),
             'numero_factura' => 'nullable|string',
@@ -240,7 +240,6 @@ class Iniciar extends Component
 
         // Mensaje de éxito
         $this->dispatch('reload-page');
-
     }
 
     public function enviarMensajeWhatsApp($admisionId)
@@ -374,30 +373,30 @@ class Iniciar extends Component
     public function getPriceByWeightAndDestination($peso, $destino)
     {
         $tarifas = [
-        'POSTPAGO' => [
-            [0.001, 0.250, 10],
-            [0.251, 0.500, 12],
-            [0.501, 1, 17],
-            [1.001, 2, 23],
-            [2.001, 3, 28],
-            [3.001, 4, 34],
-            [4.001, 5, 41],
-            [5.001, 6, 48],
-            [6.001, 7, 54],
-            [7.001, 8, 60],
-            [8.001, 9, 68],
-            [9.001, 10, 74],
-            [10.001, 11, 81],
-            [11.001, 12, 87],
-            [12.001, 13, 94],
-            [13.001, 14, 101],
-            [14.001, 15, 107],
-            [15.001, 16, 114],
-            [16.001, 17, 121],
-            [17.001, 18, 127],
-            [18.001, 19, 134],
-            [19.001, 20, 140],
-        ],
+            'POSTPAGO' => [
+                [0.001, 0.250, 10],
+                [0.251, 0.500, 12],
+                [0.501, 1, 17],
+                [1.001, 2, 23],
+                [2.001, 3, 28],
+                [3.001, 4, 34],
+                [4.001, 5, 41],
+                [5.001, 6, 48],
+                [6.001, 7, 54],
+                [7.001, 8, 60],
+                [8.001, 9, 68],
+                [9.001, 10, 74],
+                [10.001, 11, 81],
+                [11.001, 12, 87],
+                [12.001, 13, 94],
+                [13.001, 14, 101],
+                [14.001, 15, 107],
+                [15.001, 16, 114],
+                [16.001, 17, 121],
+                [17.001, 18, 127],
+                [18.001, 19, 134],
+                [19.001, 20, 140],
+            ],
             'NACIONAL' => [
                 [0.001, 0.250, 10],
                 [0.251, 0.500, 12],
@@ -659,7 +658,12 @@ class Iniciar extends Component
 
     public function updatedPeso($value)
     {
-        $this->peso = $value;
+        $peso = str_replace(',', '.', $value);
+        if ((float)$peso > 20) {
+            $this->peso = 20;
+        } else {
+            $this->peso = $peso;
+        }
         $this->updatePrice();
     }
 
@@ -917,28 +921,27 @@ class Iniciar extends Component
         $this->codigo = $prefix . $cityCode . $yearSuffix . $numberPart . $suffix;
     }
     public function deleteAdmision()
-{
-    if ($this->admisionId) {
-        $admision = Admision::findOrFail($this->admisionId);
+    {
+        if ($this->admisionId) {
+            $admision = Admision::findOrFail($this->admisionId);
 
-        // Cambiar el estado de la admisión a inactivo (soft delete)
-        $admision->update(['estado' => 0]);
+            // Cambiar el estado de la admisión a inactivo (soft delete)
+            $admision->update(['estado' => 0]);
 
-        // Registrar el evento de eliminación
-        Eventos::create([
-            'accion' => 'Baja',
-            'descripcion' => 'Se dio de baja a la admisión',
-            'codigo' => $admision->codigo,
-            'user_id' => Auth::id(),
-        ]);
+            // Registrar el evento de eliminación
+            Eventos::create([
+                'accion' => 'Baja',
+                'descripcion' => 'Se dio de baja a la admisión',
+                'codigo' => $admision->codigo,
+                'user_id' => Auth::id(),
+            ]);
 
-        // Mensaje de éxito y cerrar el modal
-        session()->flash('message', 'Admisión eliminada correctamente.');
-        $this->dispatch('close-edit-modal'); // Cierra el modal
-        $this->resetInputFields(); // Limpia los campos del formulario
-    } else {
-        session()->flash('error', 'No se pudo eliminar la admisión.');
+            // Mensaje de éxito y cerrar el modal
+            session()->flash('message', 'Admisión eliminada correctamente.');
+            $this->dispatch('close-edit-modal'); // Cierra el modal
+            $this->resetInputFields(); // Limpia los campos del formulario
+        } else {
+            session()->flash('error', 'No se pudo eliminar la admisión.');
+        }
     }
-}
-
 }

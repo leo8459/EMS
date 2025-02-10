@@ -113,8 +113,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/enviosretenidos', [AdmisionesController::class, 'verretenidos']);
     Route::get('/admisionesobservadas', [AdmisionesController::class, 'vernotificados']);
 
-   
-    
+
+
 
 
 
@@ -137,7 +137,7 @@ Route::middleware('auth')->group(function () {
     //dashboard
     Route::get('/dashboardgeneral', [DashboardAdminController::class, 'dashboardadmin']);
 
-   
+
 
 
 
@@ -146,11 +146,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
- // SACAS
- Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
- ->name('api.admisiones.manifiesto');
+// SACAS
+Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
+    ->name('api.admisiones.manifiesto');
+    
 require __DIR__ . '/auth.php';
-Route::middleware(['simple.token'])->group(function() {
+Route::middleware(['simple.token'])->group(function () {
     Route::get('/busqueda/{numero_guia}', [HistoricoController::class, 'buscarPorNumeroGuia']);
 });
 

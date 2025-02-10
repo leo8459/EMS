@@ -41,12 +41,15 @@
                                 <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
                             </div>
                             <!-- Botón para abrir el modal -->
-                           
+
                             <div class="d-flex justify-content-end align-items-center mt-3">
                                 <a href="{{ route('asignarcartero') }}" class="btn btn-success"
                                     style="margin-right: 10px;">
                                     Asignar Carteros
                                 </a>
+                                <button class="btn btn-info" wire:click="abrirModalCN33">
+                                    Añadir a CN-33
+                                </button>
 
                                 <button class="btn btn-warning" wire:click="abrirModal" style="margin-right: 10px;">
                                     Mandar a Regional / Reencaminar
@@ -84,7 +87,7 @@
                                             <th>Servicio</th>
                                             <th>Tipo Correspondencia</th>
                                             <th>Cantidad</th>
-                                            <th>Peso</th>
+                                            <th>Peso (kg)</th>
                                             <th>Destino</th>
                                             <th>Envio</th>
                                             <th>Código</th>
@@ -148,6 +151,45 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                                @if (!empty($selectedAdmisionesList))
+                                    <div class="card mt-3">
+                                        <div class="card-header bg-primary text-white">
+                                            Admisiones Seleccionadas ({{ count($selectedAdmisionesList) }})
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Código</th>
+                                                        <th>Origen</th>
+                                                        <th>Destino</th>
+                                                        <th>Peso (kg)</th>
+                                                        <th>Acción</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($selectedAdmisionesList as $index => $admision)
+                                                        <tr>
+                                                            <td>{{ $index + 1 }}</td>
+                                                            <td>{{ $admision->codigo }}</td>
+                                                            <td>{{ $admision->origen }}</td>
+                                                            <td>{{ $admisione->reencaminamiento ?? $admisione->ciudad }}
+                                                            </td>
+                                                            <td>{{ $admision->peso }}</td>
+                                                            <td>
+                                                                <button class="btn btn-danger btn-sm"
+                                                                    wire:click="removeFromSelection({{ $admision->id }})">
+                                                                    Eliminar
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <!-- Modal para Crear Nuevo Paquete -->
                                 <div wire:ignore.self class="modal fade" id="createPaqueteModal" tabindex="-1"
@@ -247,8 +289,8 @@
                                                                     </option>
                                                                     <option value="OFICIAL">OFICIAL</option>
                                                                     <option value="TRANSITO">TRANSITO
-                                                                        <option value="ENDAS">ENCOMIENDA</option>
-                                                                        <option value="COR">CORREO TRADICIONAL</option>
+                                                                    <option value="ENDAS">ENCOMIENDA</option>
+                                                                    <option value="COR">CORREO TRADICIONAL</option>
 
                                                                     </option>
                                                                     {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
@@ -295,11 +337,6 @@
                                                             <div class="form-group">
                                                                 <label for="peso">Peso (Kg.)*</label>
                                                                 <input type="text" wire:model="peso">
-
-
-
-
-
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
@@ -447,116 +484,168 @@
                                 </div>
                                 <!-- Botón para abrir el modal -->
                             </div>
-                            <!-- Modal para Reimprimir -->
-                            @if ($showReimprimirModal)
-                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Reimprimir Manifiesto</h5>
-                                            <button type="button" class="close" wire:click="$set('showReimprimirModal', false)">
-                                                <span>&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                                                <label for="manifiestoInput">Ingrese el Manifiesto:</label>
-                                                <input type="text" id="manifiestoInput" class="form-control" wire:model="manifiestoInput">
-                                                @error('manifiestoInput') <span class="text-danger">{{ $message }}</span> @enderror
+                            @if ($showCN33Modal)
+                                <div class="modal fade show d-block" tabindex="-1" role="dialog"
+                                    style="background-color: rgba(0,0,0,0.5);">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Añadir a CN-33</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showCN33Modal', false)">
+                                                    <span>&times;</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-secondary" wire:click="$set('showReimprimirModal', false)">Cancelar</button>
-                                            <button class="btn btn-primary" wire:click="reimprimirManifiesto">Reimprimir</button>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="manualManifiesto">Manifiesto (obligatorio):</label>
+                                                    <input type="text" wire:model="manualManifiesto"
+                                                        class="form-control" id="manualManifiesto"
+                                                        placeholder="Ej: BO0456789">
+                                                    @error('manualManifiesto')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-success mt-2" wire:click="añadirACN33">
+                                                    Guardar en CN-33
+                                                </button>
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showCN33Modal', false)">
+                                                    Cancelar
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                             @endif
-                            
-                            @if ($showModal)
-                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content" style="max-height: 80vh; overflow: hidden;">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirmar Envío</h5>
-                                            <button type="button" class="close" wire:click="$set('showModal', false)">
-                                                <span>&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-                                            <p>Puede enviar las admisiones seleccionadas a la regional o
-                                                reencaminarlas a otro departamento.</p>
-                        
-                                            <p><strong>Total de envíos seleccionados:</strong>
-                                                {{ count($selectedAdmisionesCodes) }}</p>
-                        
-                                            {{-- Departamento de destino --}}
-                                            <div class="form-group">
-                                                <label for="selectedDepartment">Enviar al departamento (obligatorio):</label>
-                                                <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
-                                                    <option value="">Seleccione un departamento</option>
-                                                    <option value="LA PAZ">LA PAZ</option>
-                                                    <option value="ORURO">ORURO</option>
-                                                    <option value="BENI">BENI</option>
-                                                    <option value="COCHABAMBA">COCHABAMBA</option>
-                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                                    <option value="POTOSI">POTOSI</option>
-                                                    <option value="CHUQUISACA">CHUQUISACA</option>
-                                                    <option value="PANDO">PANDO</option>
-                                                    <option value="TARIJA">TARIJA</option>
-                                                </select>
-                                                @if (!$selectedDepartment)
-                                                    <small class="text-danger">Debe seleccionar un departamento.</small>
-                                                @endif
+
+                            <!-- Modal para Reimprimir -->
+                            @if ($showReimprimirModal)
+                                <div class="modal fade show d-block" tabindex="-1" role="dialog"
+                                    style="background-color: rgba(0,0,0,0.5);">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Reimprimir Manifiesto</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showReimprimirModal', false)">
+                                                    <span>&times;</span>
+                                                </button>
                                             </div>
-                        
-                                            {{-- Campo para Manifiesto manual --}}
-                                            <div class="form-group">
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="manifiestoInput">Ingrese el Manifiesto:</label>
+                                                    <input type="text" id="manifiestoInput" class="form-control"
+                                                        wire:model="manifiestoInput">
+                                                    @error('manifiestoInput')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showReimprimirModal', false)">Cancelar</button>
+                                                <button class="btn btn-primary"
+                                                    wire:click="reimprimirManifiesto">Reimprimir</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($showModal)
+                                <div class="modal fade show d-block" tabindex="-1" role="dialog"
+                                    style="background-color: rgba(0,0,0,0.5);">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content" style="max-height: 80vh; overflow: hidden;">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Envío</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showModal', false)">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                                                <p>Puede enviar las admisiones seleccionadas a la regional o
+                                                    reencaminarlas a otro departamento.</p>
+
+                                                <p><strong>Total de envíos seleccionados:</strong>
+                                                    {{ count($selectedAdmisionesCodes) }}</p>
+
+                                                {{-- Departamento de destino --}}
+                                                <div class="form-group">
+                                                    <label for="selectedDepartment">Enviar al departamento
+                                                        (obligatorio):</label>
+                                                    <select wire:model="selectedDepartment" class="form-control"
+                                                        id="selectedDepartment">
+                                                        <option value="">Seleccione la Regional de Destino
+                                                        </option>
+                                                        <option value="LA PAZ">LA PAZ</option>
+                                                        <option value="ORURO">ORURO</option>
+                                                        <option value="BENI">BENI</option>
+                                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                        <option value="POTOSI">POTOSI</option>
+                                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                                        <option value="PANDO">PANDO</option>
+                                                        <option value="TARIJA">TARIJA</option>
+                                                    </select>
+                                                    @if (!$selectedDepartment)
+                                                        <small class="text-danger">Debe seleccionar un
+                                                            departamento.</small>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Campo para Manifiesto manual --}}
+                                                {{-- <div class="form-group">
                                                 <label for="manualManifiesto">Manifiesto (déjelo vacío para generar uno automático):</label>
                                                 <input type="text" wire:model="manualManifiesto"
                                                        class="form-control"
                                                        id="manualManifiesto"
                                                        placeholder="Ej: BO0456789 (opcional)">
+                                            </div> --}}
+
+                                                {{-- NUEVO: Tipo de Transporte (AÉREO o TERRESTRE) --}}
+                                                <div class="form-group">
+                                                    <label for="selectedTransport">Medio de Transporte:</label>
+                                                    <select wire:model="selectedTransport" class="form-control"
+                                                        id="selectedTransport">
+                                                        <option value="AEREO">AÉREO</option>
+                                                        <option value="TERRESTRE">TERRESTRE</option>
+                                                    </select>
+                                                </div>
+
+                                                {{-- NUEVO: Campo para escribir manualmente el número de vuelo (opcional) --}}
+                                                <div class="form-group">
+                                                    <label for="numeroVuelo">N° de vuelo/ medio transporte
+                                                        (opcional):</label>
+                                                    <input type="text" wire:model="numeroVuelo"
+                                                        class="form-control" id="numeroVuelo"
+                                                        placeholder="Ingrese el número de vuelo si aplica.">
+                                                </div>
+
+                                                <hr>
+                                                <!-- Mostrar los códigos de las admisiones seleccionadas -->
+                                                <ul>
+                                                    @foreach ($selectedAdmisionesCodes as $codigo)
+                                                        <li>Código: {{ $codigo }}</li>
+                                                    @endforeach
+                                                </ul>
                                             </div>
-                        
-                                            {{-- NUEVO: Tipo de Transporte (AÉREO o TERRESTRE) --}}
-                                            <div class="form-group">
-                                                <label for="selectedTransport">Medio de Transporte:</label>
-                                                <select wire:model="selectedTransport" class="form-control" id="selectedTransport">
-                                                    <option value="AEREO">AÉREO</option>
-                                                    <option value="TERRESTRE">TERRESTRE</option>
-                                                </select>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary" wire:click="mandarARegional">
+                                                    Guardar y Generar PDF
+                                                </button>
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showModal', false)">Cancelar</button>
                                             </div>
-                        
-                                            {{-- NUEVO: Campo para escribir manualmente el número de vuelo (opcional) --}}
-                                            <div class="form-group">
-                                                <label for="numeroVuelo">N° de vuelo (opcional):</label>
-                                                <input type="text" wire:model="numeroVuelo"
-                                                       class="form-control"
-                                                       id="numeroVuelo"
-                                                       placeholder="Ingrese el número de vuelo si aplica.">
-                                            </div>
-                        
-                                            <hr>
-                                            <!-- Mostrar los códigos de las admisiones seleccionadas -->
-                                            <ul>
-                                                @foreach ($selectedAdmisionesCodes as $codigo)
-                                                    <li>Código: {{ $codigo }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-primary" wire:click="mandarARegional">
-                                                Guardar y Generar PDF
-                                            </button>
-                                            <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                        
+                            @endif
+
 
 
 
@@ -669,8 +758,8 @@
 
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        window.addEventListener('reloadPage', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('reloadPage', function() {
             // Recargar la página
             location.reload();
         });
@@ -681,5 +770,3 @@
         location.reload();
     });
 </script>
-    
-    

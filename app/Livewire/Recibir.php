@@ -93,21 +93,21 @@ class Recibir extends Component
     public function saveAdmissionData()
     {
         $admisionesProcesadas = [];
-    
+
         foreach ($this->admissionData as $id => $data) {
             $this->validate([
                 'admissionData.' . $id . '.peso_ems' => 'nullable|numeric',
                 'admissionData.' . $id . '.observacion' => 'nullable|string',
             ]);
-    
+
             $admision = Admision::find($id);
-    
+
             if ($admision) {
                 // Registrar el evento si no existe previamente
                 $exists = \App\Models\Eventos::where('codigo', $admision->codigo)
                     ->where('accion', 'Recibir')
                     ->exists();
-    
+
                 if (!$exists) {
                     Eventos::create([
                         'accion' => 'Recibir',
@@ -128,14 +128,14 @@ class Recibir extends Component
                         'estado_actualizacion' => ' "Operador" en posesión del envío', // Descripción del estado
                     ]);
                 }
-    
+
                 // Actualizar el estado y detalles de la admisión
                 $admision->update([
                     'peso_ems' => $data['peso_ems'] !== '' ? $data['peso_ems'] : null,
                     'observacion' => $data['observacion'],
                     'estado' => 3, // Cambiar el estado solo al confirmar
                 ]);
-    
+
                 $admisionesProcesadas[] = $admision;
             }
         }
@@ -145,17 +145,17 @@ class Recibir extends Component
         if (!empty($admisionesProcesadas)) {
             return $this->generateReportFromAdmisiones(collect($admisionesProcesadas));
         }
-    
+
         session()->flash('message', 'Las admisiones seleccionadas han sido procesadas.');
-    // Emitir evento para recargar la página
+        // Emitir evento para recargar la página
         // Resetear el estado del modal y los datos
         $this->reset(['selectedAdmisiones', 'admissionData', 'showModal']);
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
 
 
@@ -194,29 +194,29 @@ class Recibir extends Component
             session()->flash('error', 'Por favor seleccione un rango de fechas.');
             return;
         }
-    
+
         // Convertir las fechas al inicio y fin del día
         $start = Carbon::parse($this->startDate)->startOfDay(); // Inicio del día (00:00:00)
         $end = Carbon::parse($this->endDate)->endOfDay(); // Fin del día (23:59:59)
-    
+
         // Obtener eventos de tipo "Recibir" filtrados por fechas y departamento
         $query = \App\Models\Eventos::where('accion', 'Recibir')
             ->whereBetween('created_at', [$start, $end]);
-    
+
         if ($this->selectedDepartment) {
             $query->where('origen', $this->selectedDepartment);
         }
-    
+
         $eventos = $query->get();
-    
+
         if ($eventos->isEmpty()) {
             session()->flash('error', 'No se encontraron registros en este rango de fechas.');
             return;
         }
-    
+
         // Generar el PDF con el diseño
         $pdf = \PDF::loadView('pdfs.recibir2', ['admisiones' => $eventos]);
-    
+
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
         }, 'reporte_admisiones_recibidas_' . now()->format('Ymd_His') . '.pdf');
@@ -228,17 +228,17 @@ class Recibir extends Component
     {
         // Obtener la fecha de hoy
         $hoy = Carbon::today();
-    
+
         // Buscar todas las admisiones con estado 2 creadas hoy
         $admisionesHoy = Admision::whereDate('fecha', $hoy)
             ->where('estado', 2)
             ->get();
-    
+
         if ($admisionesHoy->isEmpty()) {
             session()->flash('error', 'No hay admisiones generadas el día de hoy.');
             return;
         }
-    
+
         // Cargar las admisiones en el modal
         foreach ($admisionesHoy as $admission) {
             $this->admissionData[$admission->id] = [
@@ -247,56 +247,54 @@ class Recibir extends Component
                 'codigo' => $admission->codigo,
             ];
         }
-    
+
         // Marcar las admisiones de hoy como seleccionadas
         $this->selectedAdmisiones = $admisionesHoy->pluck('id')->toArray();
-    
+
         // Mostrar el modal
         $this->showModal = true;
         if (!empty($this->admissionData)) {
             $this->generateTodayReport(collect($this->admissionData));
         }
-        
+
         session()->flash('message', 'Las admisiones generadas hoy han sido cargadas en el modal.');
     }
-    
-    
+
+
     public function generateTodayReport($admisiones)
     {
         $hoy = Carbon::today()->format('Y-m-d');
-    
+
         try {
             // Generar el PDF usando la vista
             $pdf = \PDF::loadView('pdfs.recibir2', ['admisiones' => $admisiones]);
-    
+
             // Guardar el PDF en el servidor
             $filePath = storage_path('app/public/reportes/reporte_admisiones_' . $hoy . '.pdf');
             \Storage::put('public/reportes/reporte_admisiones_' . $hoy . '.pdf', $pdf->output());
-    
+
             // También puedes devolver la descarga directa
             return response()->streamDownload(function () use ($pdf) {
                 echo $pdf->stream();
             }, 'reporte_admisiones_' . $hoy . '.pdf');
         } catch (\Exception $e) {
             // Manejar errores en caso de que falle la generación del PDF
-            session()->flash('error', 'Ocurrió un error al generar el reporte: ' . $e->getMessage());
         }
     }
     public function generateReportFromAdmisiones($admisiones)
-{
-    try {
-        // Generar el PDF con las admisiones procesadas
-        $pdf = \PDF::loadView('pdfs.recibir', ['admisiones' => $admisiones]);
+    {
+        try {
+            // Generar el PDF con las admisiones procesadas
+            $pdf = \PDF::loadView('pdfs.recibir', ['admisiones' => $admisiones]);
 
-        // Devolver el PDF como una descarga
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->stream();
-        }, 'reporte_admisiones_' . now()->format('Ymd_His') . '.pdf');
-    } catch (\Exception $e) {
-        // Manejar errores si la generación del PDF falla
-        session()->flash('error', 'Ocurrió un error al generar el reporte: ' . $e->getMessage());
-        return;
+            // Devolver el PDF como una descarga
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->stream();
+            }, 'reporte_admisiones_' . now()->format('Ymd_His') . '.pdf');
+        } catch (\Exception $e) {
+            // Manejar errores si la generación del PDF falla
+            session()->flash('error', 'Ocurrió un error al generar el reporte: ' . $e->getMessage());
+            return;
+        }
     }
-}
-
 }
