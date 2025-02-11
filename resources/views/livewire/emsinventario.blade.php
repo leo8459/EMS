@@ -149,8 +149,44 @@
                                                 @endhasrole
                                             </tr>
                                         @endforeach
+
                                     </tbody>
+
                                 </table>
+                                <!-- Registros externos -->
+                                @if (count($solicitudesExternas) > 0)
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Guía</th>
+                                                <th>Remitente</th>
+                                                <th>Destinatario</th>
+                                                <th>Peso (kg)</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($solicitudesExternas as $solicitud)
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" wire:model="selectedSolicitudesExternas"
+                                                            value="{{ $solicitud['guia'] }}">
+                                                    </td>
+                                                    <td>{{ $solicitud['guia'] }}</td>
+                                                    <td>{{ $solicitud['remitente'] }}</td>
+                                                    <td>{{ $solicitud['destinatario'] }}</td>
+                                                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                    <td>{{ $solicitud['estado'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <p>No hay solicitudes externas con estado=2.</p>
+                                @endif
+
+
                                 @if (!empty($selectedAdmisionesList))
                                     <div class="card mt-3">
                                         <div class="card-header bg-primary text-white">

@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use App\Models\Eventos; // Asegúrate de importar el modelo Evento
 use Livewire\WithFileDownloads; // Importar el trait
 use App\Models\Historico; // Asegúrate de importar el modelo Evento
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -46,7 +47,8 @@ class Emsinventario extends Component
     public $numeroVuelo = '';            // Campo para el número de vuelo
     public $selectedAdmisionesList = []; // Lista de admisiones seleccionadas
     public $showCN33Modal = false; // Controla la visibilidad del modal para CN-33
-
+    public $selectedSolicitudesExternas = [];   // Para registros externos
+    
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
     public $showReprintModal = false; // Controla la visibilidad del modal de reimpresión
@@ -54,6 +56,9 @@ class Emsinventario extends Component
 
     public $showReimprimirModal = false;
     public $manifiestoInput = '';
+    public $solicitudesExternas = [];
+// Dentro de tu clase Livewire:
+public $selectedRecords = []; // Aquí se guardarán los identificadores unificados
 
     public function updatedSelectedCity()
     {
@@ -583,10 +588,22 @@ class Emsinventario extends Component
     }
     public function mount()
     {
-        $this->origen = Auth::user()->city; // Si tienes una ciudad por defecto
-        $this->ciudad = ""; // Cambia este valor si quieres que otra ciudad sea la predeterminada
-        $this->cantidad = 1; // Establece cantidad en 1
+        // Petición al primer sistema que está en carteros.php
+        $response = Http::get('http://127.0.0.1:9000/carteros/ems/estado/2');
+
+    if ($response->successful()) {
+        $this->solicitudesExternas = $response->json();
+    } else {
+        $this->solicitudesExternas = [];
     }
+
+    
+        // Resto de lo que ya tenías en mount()
+        $this->origen = Auth::user()->city;
+        $this->ciudad = "";
+        $this->cantidad = 1;
+    }
+    
     public function store()
     {
         // Establecer precio predeterminado en 0 si no está definido
@@ -853,6 +870,8 @@ class Emsinventario extends Component
         $this->dispatch('reloadPage');
     }
 
+    
+   
 
     private $cityPrefixes = [
         'LA PAZ' => '0',

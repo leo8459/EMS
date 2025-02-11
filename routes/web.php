@@ -12,7 +12,10 @@ use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\Tarifa;
 use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\HistoricoController;
+use App\Models\Admision;
 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -146,6 +149,46 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+
+//CONTRATOS
+Route::get('/solicitudes-externo-estado/{estado}', function ($estado) {
+    $url = "http://127.0.0.1:9000/carteros/ems/estado/{$estado}";
+
+    $response = Http::get($url);
+
+    if ($response->successful()) {
+        return $response->json();
+    } else {
+        return response()->json([
+            'error' => 'No se pudo conectar o la respuesta falló',
+            'status' => $response->status(),
+        ], $response->status());
+    }
+});
+Route::get('/registros-combinados-multi', function () {
+    // Obtener registros externos (solicitudes externas) con estado = 2
+    $urlSolicitudes = "http://127.0.0.1:9000/carteros/ems/estado/2";
+    $responseSolicitudes = Http::get($urlSolicitudes);
+    $solicitudesExternas = $responseSolicitudes->successful()
+        ? $responseSolicitudes->json()
+        : [
+            'error'  => 'No se pudo conectar o la respuesta falló',
+            'status' => $responseSolicitudes->status(),
+        ];
+
+    // Obtener registros internos de la tabla admisions con estados 3, 7 o 10
+    $emsinventario = Admision::whereIn('estado', [3, 7, 10])->get();
+
+    // Combinar y retornar ambos conjuntos de datos en una respuesta JSON
+    return response()->json([
+        'solicitudes_externas' => $solicitudesExternas,
+        'emsinventario'        => $emsinventario,
+    ]);
+});
+
+
 // SACAS
 Route::get('/api/admisiones/manifiesto', [AdmisionesController::class, 'getAdmisionesPorManifiesto'])
     ->name('api.admisiones.manifiesto');
@@ -157,3 +200,6 @@ Route::middleware(['simple.token'])->group(function () {
 
 Route::get('/eventos/buscar/{codigo}', [EventosController::class, 'buscarPorCodigo']);
 Route::get('/eventos', [EventosController::class, 'listarEventos']);
+
+
+Route::get('/asignarsecartero', [AdmisionesController::class, 'asignarse'])->name('asignarsecartero');
