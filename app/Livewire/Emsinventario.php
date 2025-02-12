@@ -48,7 +48,7 @@ class Emsinventario extends Component
     public $selectedAdmisionesList = []; // Lista de admisiones seleccionadas
     public $showCN33Modal = false; // Controla la visibilidad del modal para CN-33
     public $selectedSolicitudesExternas = [];   // Para registros externos
-    
+
     public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
 
     public $showReprintModal = false; // Controla la visibilidad del modal de reimpresión
@@ -57,8 +57,8 @@ class Emsinventario extends Component
     public $showReimprimirModal = false;
     public $manifiestoInput = '';
     public $solicitudesExternas = [];
-// Dentro de tu clase Livewire:
-public $selectedRecords = []; // Aquí se guardarán los identificadores unificados
+    // Dentro de tu clase Livewire:
+    public $selectedRecords = []; // Aquí se guardarán los identificadores unificados
 
     public function updatedSelectedCity()
     {
@@ -174,27 +174,44 @@ public $selectedRecords = []; // Aquí se guardarán los identificadores unifica
 
     public function abrirModal()
     {
-        if (count($this->selectedAdmisiones) > 0) {
+        if (count($this->selectedAdmisiones) > 0 || count($this->selectedSolicitudesExternas) > 0) {
+            // Obtener solo las admisiones seleccionadas
             $admissions = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
-            if ($admissions->isEmpty()) {
+            if ($admissions->isEmpty() && empty($this->selectedSolicitudesExternas)) {
                 session()->flash('error', 'No hay admisiones seleccionadas.');
                 return;
             }
 
-            $this->showModal = true;
+            // Obtener datos de la API solo de los registros seleccionados
+            $response = Http::get('http://127.0.0.1:9000/api/ems/estado/2');
 
+            if ($response->successful()) {
+                $solicitudes = collect($response->json()); // Convertir en colección para filtrar
+                // Filtrar solo los registros seleccionados
+                $this->solicitudesExternas = $solicitudes->whereIn('guia', $this->selectedSolicitudesExternas)->values()->toArray();
+            } else {
+                $this->solicitudesExternas = [];
+                session()->flash('error', 'No se pudo obtener datos de la API.');
+            }
+
+            // Guardamos los datos en variables que el modal usará
+            $this->showModal = true;
             $this->destinoModal = null;
             $this->ciudadModal = null;
-
             $this->selectedAdmisionesCodes = $admissions->pluck('codigo')->toArray();
-
-            // Inicializar el campo de reencaminamiento en null
+            $this->selectedAdmisionesList = $admissions; // Guardar la lista para mostrar en el modal
             $this->selectedDepartment = null;
+            $this->manualManifiesto = ''; // Resetear manifiesto si es necesario
+            $this->selectedTransport = 'AEREO'; // Default transporte
+            $this->numeroVuelo = ''; // Resetear el número de vuelo
         } else {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
+            session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
         }
     }
+
+
+
 
 
 
@@ -589,21 +606,21 @@ public $selectedRecords = []; // Aquí se guardarán los identificadores unifica
     public function mount()
     {
         // Petición al primer sistema que está en carteros.php
-        $response = Http::get('http://127.0.0.1:9000/carteros/ems/estado/2');
+        $response = Http::get('http://127.0.0.1:9000/api/ems/estado/2');
 
-    if ($response->successful()) {
-        $this->solicitudesExternas = $response->json();
-    } else {
-        $this->solicitudesExternas = [];
-    }
+        if ($response->successful()) {
+            $this->solicitudesExternas = $response->json();
+        } else {
+            $this->solicitudesExternas = [];
+        }
 
-    
+
         // Resto de lo que ya tenías en mount()
         $this->origen = Auth::user()->city;
         $this->ciudad = "";
         $this->cantidad = 1;
     }
-    
+
     public function store()
     {
         // Establecer precio predeterminado en 0 si no está definido
@@ -773,44 +790,43 @@ public $selectedRecords = []; // Aquí se guardarán los identificadores unifica
 
 
 
-    public function generarPdf($admisiones)
-    {
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-            return;
-        }
+    public function generarPdf()
+{
+    // Unir admisiones seleccionadas con registros externos seleccionados
+    $admisionesSeleccionadas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
 
-        // Prepara datos para la vista
-        $currentDate = now()->format('d/m/Y');
-        $currentTime = now()->format('H:i');
-        $firstPackage = $admisiones->first();
+    // Obtener solo los registros externos seleccionados
+    $solicitudesExternasSeleccionadas = collect($this->solicitudesExternas)->whereIn('guia', $this->selectedSolicitudesExternas);
 
-        $loggedInUserCity = Auth::user()->city;
-        $destinationCity = $this->selectedDepartment
-            ?? $firstPackage->reencaminamiento
-            ?? $firstPackage->ciudad
-            ?? '';
-
-        $data = [
-            'admisiones'        => $admisiones,
-            'currentDate'       => $currentDate,
-            'currentTime'       => $currentTime,
-            'currentManifiesto' => $this->currentManifiesto,
-            'loggedInUserCity'  => $loggedInUserCity,
-            'destinationCity'   => $destinationCity,
-            'selectedTransport' => $firstPackage->tipo_transporte, // Medio de transporte desde la BD
-            'numeroVuelo'       => $firstPackage->numero_vuelo,     // Número de vuelo desde la BD
-        ];
-
-        // Generar el PDF con DomPDF
-        $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-
-        // Descargar el PDF directamente
-        return response()->streamDownload(
-            fn() => print($pdf->stream('cn-33.pdf')),
-            'cn-33.pdf'
-        );
+    // Verificamos si hay admisiones seleccionadas o solicitudes externas
+    if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+        return;
     }
+
+    // Datos para la plantilla del PDF
+    $data = [
+        'admisiones'        => $admisionesSeleccionadas,
+        'solicitudesExternas' => $solicitudesExternasSeleccionadas,
+        'currentDate'       => now()->format('d/m/Y'),
+        'currentTime'       => now()->format('H:i'),
+        'currentManifiesto' => $this->currentManifiesto,
+        'loggedInUserCity'  => Auth::user()->city,
+        'destinationCity'   => $this->selectedDepartment ?? $admisionesSeleccionadas->first()->reencaminamiento ?? $admisionesSeleccionadas->first()->ciudad ?? '',
+        'selectedTransport' => $this->selectedTransport,
+        'numeroVuelo'       => $this->numeroVuelo,
+    ];
+
+    // Generar el PDF con DomPDF
+    $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
+
+    // Descargar el PDF directamente
+    return response()->streamDownload(
+        fn() => print($pdf->stream('cn-33.pdf')),
+        'cn-33.pdf'
+    );
+}
+
     public function updatedSelectedAdmisiones()
     {
         $this->selectedAdmisionesList = Admision::whereIn('id', $this->selectedAdmisiones)->get();
@@ -870,8 +886,8 @@ public $selectedRecords = []; // Aquí se guardarán los identificadores unifica
         $this->dispatch('reloadPage');
     }
 
-    
-   
+
+
 
     private $cityPrefixes = [
         'LA PAZ' => '0',

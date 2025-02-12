@@ -143,7 +143,7 @@
                     $peso = $admision->peso_ems ?: $admision->peso; 
                     $totalCantidad += 1;
                     $totalPeso += $peso;
-
+        
                     // Determinar dónde colocar la "X" basado en el campo destino
                     $endasX = ($admision->destino === 'ENDAS') ? 'X' : '';
                     $corX = ($admision->destino === 'COR') ? 'X' : '';
@@ -160,22 +160,31 @@
                     </td>
                     <td>1</td>
                     <td>{{ $corX }}</td>
-                    <td>
-                        @if (!empty($admision->peso_regional))
-                            {{ $admision->peso_regional }}
-                        @elseif (!empty($admision->peso_ems))
-                            {{ $admision->peso_ems }}
-                        @else
-                            {{ $admision->peso }}
-                        @endif
-                    </td>
+                    <td>{{ $peso }}</td>
                     <td>{{ $admision->nombre_remitente }}</td>
                     <td>{{ $endasX }}</td>
                     <td></td>
                     <td>{{ $admision->observacion }}</td>
                 </tr>
             @endforeach
+        
+            <!-- Incluir registros externos seleccionados -->
+            @foreach ($solicitudesExternas as $solicitud)
+                <tr>
+                    <td>{{ $solicitud['guia'] }}</td>
+                    <td>{{ $loggedInUserCity }}</td>
+                    <td>{{ $destinationCity }}</td>
+                    <td>1</td>
+                    <td></td>
+                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                    <td>{{ $solicitud['remitente'] }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            @endforeach
         </tbody>
+        
         
         <tfoot>
             <tr>
