@@ -140,10 +140,10 @@
         
             @foreach ($admisiones as $admision)
                 @php
-                    $peso = $admision->peso_ems ?: $admision->peso; 
+                    $peso = (float) ($admision->peso_ems ?? $admision->peso ?? 0); 
                     $totalCantidad += 1;
                     $totalPeso += $peso;
-        
+    
                     // Determinar dónde colocar la "X" basado en el campo destino
                     $endasX = ($admision->destino === 'ENDAS') ? 'X' : '';
                     $corX = ($admision->destino === 'COR') ? 'X' : '';
@@ -160,7 +160,7 @@
                     </td>
                     <td>1</td>
                     <td>{{ $corX }}</td>
-                    <td>{{ $peso }}</td>
+                    <td>{{ number_format($peso, 2) }}</td>
                     <td>{{ $admision->nombre_remitente }}</td>
                     <td>{{ $endasX }}</td>
                     <td></td>
@@ -170,13 +170,18 @@
         
             <!-- Incluir registros externos seleccionados -->
             @foreach ($solicitudesExternas as $solicitud)
+                @php
+                    $pesoExterno = (float) ($solicitud['peso_o'] ?? $solicitud['peso_v'] ?? $solicitud['peso_r'] ?? 0);
+                    $totalCantidad += 1;
+                    $totalPeso += $pesoExterno;
+                @endphp
                 <tr>
                     <td>{{ $solicitud['guia'] }}</td>
                     <td>{{ $loggedInUserCity }}</td>
                     <td>{{ $destinationCity }}</td>
                     <td>1</td>
                     <td></td>
-                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                    <td>{{ number_format($pesoExterno, 2) }}</td>
                     <td>{{ $solicitud['remitente'] }}</td>
                     <td></td>
                     <td></td>
@@ -184,8 +189,7 @@
                 </tr>
             @endforeach
         </tbody>
-        
-        
+    
         <tfoot>
             <tr>
                 <td><strong>TOTAL</strong></td>
@@ -193,32 +197,13 @@
                 <td></td>
                 <td><strong>{{ $totalCantidad }}</strong></td>
                 <td></td>
-                <td><strong>{{ $totalPeso }}</strong></td>
+                <td><strong>{{ number_format($totalPeso, 2) }} Kg</strong></td>
                 <td colspan="4"></td>
             </tr>
         </tfoot>
+        
     </table>
-
-    <div class="footer">
-        <table style="width: 100%; margin-top: 50px; text-align: center; border-collapse: collapse;">
-            <tr>
-                <td style="border: 1px solid #333; padding: 10px; text-align: left; width: 30%;">
-                    <strong>Oficina de intercambio de despacho</strong><br>
-                    {{ $loggedInUserCity }}<br>
-                    <strong>Firma</strong><br>
-                    {{ Auth::user()->name }}<br>
-                    Salidas Internacionales
-                </td>
-                <td style="border: 1px solid #333; padding: 10px; width: 30%;">
-                    <strong>El funcionario del transportista del aeropuerto</strong><br>
-                    <strong>Fecha y firma</strong>
-                </td>
-                <td style="border: 1px solid #333; padding: 10px; width: 30%;">
-                    <strong>Oficina de intercambio de destino</strong><br>
-                    <strong>Fecha y firma</strong>
-                </td>
-            </tr>
-        </table>
+    
     </div>
 </body>
 </html>

@@ -153,38 +153,78 @@
                                     </tbody>
 
                                 </table>
-                                <!-- Registros externos -->
-                                @if (count($solicitudesExternas) > 0)
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Guía</th>
-                                                <th>Remitente</th>
-                                                <th>Destinatario</th>
-                                                <th>Peso (kg)</th>
-                                                <th>Estado</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($solicitudesExternas as $solicitud)
-                                                <tr>
-                                                    <td>
-                                                        <input type="checkbox" wire:model="selectedSolicitudesExternas"
-                                                            value="{{ $solicitud['guia'] }}">
-                                                    </td>
-                                                    <td>{{ $solicitud['guia'] }}</td>
-                                                    <td>{{ $solicitud['remitente'] }}</td>
-                                                    <td>{{ $solicitud['destinatario'] }}</td>
-                                                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
-                                                    <td>{{ $solicitud['estado'] }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                @else
-                                    <p>No hay solicitudes externas con estado=2.</p>
-                                @endif
+                    <!-- Registros externos -->
+<!-- =================== REGISTROS EXTERNOS =================== -->
+@php
+    // Array de mapeo para origen/destino
+    $codeToCity = [
+        'LPB' => 'LA PAZ',
+        'SRZ' => 'SANTA CRUZ',
+        'CIJ' => 'PANDO',
+        'TDD' => 'BENI',
+        'TJA' => 'TARIJA',
+        'SRE' => 'CHUQUISACA',
+        'ORU' => 'ORURO',
+        'POI' => 'POTOSI',
+    ];
+@endphp
+
+@if (count($solicitudesExternas) > 0)
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <!-- Para seleccionar los registros externos -->
+                <th></th>
+                <th>Guía</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Peso (kg)</th>
+                <th>Servicio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($solicitudesExternas as $solicitud)
+                @php
+                    // Tomamos la guía completa
+                    $fullCode  = $solicitud['guia'] ?? '';
+
+                    // Extraemos el "código de origen" (posiciones 4..6)
+                    // Ajusta los índices si tu guía tiene otra estructura
+                    $leftCode  = substr($fullCode, 4, 3);
+
+                    // Extraemos el "código de destino" (posiciones 7..9)
+                    $rightCode = substr($fullCode, 7, 3);
+
+                    // Convertimos los códigos de 3 letras a ciudad/departamento
+                    $origen  = $codeToCity[strtoupper($leftCode)]  ?? 'DESCONOCIDO';
+                    $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
+                @endphp
+                <tr>
+                    <td>
+                        <!-- Checkbox para seleccionar este registro externo -->
+                        <input type="checkbox"
+                               wire:model="selectedSolicitudesExternas"
+                               value="{{ $solicitud['guia'] }}">
+                    </td>
+                    <!-- Mostrar la guía completa -->
+                    <td>{{ $fullCode }}</td>
+                    <!-- Mostrar el origen/destino calculados -->
+                    <td>{{ $origen }}</td>
+                    <td>{{ $destino }}</td>
+                    <!-- Peso (ajusta si tu campo no se llama 'peso_o') -->
+                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                    <!-- En vez de 'Estado', mostrar 'Servicio' con el valor "Contratos" -->
+                    <td>Contratos</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@else
+    <p>No hay solicitudes externas con estado=2.</p>
+@endif
+
+
+
 
 
                                 @if (!empty($selectedAdmisionesList))

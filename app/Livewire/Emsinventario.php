@@ -184,7 +184,7 @@ class Emsinventario extends Component
             }
 
             // Obtener datos de la API solo de los registros seleccionados
-            $response = Http::get('http://127.0.0.1:9000/api/ems/estado/2');
+            $response = Http::get('http://127.0.0.1:9000/api/ems/estado/5');
 
             if ($response->successful()) {
                 $solicitudes = collect($response->json()); // Convertir en colección para filtrar
@@ -525,57 +525,90 @@ class Emsinventario extends Component
 
     public function mandarARegional()
     {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
+        if (empty($this->selectedAdmisiones) && empty($this->selectedSolicitudesExternas)) {
+            session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
             return;
         }
-
+    
         if (empty($this->selectedDepartment)) {
             session()->flash('error', 'Debe seleccionar un departamento para reencaminar.');
             return;
         }
-
-        // Obtener las admisiones existentes en el manifiesto (si ya existe)
-        $admisionesExistentes = Admision::where('manifiesto', $this->manualManifiesto)->get();
-
-        // Si se proporciona un manifiesto manual, usarlo; de lo contrario, generar uno nuevo
-        if (!empty($this->manualManifiesto)) {
-            $this->currentManifiesto = $this->manualManifiesto;
-        } else {
-            $this->currentManifiesto = $this->generarManifiesto(Auth::user()->city);
+    
+        // Generar manifiesto si no se ingresó manualmente
+        if (empty($this->manualManifiesto)) {
+            $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
         }
-
-        // Actualizar las admisiones seleccionadas para asignarlas al manifiesto
-        $admisionesNuevas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-        foreach ($admisionesNuevas as $admision) {
-            $admision->estado = 6; // Mandado a regional
-            $admision->manifiesto = $this->currentManifiesto;
-            $admision->reencaminamiento = $this->selectedDepartment;
-            $admision->tipo_transporte = $this->selectedTransport; // Guardar el modo de transporte
-            $admision->numero_vuelo = $this->numeroVuelo; // Guardar el número de vuelo
-            $admision->save();
-
-            Eventos::create([
-                'accion' => 'Mandar a regional',
-                'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->currentManifiesto}.",
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
-            ]);
-            Historico::create([
-                'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
-                'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
-                'id_estado_actualizacion' => 2, // Estado inicial: 1
-                'estado_actualizacion' => 'En Transito', // Descripción del estado
-            ]);
+    
+        $errores = [];
+    
+        // Procesar solicitudes externas y actualizar en la API
+        if (!empty($this->selectedSolicitudesExternas)) {
+            foreach ($this->selectedSolicitudesExternas as $guia) {
+                // Aquí añadimos 'manifiesto' al request
+                $response = Http::put("http://localhost:9000/api/solicitudes/reencaminar", [
+                    'guia' => $guia,
+                    'reencaminamiento' => $this->selectedDepartment,
+                    'manifiesto' => $this->manualManifiesto,  // <--- IMPORTANTE
+                ]);
+    
+                if (!$response->successful()) {
+                    $errores[] = "Error en la solicitud externa {$guia}: " . $response->body();
+                }
+            }
         }
+    
+        // Procesar admisiones internas
+        if (!empty($this->selectedAdmisiones)) {
+            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+            
+            foreach ($admisiones as $admision) {
+                $admision->estado           = 6; // Mandado a regional
+                $admision->manifiesto       = $this->manualManifiesto;
+                $admision->reencaminamiento = $this->selectedDepartment;
+                $admision->tipo_transporte  = $this->selectedTransport;
+                $admision->numero_vuelo     = $this->numeroVuelo;
+                $admision->save();
+    
+                // Registrar eventos
+                Eventos::create([
+                    'accion'      => 'Mandar a regional',
+                    'descripcion' => "La admisión fue enviada a la regional con el manifiesto {$this->manualManifiesto}.",
+                    'codigo'      => $admision->codigo,
+                    'user_id'     => Auth::id(),
+                ]);
+    
+                Historico::create([
+                    'numero_guia'             => $admision->codigo,
+                    'fecha_actualizacion'     => now(),
+                    'id_estado_actualizacion' => 2,
+                    'estado_actualizacion'    => 'En Tránsito',
+                ]);
+            }
+        }
+    
+        // Generar tu PDF u otras lógicas
+        $solicitudesExternasSeleccionadas = collect($this->solicitudesExternas)
+            ->whereIn('guia', $this->selectedSolicitudesExternas);
+            
+        $this->selectedAdmisionesList = $admisiones ?? collect();
+        return $this->generarPdf($solicitudesExternasSeleccionadas);
+    
+        // Limpiar selección
+        $this->selectedAdmisiones        = [];
+        $this->selectedSolicitudesExternas = [];
         $this->dispatch('reloadPage');
-
-        // Combinar las admisiones nuevas con las existentes
-        $todasAdmisiones = $admisionesExistentes->merge($admisionesNuevas);
-
-        // Generar el PDF con todas las admisiones asociadas al manifiesto
-        return $this->generarPdf($todasAdmisiones);
+    
+        if (!empty($errores)) {
+            session()->flash('error', implode(', ', $errores));
+        } else {
+            session()->flash('message', 'Las solicitudes externas han sido reencaminadas y las admisiones enviadas correctamente.');
+        }
     }
+    
+    
+    
+    
 
 
 
@@ -606,7 +639,7 @@ class Emsinventario extends Component
     public function mount()
     {
         // Petición al primer sistema que está en carteros.php
-        $response = Http::get('http://127.0.0.1:9000/api/ems/estado/2');
+        $response = Http::get('http://127.0.0.1:9000/api/ems/estado/5');
 
         if ($response->successful()) {
             $this->solicitudesExternas = $response->json();
@@ -790,42 +823,60 @@ class Emsinventario extends Component
 
 
 
-    public function generarPdf()
-{
-    // Unir admisiones seleccionadas con registros externos seleccionados
-    $admisionesSeleccionadas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-
-    // Obtener solo los registros externos seleccionados
-    $solicitudesExternasSeleccionadas = collect($this->solicitudesExternas)->whereIn('guia', $this->selectedSolicitudesExternas);
-
-    // Verificamos si hay admisiones seleccionadas o solicitudes externas
-    if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
-        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-        return;
+    public function generarPdf($solicitudesExternasSeleccionadas)
+    {
+        // Obtener admisiones seleccionadas
+        $admisionesSeleccionadas = $this->selectedAdmisionesList;
+    
+        // Verificamos si hay admisiones seleccionadas o solicitudes externas
+        if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+            return;
+        }
+    
+        // **Cálculo de cantidad total**
+        $totalCantidad = count($admisionesSeleccionadas) + count($solicitudesExternasSeleccionadas);
+    
+        // **Cálculo de peso total**
+        $totalPeso = 0;
+    
+        // Sumar peso de admisiones internas
+        foreach ($admisionesSeleccionadas as $admision) {
+            $peso = (float) ($admision->peso_ems ?? $admision->peso ?? 0);
+            $totalPeso += $peso;
+        }
+    
+        // Sumar peso de solicitudes externas
+        foreach ($solicitudesExternasSeleccionadas as $solicitud) {
+            $pesoExterno = (float) ($solicitud['peso_o'] ?? $solicitud['peso_v'] ?? $solicitud['peso_r'] ?? 0);
+            $totalPeso += $pesoExterno;
+        }
+    
+        // Datos para la plantilla del PDF
+        $data = [
+            'admisiones'        => $admisionesSeleccionadas,
+            'solicitudesExternas' => $solicitudesExternasSeleccionadas,
+            'currentDate'       => now()->format('d/m/Y'),
+            'currentTime'       => now()->format('H:i'),
+            'currentManifiesto' => $this->manualManifiesto, // 👈 Mantenemos el manifiesto
+            'loggedInUserCity'  => Auth::user()->city,
+            'destinationCity'   => $this->selectedDepartment ?? ($admisionesSeleccionadas->first()->reencaminamiento ?? $admisionesSeleccionadas->first()->ciudad ?? ''),
+            'selectedTransport' => $this->selectedTransport,
+            'numeroVuelo'       => $this->numeroVuelo,
+            'totalCantidad'     => $totalCantidad, // 👈 Cantidad total corregida
+            'totalPeso'         => number_format($totalPeso, 2, '.', ''), // 👈 Peso total corregido con 2 decimales
+        ];
+    
+        // Generar el PDF con DomPDF
+        $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
+    
+        // Descargar el PDF directamente
+        return response()->streamDownload(
+            fn() => print($pdf->stream('cn-33.pdf')),
+            'cn-33.pdf'
+        );
     }
-
-    // Datos para la plantilla del PDF
-    $data = [
-        'admisiones'        => $admisionesSeleccionadas,
-        'solicitudesExternas' => $solicitudesExternasSeleccionadas,
-        'currentDate'       => now()->format('d/m/Y'),
-        'currentTime'       => now()->format('H:i'),
-        'currentManifiesto' => $this->currentManifiesto,
-        'loggedInUserCity'  => Auth::user()->city,
-        'destinationCity'   => $this->selectedDepartment ?? $admisionesSeleccionadas->first()->reencaminamiento ?? $admisionesSeleccionadas->first()->ciudad ?? '',
-        'selectedTransport' => $this->selectedTransport,
-        'numeroVuelo'       => $this->numeroVuelo,
-    ];
-
-    // Generar el PDF con DomPDF
-    $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-
-    // Descargar el PDF directamente
-    return response()->streamDownload(
-        fn() => print($pdf->stream('cn-33.pdf')),
-        'cn-33.pdf'
-    );
-}
+    
 
     public function updatedSelectedAdmisiones()
     {
