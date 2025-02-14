@@ -183,10 +183,10 @@ public function saveAssignments()
 
 public function searchAdmision()
 {
-    // Implementar la misma lógica de filtros en la búsqueda
     $userCity = Auth::user()->city;
 
-    $this->admisiones = Admision::where(function ($query) use ($userCity) {
+    // Buscar la primera admisión que coincida con el criterio de búsqueda
+    $admision = Admision::where(function ($query) use ($userCity) {
             $query->where(function ($subQuery) use ($userCity) {
                 $subQuery->where('estado', 3)
                          ->where('origen', $userCity)
@@ -200,6 +200,14 @@ public function searchAdmision()
         })
         ->where('codigo', 'like', '%' . $this->searchTerm . '%')
         ->orderBy('fecha', 'desc')
-        ->paginate($this->perPage);
+        ->first(); // Tomar solo el primer resultado
+
+    if ($admision) {
+        $this->selectAdmision($admision->id); // Agregarlo a la lista
+    }
+
+    // Limpiar el campo de búsqueda después de añadirlo
+    $this->searchTerm = '';
 }
+
 }
