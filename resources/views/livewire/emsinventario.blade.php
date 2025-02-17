@@ -153,75 +153,74 @@
                                     </tbody>
 
                                 </table>
-                    <!-- Registros externos -->
-<!-- =================== REGISTROS EXTERNOS =================== -->
-@php
-    // Array de mapeo para origen/destino
-    $codeToCity = [
-        'LPB' => 'LA PAZ',
-        'SRZ' => 'SANTA CRUZ',
-        'CIJ' => 'PANDO',
-        'TDD' => 'BENI',
-        'TJA' => 'TARIJA',
-        'SRE' => 'CHUQUISACA',
-        'ORU' => 'ORURO',
-        'POI' => 'POTOSI',
-    ];
-@endphp
+                                <!-- Registros externos -->
+                                <!-- =================== REGISTROS EXTERNOS =================== -->
+                                @php
+                                    // Array de mapeo para origen/destino
+                                    $codeToCity = [
+                                        'LPB' => 'LA PAZ',
+                                        'SRZ' => 'SANTA CRUZ',
+                                        'CIJ' => 'PANDO',
+                                        'TDD' => 'BENI',
+                                        'TJA' => 'TARIJA',
+                                        'SRE' => 'CHUQUISACA',
+                                        'ORU' => 'ORURO',
+                                        'POI' => 'POTOSI',
+                                    ];
+                                @endphp
 
-@if (count($solicitudesExternas) > 0)
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <!-- Para seleccionar los registros externos -->
-                <th></th>
-                <th>Guía</th>
-                <th>Origen</th>
-                <th>Destino</th>
-                <th>Peso (kg)</th>
-                <th>Servicio</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($solicitudesExternas as $solicitud)
-                @php
-                    // Tomamos la guía completa
-                    $fullCode  = $solicitud['guia'] ?? '';
+                                @if (count($solicitudesExternas) > 0)
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <!-- Para seleccionar los registros externos -->
+                                                <th></th>
+                                                <th>Guía</th>
+                                                <th>Origen</th>
+                                                <th>Destino</th>
+                                                <th>Peso (kg)</th>
+                                                <th>Servicio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($solicitudesExternas as $solicitud)
+                                                @php
+                                                    // Tomamos la guía completa
+                                                    $fullCode = $solicitud['guia'] ?? '';
 
-                    // Extraemos el "código de origen" (posiciones 4..6)
-                    // Ajusta los índices si tu guía tiene otra estructura
-                    $leftCode  = substr($fullCode, 4, 3);
+                                                    // Extraemos el "código de origen" (posiciones 4..6)
+                                                    // Ajusta los índices si tu guía tiene otra estructura
+                                                    $leftCode = substr($fullCode, 4, 3);
 
-                    // Extraemos el "código de destino" (posiciones 7..9)
-                    $rightCode = substr($fullCode, 7, 3);
+                                                    // Extraemos el "código de destino" (posiciones 7..9)
+                                                    $rightCode = substr($fullCode, 7, 3);
 
-                    // Convertimos los códigos de 3 letras a ciudad/departamento
-                    $origen  = $codeToCity[strtoupper($leftCode)]  ?? 'DESCONOCIDO';
-                    $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
-                @endphp
-                <tr>
-                    <td>
-                        <!-- Checkbox para seleccionar este registro externo -->
-                        <input type="checkbox"
-                               wire:model="selectedSolicitudesExternas"
-                               value="{{ $solicitud['guia'] }}">
-                    </td>
-                    <!-- Mostrar la guía completa -->
-                    <td>{{ $fullCode }}</td>
-                    <!-- Mostrar el origen/destino calculados -->
-                    <td>{{ $origen }}</td>
-                    <td>{{ $destino }}</td>
-                    <!-- Peso (ajusta si tu campo no se llama 'peso_o') -->
-                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
-                    <!-- En vez de 'Estado', mostrar 'Servicio' con el valor "Contratos" -->
-                    <td>Contratos</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-@else
-    <p>No hay solicitudes externas con estado=2.</p>
-@endif
+                                                    // Convertimos los códigos de 3 letras a ciudad/departamento
+                                                    $origen = $codeToCity[strtoupper($leftCode)] ?? 'DESCONOCIDO';
+                                                    $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
+                                                @endphp
+                                                <tr>
+                                                    <td>
+                                                        <!-- Checkbox para seleccionar este registro externo -->
+                                                        <input type="checkbox" wire:model="selectedSolicitudesExternas"
+                                                            value="{{ $solicitud['guia'] }}">
+                                                    </td>
+                                                    <!-- Mostrar la guía completa -->
+                                                    <td>{{ $fullCode }}</td>
+                                                    <!-- Mostrar el origen/destino calculados -->
+                                                    <td>{{ $origen }}</td>
+                                                    <td>{{ $destino }}</td>
+                                                    <!-- Peso (ajusta si tu campo no se llama 'peso_o') -->
+                                                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                    <!-- En vez de 'Estado', mostrar 'Servicio' con el valor "Contratos" -->
+                                                    <td>Contratos</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <p>No hay solicitudes externas con estado=2.</p>
+                                @endif
 
 
 
@@ -632,127 +631,142 @@
                             @endif
 
                             @if ($showModal)
-                            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirmar Envío</h5>
-                                            <button type="button" class="close" wire:click="$set('showModal', false)">
-                                                <span>&times;</span>
-                                            </button>
-                                        </div>
-                        
-                                        <!-- Aquí aplicamos el scroll al cuerpo del modal -->
-                                        <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-                                            <p>Puede enviar las admisiones seleccionadas a la regional o reencaminarlas a otro departamento.</p>
-                        
-                                            <p><strong>Total de envíos seleccionados:</strong> {{ count($selectedAdmisionesCodes) }}</p>
-                        
-                                            <!-- Selección del departamento de destino -->
-                                            <div class="form-group">
-                                                <label for="selectedDepartment">Enviar al departamento (obligatorio):</label>
-                                                <select wire:model="selectedDepartment" class="form-control" id="selectedDepartment">
-                                                    <option value="">Seleccione la Regional de Destino</option>
-                                                    <option value="LA PAZ">LA PAZ</option>
-                                                    <option value="ORURO">ORURO</option>
-                                                    <option value="BENI">BENI</option>
-                                                    <option value="COCHABAMBA">COCHABAMBA</option>
-                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                                    <option value="POTOSI">POTOSI</option>
-                                                    <option value="CHUQUISACA">CHUQUISACA</option>
-                                                    <option value="PANDO">PANDO</option>
-                                                    <option value="TARIJA">TARIJA</option>
-                                                </select>
-                                                @if (!$selectedDepartment)
-                                                    <small class="text-danger">Debe seleccionar un departamento.</small>
-                                                @endif
+                                <div class="modal fade show d-block" tabindex="-1" role="dialog"
+                                    style="background-color: rgba(0,0,0,0.5);">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Envío</h5>
+                                                <button type="button" class="close"
+                                                    wire:click="$set('showModal', false)">
+                                                    <span>&times;</span>
+                                                </button>
                                             </div>
-                        
-                                            <!-- Campo para manifiesto -->
-                                            <div class="form-group">
-                                                <label for="manualManifiesto">Manifiesto (déjelo vacío para generar uno automático):</label>
-                                                <input type="text" wire:model="manualManifiesto" class="form-control"
-                                                       id="manualManifiesto" placeholder="Ej: BO0456789 (opcional)">
-                                            </div>
-                        
-                                            <!-- Selección de tipo de transporte -->
-                                            <div class="form-group">
-                                                <label for="selectedTransport">Medio de Transporte:</label>
-                                                <select wire:model="selectedTransport" class="form-control" id="selectedTransport">
-                                                    <option value="AEREO">AÉREO</option>
-                                                    <option value="TERRESTRE">TERRESTRE</option>
-                                                </select>
-                                            </div>
-                        
-                                            <!-- Número de vuelo -->
-                                            <div class="form-group">
-                                                <label for="numeroVuelo">N° de vuelo/medio transporte (opcional):</label>
-                                                <input type="text" wire:model="numeroVuelo" class="form-control"
-                                                       id="numeroVuelo" placeholder="Ingrese el número de vuelo si aplica.">
-                                            </div>
-                        
-                                            <hr>
-                        
-                                            <!-- Mostrar solo las admisiones seleccionadas -->
-                                            <h5>Admisiones Seleccionadas</h5>
-                                            <table class="table table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Código</th>
-                                                        <th>Origen</th>
-                                                        <th>Destino</th>
-                                                        <th>Peso (kg)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($selectedAdmisionesList as $admision)
-                                                        <tr>
-                                                            <td>{{ $admision->codigo }}</td>
-                                                            <td>{{ $admision->origen }}</td>
-                                                            <td>{{ $admision->reencaminamiento ?? $admision->ciudad }}</td>
-                                                            <td>{{ $admision->peso }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                        
-                                            <!-- Mostrar solo los registros externos seleccionados -->
-                                            @if (!empty($solicitudesExternas))
-                                                <h5>Solicitudes Externas Seleccionadas</h5>
+
+                                            <!-- Aquí aplicamos el scroll al cuerpo del modal -->
+                                            <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                                                <p>Puede enviar las admisiones seleccionadas a la regional o
+                                                    reencaminarlas a otro departamento.</p>
+
+                                                <p><strong>Total de envíos seleccionados:</strong>
+                                                    {{ count($selectedAdmisionesCodes) }}</p>
+
+                                                <!-- Selección del departamento de destino -->
+                                                <div class="form-group">
+                                                    <label for="selectedDepartment">Enviar al departamento
+                                                        (obligatorio):</label>
+                                                    <select wire:model="selectedDepartment" class="form-control"
+                                                        id="selectedDepartment">
+                                                        <option value="">Seleccione la Regional de Destino
+                                                        </option>
+                                                        <option value="LA PAZ">LA PAZ</option>
+                                                        <option value="ORURO">ORURO</option>
+                                                        <option value="BENI">BENI</option>
+                                                        <option value="COCHABAMBA">COCHABAMBA</option>
+                                                        <option value="SANTA CRUZ">SANTA CRUZ</option>
+                                                        <option value="POTOSI">POTOSI</option>
+                                                        <option value="CHUQUISACA">CHUQUISACA</option>
+                                                        <option value="PANDO">PANDO</option>
+                                                        <option value="TARIJA">TARIJA</option>
+                                                    </select>
+                                                    @if (!$selectedDepartment)
+                                                        <small class="text-danger">Debe seleccionar un
+                                                            departamento.</small>
+                                                    @endif
+                                                </div>
+
+                                                <!-- Campo para manifiesto -->
+                                                <div class="form-group">
+                                                    <label for="manualManifiesto">Manifiesto (déjelo vacío para generar
+                                                        uno automático):</label>
+                                                    <input type="text" wire:model="manualManifiesto"
+                                                        class="form-control" id="manualManifiesto"
+                                                        placeholder="Ej: BO0456789 (opcional)">
+                                                </div>
+
+                                                <!-- Selección de tipo de transporte -->
+                                                <div class="form-group">
+                                                    <label for="selectedTransport">Medio de Transporte:</label>
+                                                    <select wire:model="selectedTransport" class="form-control"
+                                                        id="selectedTransport">
+                                                        <option value="AEREO">AÉREO</option>
+                                                        <option value="TERRESTRE">TERRESTRE</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Número de vuelo -->
+                                                <div class="form-group">
+                                                    <label for="numeroVuelo">N° de vuelo/medio transporte
+                                                        (opcional):</label>
+                                                    <input type="text" wire:model="numeroVuelo"
+                                                        class="form-control" id="numeroVuelo"
+                                                        placeholder="Ingrese el número de vuelo si aplica.">
+                                                </div>
+
+                                                <hr>
+
+                                                <!-- Mostrar solo las admisiones seleccionadas -->
+                                                <h5>Admisiones Seleccionadas</h5>
                                                 <table class="table table-striped">
                                                     <thead>
                                                         <tr>
-                                                            <th>Guía</th>
-                                                            <th>Remitente</th>
-                                                            <th>Destinatario</th>
-                                                            <th>Peso</th>
+                                                            <th>Código</th>
+                                                            <th>Origen</th>
+                                                            <th>Destino</th>
+                                                            <th>Peso (kg)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($solicitudesExternas as $solicitud)
+                                                        @foreach ($selectedAdmisionesList as $admision)
                                                             <tr>
-                                                                <td>{{ $solicitud['guia'] }}</td>
-                                                                <td>{{ $solicitud['remitente'] }}</td>
-                                                                <td>{{ $solicitud['destinatario'] }}</td>
-                                                                <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                                <td>{{ $admision->codigo }}</td>
+                                                                <td>{{ $admision->origen }}</td>
+                                                                <td>{{ $admision->reencaminamiento ?? $admision->ciudad }}
+                                                                </td>
+                                                                <td>{{ $admision->peso }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
                                                 </table>
-                                            @endif
-                                        </div>
-                        
-                                        <div class="modal-footer">
-                                            <button class="btn btn-primary" wire:click="mandarARegional">
-                                                Guardar y Generar PDF
-                                            </button>
-                                            <button class="btn btn-secondary" wire:click="$set('showModal', false)">Cancelar</button>
+
+                                                <!-- Mostrar solo los registros externos seleccionados -->
+                                                @if (!empty($solicitudesExternas))
+                                                    <h5>Solicitudes Externas Seleccionadas</h5>
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Guía</th>
+                                                                <th>Remitente</th>
+                                                                <th>Destinatario</th>
+                                                                <th>Peso</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($solicitudesExternas as $solicitud)
+                                                                <tr>
+                                                                    <td>{{ $solicitud['guia'] }}</td>
+                                                                    <td>{{ $solicitud['remitente'] }}</td>
+                                                                    <td>{{ $solicitud['destinatario'] }}</td>
+                                                                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                @endif
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary" wire:click="mandarARegional">
+                                                    Guardar y Generar PDF
+                                                </button>
+                                                <button class="btn btn-secondary"
+                                                    wire:click="$set('showModal', false)">Cancelar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                        
+                            @endif
+
 
 
 
