@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdmisionController;
+use App\Http\Controllers\ApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 });
 // Route::apiResource('admisiones', AdmisionController::class);
+Route::get('/admisiones/buscar-por-codigo/{codigo}', [ApiController::class, 'admisionPorCodigo']);
