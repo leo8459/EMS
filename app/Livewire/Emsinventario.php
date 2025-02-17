@@ -535,6 +535,22 @@ class Emsinventario extends Component
             return;
         }
     
+        // Mapeo de ciudades a códigos correctos
+        $cityCodes = [
+            'LA PAZ'       => 'LPB',
+            'SANTA CRUZ'   => 'SRZ',
+            'COCHABAMBA'   => 'CBB',
+            'ORURO'        => 'ORU',
+            'POTOSI'       => 'PTI',
+            'TARIJA'       => 'TJA',
+            'CHUQUISACA'   => 'SRE',
+            'BENI'         => 'TDD', // Trinidad
+            'PANDO'        => 'CIJ', // Cobija
+        ];
+    
+        // Convertir el nombre de la ciudad al código correcto
+        $reencaminamiento = $cityCodes[$this->selectedDepartment] ?? $this->selectedDepartment;
+    
         // Generar manifiesto si no se ingresó manualmente
         if (empty($this->manualManifiesto)) {
             $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
@@ -545,11 +561,10 @@ class Emsinventario extends Component
         // Procesar solicitudes externas y actualizar en la API
         if (!empty($this->selectedSolicitudesExternas)) {
             foreach ($this->selectedSolicitudesExternas as $guia) {
-                // Aquí añadimos 'manifiesto' al request
                 $response = Http::put("http://localhost:9000/api/solicitudes/reencaminar", [
                     'guia' => $guia,
-                    'reencaminamiento' => $this->selectedDepartment,
-                    'manifiesto' => $this->manualManifiesto,  // <--- IMPORTANTE
+                    'reencaminamiento' => $reencaminamiento, // Ahora enviará el código correcto
+                    'manifiesto' => $this->manualManifiesto,
                 ]);
     
                 if (!$response->successful()) {
@@ -561,11 +576,11 @@ class Emsinventario extends Component
         // Procesar admisiones internas
         if (!empty($this->selectedAdmisiones)) {
             $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-            
+    
             foreach ($admisiones as $admision) {
                 $admision->estado           = 6; // Mandado a regional
                 $admision->manifiesto       = $this->manualManifiesto;
-                $admision->reencaminamiento = $this->selectedDepartment;
+                $admision->reencaminamiento = $reencaminamiento; // Ahora almacena el código correcto
                 $admision->tipo_transporte  = $this->selectedTransport;
                 $admision->numero_vuelo     = $this->numeroVuelo;
                 $admision->save();
@@ -587,10 +602,10 @@ class Emsinventario extends Component
             }
         }
     
-        // Generar tu PDF u otras lógicas
+        // Generar el PDF con las admisiones seleccionadas
         $solicitudesExternasSeleccionadas = collect($this->solicitudesExternas)
             ->whereIn('guia', $this->selectedSolicitudesExternas);
-            
+    
         $this->selectedAdmisionesList = $admisiones ?? collect();
         return $this->generarPdf($solicitudesExternasSeleccionadas);
     
@@ -605,6 +620,7 @@ class Emsinventario extends Component
             session()->flash('message', 'Las solicitudes externas han sido reencaminadas y las admisiones enviadas correctamente.');
         }
     }
+    
     
     
     
@@ -780,59 +796,65 @@ class Emsinventario extends Component
 
 
     public function reimprimirManifiesto()
-    {
-        // Validar que el manifiesto haya sido ingresado
-        $this->validate([
-            'manifiestoInput' => 'required|string'
-        ]);
-
-        // Buscar todas las admisiones asociadas al manifiesto
-        $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
-
-        if ($admisionesExistentes->isEmpty()) {
-            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado.');
-            return;
-        }
-
-        // Verificar si hay admisiones seleccionadas para agregar al manifiesto
-        if (!empty($this->selectedAdmisiones)) {
-            $admisionesNuevas = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-
-            // Actualizar el manifiesto de las admisiones seleccionadas
-            foreach ($admisionesNuevas as $admision) {
-                $admision->manifiesto = $this->manifiestoInput;
-                $admision->save();
-
-                // Registrar evento
-                Eventos::create([
-                    'accion' => 'Agregar al manifiesto',
-                    'descripcion' => "Se agregó el envío al manifiesto {$this->manifiestoInput}.",
-                    'codigo' => $admision->codigo,
-                    'user_id' => Auth::id(),
-                ]);
-            }
-
-            // Combinar las admisiones existentes con las nuevas
-            $admisionesExistentes = $admisionesExistentes->merge($admisionesNuevas);
-        }
-
-        // Generar el PDF con todas las admisiones del manifiesto
-        $this->currentManifiesto = $this->manifiestoInput;
-        return $this->generarPdf($admisionesExistentes);
+{
+    // Validar que el manifiesto haya sido ingresado o generar uno
+    if (empty($this->manifiestoInput)) {
+        // Si no hay, generamos uno automáticamente
+        $this->manifiestoInput = $this->generarManifiesto(Auth::user()->city);
     }
+
+    // Buscar admisiones internas con ese manifiesto
+    $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
+
+    // Consultar en la API si hay registros con ese manifiesto
+    $response = Http::get("http://localhost:9000/api/solicitudes/manifiesto/{$this->manifiestoInput}");
+
+    $solicitudesExternasSeleccionadas = collect(); // Inicializar colección vacía
+
+    if ($response->successful()) {
+        $data = $response->json();
+        // Ajustar si la respuesta está anidada, por ejemplo, en $data['data']
+        $solicitudesExternasSeleccionadas = collect($data);
+    }
+
+    // Verificar si no hay resultados en ambos sistemas
+    if ($admisionesExistentes->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+        session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado en ningún sistema.');
+        return;
+    }
+
+    // Asignar ambos para que coincidan
+    $this->manualManifiesto = $this->manifiestoInput;
+    $this->currentManifiesto = $this->manifiestoInput;
+
+    // (Opcional) Si quieres reimprimir también las admisiones locales, setéalas 
+    // en la lista seleccionada para que tu generarPdf() las lea:
+    $this->selectedAdmisionesList = $admisionesExistentes;
+
+    // Generar el PDF con todas las admisiones del manifiesto
+    return $this->generarPdf($solicitudesExternasSeleccionadas);
+}
+
+    
+    
 
 
 
     public function generarPdf($solicitudesExternasSeleccionadas)
     {
-        // Obtener admisiones seleccionadas
-        $admisionesSeleccionadas = $this->selectedAdmisionesList;
-    
-        // Verificamos si hay admisiones seleccionadas o solicitudes externas
-        if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-            return;
-        }
+        // 1. Obtener admisiones locales seleccionadas (si las hay)
+    $admisionesSeleccionadas = $this->selectedAdmisionesList;
+
+    // 2. Convertir $solicitudesExternasSeleccionadas a colección si es un array
+    if (is_array($solicitudesExternasSeleccionadas)) {
+        $solicitudesExternasSeleccionadas = collect($solicitudesExternasSeleccionadas);
+    }
+
+    // 3. Verificar si hay admisiones seleccionadas o solicitudes externas
+    if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+        return;
+    }
     
         // **Cálculo de cantidad total**
         $totalCantidad = count($admisionesSeleccionadas) + count($solicitudesExternasSeleccionadas);
@@ -888,54 +910,79 @@ class Emsinventario extends Component
         $this->updatedSelectedAdmisiones(); // Actualizar la lista
     }
     public function abrirModalCN33()
-    {
-        if (count($this->selectedAdmisiones) > 0) {
-            $this->showCN33Modal = true;
-        } else {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
-        }
+{
+    if (count($this->selectedAdmisiones) > 0 || count($this->selectedSolicitudesExternas) > 0) {
+        $this->showCN33Modal = true;
+    } else {
+        session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
     }
+}
+
 
 
     public function añadirACN33()
-    {
-        if (empty($this->selectedAdmisiones)) {
-            session()->flash('error', 'Debe seleccionar al menos una admisión.');
-            return;
-        }
+{
+    if (empty($this->selectedAdmisiones) && empty($this->selectedSolicitudesExternas)) {
+        session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
+        return;
+    }
 
-        // Validar que el usuario haya ingresado o generado un manifiesto
-        if (empty($this->manualManifiesto)) {
-            // Si no hay manifiesto manual, generar uno automáticamente
-            $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
-        }
+    // Validar que el usuario haya ingresado o generado un manifiesto
+    if (empty($this->manualManifiesto)) {
+        // Si no hay manifiesto manual, generar uno automáticamente
+        $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
+    }
 
-        // Obtener las admisiones seleccionadas y actualizar su estado y manifiesto
+    // Procesar admisiones internas (del sistema actual)
+    if (!empty($this->selectedAdmisiones)) {
         $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+
         foreach ($admisiones as $admision) {
-            $admision->estado = 6; // Cambiar al estado 6
+            $admision->estado = 6; // Cambiar al estado 6 (CN-33)
             $admision->manifiesto = $this->manualManifiesto;
             $admision->save();
 
-            // Registrar el evento en la base de datos
+            // Registrar evento
             Eventos::create([
-                'accion' => 'Añadir a CN-33',
+                'accion'      => 'Añadir a CN-33',
                 'descripcion' => "Se añadió al manifiesto {$this->manualManifiesto}.",
-                'codigo' => $admision->codigo,
-                'user_id' => Auth::id(),
+                'codigo'      => $admision->codigo,
+                'user_id'     => Auth::id(),
             ]);
         }
-
-        // Limpiar selección después de procesar
-        $this->selectedAdmisiones = [];
-        $this->showManifiestoInput = false; // Ocultar el campo de manifiesto después de guardar
-
-        // Mostrar mensaje de éxito
-        session()->flash('message', 'Las admisiones seleccionadas han sido añadidas a CN-33 con éxito.');
-
-        // Opcional: Recargar la página para ver cambios
-        $this->dispatch('reloadPage');
     }
+
+    // Procesar solicitudes externas (del otro sistema)
+    $errores = [];
+
+    if (!empty($this->selectedSolicitudesExternas)) {
+        foreach ($this->selectedSolicitudesExternas as $guia) {
+            // Actualizar en la API
+            $response = Http::put("http://localhost:9000/api/solicitudes/reencaminar", [
+                'guia'       => $guia,
+                'manifiesto' => $this->manualManifiesto, // Asignar el manifiesto generado
+                'estado'     => 8, // Cambiar estado a 8
+            ]);
+
+            if (!$response->successful()) {
+                $errores[] = "Error en solicitud externa {$guia}: " . $response->body();
+            }
+        }
+    }
+
+    // Limpiar selección después de procesar
+    $this->selectedAdmisiones = [];
+    $this->selectedSolicitudesExternas = [];
+
+    $this->dispatch('reloadPage');
+
+    if (!empty($errores)) {
+        session()->flash('error', implode(', ', $errores));
+    } else {
+        session()->flash('message', 'Las admisiones y solicitudes externas han sido añadidas a CN-33 correctamente.');
+    }
+}
+
 
 
 

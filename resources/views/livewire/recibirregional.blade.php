@@ -51,86 +51,57 @@
                 </div>
             </div>
 
-            <!-- BODY: Tabla de admisiones -->
-            <div class="card-body">
+               <!-- BODY: Tabla combinada de admisiones y solicitudes externas -->
+               <div class="card-body">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>
-                                <!-- Checkbox de "Seleccionar Todos" -->
-                                <input type="checkbox" wire:model="selectAll" />
-                            </th>
+                            <th><input type="checkbox" wire:model="selectAll" /></th>
                             <th>#</th>
+                            <th>Tipo</th>
                             <th>Origen</th>
                             <th>Peso</th>
-                            <th>Envio</th>
                             <th>Destino</th>
                             <th>Código</th>
                             <th>Fecha</th>
                             <th>Observación</th>
-                            {{-- <th>Reencaminamiento</th> --}}
                             @hasrole('SuperAdmin|Administrador')
                                 <th>Admisión</th>
                             @endhasrole
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($admisiones as $admision)
+                        <!-- Admisiones internas -->
+                        @foreach ($admisiones as $index => $admision)
                             <tr>
-                                <td>
-                                    <input type="checkbox" wire:model="selectedAdmisiones"
-                                        value="{{ $admision->id }}" 
-                                        {{ in_array($admision->id, $selectedAdmisiones) ? 'checked' : '' }}>
-                                </td>
+                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admision->id }}"></td>
                                 <td>{{ $loop->iteration }}</td>
+                                <td><span class="badge bg-primary">EMS</span></td>
                                 <td>{{ $admision->origen }}</td>
                                 <td>{{ $admision->peso_regional ?: ($admision->peso_ems ?: $admision->peso) }}</td>
                                 <td>{{ $admision->destino }}</td>
-                                <td>{{ $admision->reencaminamiento ?? $admision->ciudad }}</td>
                                 <td>{{ $admision->codigo }}</td>
                                 <td>{{ $admision->fecha }}</td>
                                 <td>{{ $admision->observacion_entrega ?: $admision->observacion }}</td>
                             </tr>
                         @endforeach
+
+                        <!-- Solicitudes externas -->
+                        @foreach ($solicitudesExternas as $index => $solicitud)
+                            <tr>
+                                <td><input type="checkbox" wire:model="selectedSolicitudesExternas" value="{{ $solicitud['guia'] }}"></td>
+                                <td>{{ $loop->iteration + count($admisiones) }}</td>
+                                <td><span class="badge bg-success">Contratos</span></td>
+                                <td>-</td>
+                                <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                <td>-</td>
+                                <td>{{ $solicitud['guia'] }}</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                        @endforeach
                     </tbody>
-                    
                 </table>
-                @if ($showExternalTable)
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h5>Solicitudes Externas</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <input type="checkbox" wire:model="selectAll" />
-                                    </th>
-                                    <th>Código</th>
-                                    <th>Peso</th>
-                                    <th>Servicio</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($solicitudesExternas as $solicitud)
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" wire:model="selectedSolicitudesExternas"
-                                                value="{{ $solicitud['guia'] }}" 
-                                                {{ in_array($solicitud['guia'], $selectedSolicitudesExternas) ? 'checked' : '' }}>
-                                        </td>
-                                        <td>{{ $solicitud['guia'] }}</td>
-                                        <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
-                                        <td>Contratos</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
-            
             
             
 
@@ -214,7 +185,7 @@
              <!-- 2) Solicitudes externas -->
 @foreach ($selectedSolicitudesExternasData as $index => $data)
 <div class="border rounded p-3 mb-3">
-    <h6>Envío externo: {{ $data['guia'] }}</h6>
+    <h6>Contratos: {{ $data['guia'] }}</h6>
     <!-- Peso original -->
     <div class="form-group">
         <label for="pesoExterno-{{ $index }}">Peso (opcional)</label>

@@ -76,38 +76,36 @@
                                     {{ session('error') }}
                                 </div>
                             @endif --}}
+                        
                             <div class="card-body">
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
-                                            <th>
-                                            </th>
+                                            <th><input type="checkbox" wire:model="selectAll" /></th>
                                             <th>#</th>
+                                            <th>Tipo</th>
                                             <th>Origen</th>
                                             <th>Servicio</th>
                                             <th>Tipo Correspondencia</th>
                                             <th>Cantidad</th>
                                             <th>Peso (kg)</th>
                                             <th>Destino</th>
-                                            <th>Envio</th>
                                             <th>Código</th>
                                             <th>Fecha</th>
                                             <th>Observación</th>
                                             <th>Estado</th>
-                                            @hasrole('SuperAdmin|Administrador')
-                                                <th>Admision</th>
-                                            @endhasrole
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($admisiones as $admisione)
+                                        <!-- Admisiones internas -->
+                                        @foreach ($admisiones as $index => $admisione)
                                             @php
                                                 $now = \Carbon\Carbon::now();
                                                 $fechaAdmision = \Carbon\Carbon::parse($admisione->fecha);
                                                 $diffInHours = $now->diffInHours($fechaAdmision);
-                                                $rowClass = '';
+                                                $rowClass = 'table-light';
                                                 $statusText = '';
-
+    
                                                 if ($diffInHours <= 24) {
                                                     $rowClass = 'table-success'; // Verde
                                                     $statusText = 'DISPONIBLE';
@@ -120,445 +118,77 @@
                                                 }
                                             @endphp
                                             <tr class="{{ $rowClass }}">
-                                                <td>
-                                                    <!-- Asegúrate de que el checkbox esté dentro del bucle -->
-                                                    <input type="checkbox" wire:model="selectedAdmisiones"
-                                                        value="{{ $admisione->id }}" />
-                                                </td>
+                                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}"></td>
                                                 <td>{{ $loop->iteration }}</td>
+                                                <td><span class="badge bg-primary">EMS</span></td>
                                                 <td>{{ $admisione->origen }}</td>
                                                 <td>{{ $admisione->servicio }}</td>
                                                 <td>{{ $admisione->tipo_correspondencia }}</td>
                                                 <td>{{ $admisione->cantidad }}</td>
                                                 <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
                                                 <td>{{ $admisione->reencaminamiento ?? $admisione->ciudad }}</td>
-                                                <td>{{ $admisione->destino }}</td>
                                                 <td>{{ $admisione->codigo }}</td>
                                                 <td>{{ $admisione->fecha }}</td>
                                                 <td>{{ $admisione->observacion_entrega ?? '' }}</td>
                                                 <td><strong>{{ $statusText }}</strong></td>
-                                                <td>
-
-                                                    <button class="btn btn-info btn-sm"
-                                                        wire:click="abrirEditModal({{ $admisione->id }})">
-                                                        Cambiar Direccion
-                                                    </button>
-                                                </td>
-                                                @hasrole('SuperAdmin|Administrador')
-                                                    <td>{{ $admisione->user->name ?? 'No asignado' }}</td>
-                                                @endhasrole
                                             </tr>
                                         @endforeach
-
-                                    </tbody>
-
-                                </table>
-                                <!-- Registros externos -->
-                                <!-- =================== REGISTROS EXTERNOS =================== -->
-                                @php
-                                    // Array de mapeo para origen/destino
-                                    $codeToCity = [
-                                        'LPB' => 'LA PAZ',
-                                        'SRZ' => 'SANTA CRUZ',
-                                        'CIJ' => 'PANDO',
-                                        'TDD' => 'BENI',
-                                        'TJA' => 'TARIJA',
-                                        'SRE' => 'CHUQUISACA',
-                                        'ORU' => 'ORURO',
-                                        'POI' => 'POTOSI',
-                                    ];
-                                @endphp
-
-                                @if (count($solicitudesExternas) > 0)
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <!-- Para seleccionar los registros externos -->
-                                                <th></th>
-                                                <th>Guía</th>
-                                                <th>Origen</th>
-                                                <th>Destino</th>
-                                                <th>Peso (kg)</th>
-                                                <th>Servicio</th>
+    
+                                        <!-- Solicitudes externas -->
+                                        @foreach ($solicitudesExternas as $index => $solicitud)
+                                            @php
+                                                $fullCode = $solicitud['guia'] ?? '';
+                                                $leftCode = substr($fullCode, 4, 3);
+                                                $rightCode = substr($fullCode, 7, 3);
+                                                $codeToCity = [
+                                                    'LPB' => 'LA PAZ',
+                                                    'SRZ' => 'SANTA CRUZ',
+                                                    'CIJ' => 'PANDO',
+                                                    'TDD' => 'BENI',
+                                                    'TJA' => 'TARIJA',
+                                                    'SRE' => 'CHUQUISACA',
+                                                    'ORU' => 'ORURO',
+                                                    'POI' => 'POTOSI',
+                                                    'CBB' => 'COCHABAMBA',
+                                                ];
+                                                $origen = $codeToCity[strtoupper($leftCode)] ?? 'DESCONOCIDO';
+                                                $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
+    
+                                                // Calcular estado según `fecha_recojo_c`
+                                                $fechaRecojo = \Carbon\Carbon::parse($solicitud['fecha_recojo_c'] ?? now());
+                                                $diffInHours = $now->diffInHours($fechaRecojo);
+                                                $rowClass = 'table-light';
+                                                $statusText = '';
+    
+                                                if ($diffInHours <= 24) {
+                                                    $rowClass = 'table-success'; // Verde
+                                                    $statusText = 'DISPONIBLE';
+                                                } elseif ($diffInHours <= 48) {
+                                                    $rowClass = 'table-warning'; // Amarillo
+                                                    $statusText = 'RETRASO';
+                                                } else {
+                                                    $rowClass = 'table-danger'; // Rojo
+                                                    $statusText = 'DEVOLVER';
+                                                }
+                                            @endphp
+                                            <tr class="{{ $rowClass }}">
+                                                <td><input type="checkbox" wire:model="selectedSolicitudesExternas" value="{{ $solicitud['guia'] }}"></td>
+                                                <td>{{ $loop->iteration + count($admisiones) }}</td>
+                                                <td><span class="badge bg-warning">Contratos</span></td>
+                                                <td>{{ $origen }}</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                <td>{{ $destino }}</td>
+                                                <td>{{ $solicitud['guia'] }}</td>
+                                                <td>{{ $solicitud['fecha_recojo_c'] ?? '-' }}</td>
+                                                <td>-</td>
+                                                <td><strong>{{ $statusText }}</strong></td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($solicitudesExternas as $solicitud)
-                                                @php
-                                                    // Tomamos la guía completa
-                                                    $fullCode = $solicitud['guia'] ?? '';
-
-                                                    // Extraemos el "código de origen" (posiciones 4..6)
-                                                    // Ajusta los índices si tu guía tiene otra estructura
-                                                    $leftCode = substr($fullCode, 4, 3);
-
-                                                    // Extraemos el "código de destino" (posiciones 7..9)
-                                                    $rightCode = substr($fullCode, 7, 3);
-
-                                                    // Convertimos los códigos de 3 letras a ciudad/departamento
-                                                    $origen = $codeToCity[strtoupper($leftCode)] ?? 'DESCONOCIDO';
-                                                    $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
-                                                @endphp
-                                                <tr>
-                                                    <td>
-                                                        <!-- Checkbox para seleccionar este registro externo -->
-                                                        <input type="checkbox" wire:model="selectedSolicitudesExternas"
-                                                            value="{{ $solicitud['guia'] }}">
-                                                    </td>
-                                                    <!-- Mostrar la guía completa -->
-                                                    <td>{{ $fullCode }}</td>
-                                                    <!-- Mostrar el origen/destino calculados -->
-                                                    <td>{{ $origen }}</td>
-                                                    <td>{{ $destino }}</td>
-                                                    <!-- Peso (ajusta si tu campo no se llama 'peso_o') -->
-                                                    <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
-                                                    <!-- En vez de 'Estado', mostrar 'Servicio' con el valor "Contratos" -->
-                                                    <td>Contratos</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                @else
-                                    <p>No hay solicitudes externas con estado=2.</p>
-                                @endif
-
-
-
-
-
-                                @if (!empty($selectedAdmisionesList))
-                                    <div class="card mt-3">
-                                        <div class="card-header bg-primary text-white">
-                                            Admisiones Seleccionadas ({{ count($selectedAdmisionesList) }})
-                                        </div>
-                                        <div class="card-body">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Código</th>
-                                                        <th>Origen</th>
-                                                        <th>Destino</th>
-                                                        <th>Peso (kg)</th>
-                                                        <th>Acción</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($selectedAdmisionesList as $index => $admision)
-                                                        <tr>
-                                                            <td>{{ $index + 1 }}</td>
-                                                            <td>{{ $admision->codigo }}</td>
-                                                            <td>{{ $admision->origen }}</td>
-                                                            <td>{{ $admisione->reencaminamiento ?? $admisione->ciudad }}
-                                                            </td>
-                                                            <td>{{ $admision->peso }}</td>
-                                                            <td>
-                                                                <button class="btn btn-danger btn-sm"
-                                                                    wire:click="removeFromSelection({{ $admision->id }})">
-                                                                    Eliminar
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Modal para Crear Nuevo Paquete -->
-                                <div wire:ignore.self class="modal fade" id="createPaqueteModal" tabindex="-1"
-                                    role="dialog" aria-labelledby="createPaqueteModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="createPaqueteModalLabel">Crear Nuevo
-                                                    Admision</h5>
-                                                <button type="button" class="close" data-dismiss="modal"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-
-                                            <div class="modal-body">
-                                                <form wire:submit.prevent="store">
-
-                                                    <!-- Sección DATOS -->
-                                                    <h5 class="mt-3" style="color: #003366;">DATOS</h5>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="origen">Origen*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="origen" wire:model="origen" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="servicio">Tipo de Servicio*</label>
-                                                                <select class="form-control" id="servicio"
-                                                                    wire:model="servicio">
-                                                                    <option value="">Seleccione el servicio
-                                                                    </option>
-                                                                    {{-- <option value="EMS">EMS</option> --}}
-                                                                    <option value="OFICIAL">OFICIAL</option>
-                                                                    <option value="TRANSITO">INTERNACIONAL</option>
-                                                                    <option value="CRIAS">CRIAS</option>
-
-                                                                    {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
-                                  <option value="EMS">POSTPAGO</option> --}}
-
-                                                                    {{-- <option value="ENCOMIENDA">ENCOMIENDA</option>
-                                  <option value="TRADICIONAL">TRADICIONAL</option>
-                                  <option value="CERTIFICADA">CERTIFICADA</option>
-                                  <option value="ORDINARIA">ORDINARIA</option>
-                                  <option value="EXPRESO">EXPRESO</option> --}}
-                                                                </select>
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label
-                                                                    for="tipo_correspondencia">Correspondencia*</label>
-                                                                <select class="form-control" id="tipo_correspondencia"
-                                                                    wire:model="tipo_correspondencia" wire:ignore>
-                                                                    <option value="">Seleccione el tipo de
-                                                                        correspondencia</option>
-                                                                    <option value="CARTA">CARTA</option>
-                                                                    <option value="ENCOMIENDA">ENCOMIENDA</option>
-                                                                    <option value="DOCUMENTO">DOCUMENTO</option>
-                                                                    <option value="PAQUETE">PAQUETE</option>
-                                                                    <option value="SACA M">SACA M</option>
-                                                                    <option value="REVISTA">REVISTA</option>
-                                                                    <option value="IMPRESO">IMPRESO</option>
-                                                                    <option value="CECOGRAMA">CECOGRAMA</option>
-                                                                    <option value="PEQUEÑO PAQUETE">PEQUEÑO PAQUETE
-                                                                    </option>
-
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="contenido">Contenido</label>
-                                                        <textarea class="form-control" id="contenido" wire:model="contenido"></textarea>
-                                                    </div>
-
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="cantidad">Cantidad*</label>
-                                                                <input type="number" class="form-control"
-                                                                    id="cantidad" placeholder="Cantidad"
-                                                                    wire:model="cantidad" value="1" disabled>
-                                                            </div>
-
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="destino">Reexpedicion*</label>
-                                                                <select class="form-control" id="destino"
-                                                                    wire:model="destino" wire:ignore>
-                                                                    <option value="">Seleccione el destino
-                                                                    </option>
-                                                                    <option value="OFICIAL">OFICIAL</option>
-                                                                    <option value="TRANSITO">TRANSITO
-                                                                    <option value="ENDAS">ENCOMIENDA</option>
-                                                                    <option value="COR">CORREO TRADICIONAL</option>
-
-                                                                    </option>
-                                                                    {{-- <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS
-                                                                    </option>
-                                                                    <option value="DEVOLUCION">NACIONAL CON DEVOLUCION
-                                                                    </option>
-                                                                    <option value="NACIONAL">NACIONAL EMS</option>
-                                                                    <option value="POSTPAGO">NACIONAL POSTPAGO</option>
-
-                                                                    <option value="CIUDADES INTERMEDIAS">CIUDADES
-                                                                        INTERMEDIAS</option>
-                                                                    <option value="TRINIDAD COBIJA">TRINIDAD COBIJA
-                                                                    </option>
-                                                                    <option value="RIVERALTA GUAYARAMERIN">RIVERALTA
-                                                                        GUAYARAMERIN</option>
-                                                                    <option value="EMS COBERTURA 1">EMS COBERTURA 1
-                                                                    </option>
-                                                                    <option value="EMS COBERTURA 2">EMS COBERTURA 2
-                                                                    </option>
-                                                                    <option value="EMS COBERTURA 3">EMS COBERTURA 3
-                                                                    </option>
-                                                                    <option value="EMS COBERTURA 4">EMS COBERTURA 4
-                                                                    </option> --}}
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="codigo">Código*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="codigo" wire:model="codigo">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="numero_factura">Número de Factura</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="numero_factura" wire:model="numero_factura">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="peso">Peso (Kg.)*</label>
-                                                                <input type="text" wire:model="peso">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="precio">Precio*</label>
-                                                                <input type="number" class="form-control"
-                                                                    id="precio" wire:model="precio" value="0"
-                                                                    readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <!-- Sección REMITENTE -->
-                                                    <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group" style="position: relative;">
-                                                                <label for="nombre_remitente">Nombre Remitente*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="nombre_remitente"
-                                                                    wire:model="nombre_remitente"
-                                                                    oninput="showSuggestions(this.value)" wire:ignore>
-                                                                <!-- Contenedor para las sugerencias -->
-                                                                <div id="suggestions"
-                                                                    style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="nombre_envia">Nombre y Apellido del que
-                                                                    Envia</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="nombre_envia" wire:model="nombre_envia">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="carnet">Carnet*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="carnet" wire:model="carnet">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="telefono_remitente">Teléfono
-                                                                    Remitente*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="telefono_remitente"
-                                                                    wire:model="telefono_remitente">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Sección DESTINATARIO -->
-                                                    <h5 class="mt-3" style="color: #003366;">DESTINATARIO</h5>
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="nombre_destinatario">Nombre
-                                                                    Destinatario*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="nombre_destinatario"
-                                                                    wire:model="nombre_destinatario">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="telefono_destinatario">Teléfono
-                                                                    Destinatario</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="telefono_destinatario"
-                                                                    wire:model="telefono_destinatario">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <!-- Cambiado a col-12 para ocupar todo el ancho -->
-                                                            <div class="form-group">
-                                                                <label for="direccion">Dirección*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="direccion" wire:model="direccion">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row">
-
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="ciudad">Ciudad*</label>
-                                                                <select class="form-control" id="ciudad"
-                                                                    wire:model="ciudad">
-                                                                    <option value="">Seleccione una ciudad
-                                                                    </option>
-                                                                    <option value="LA PAZ">LA PAZ</option>
-                                                                    <option value="POTOSI">POTOSI</option>
-                                                                    <option value="ORURO">ORURO</option>
-                                                                    <option value="SANTA CRUZ">SANTA CRUZ</option>
-                                                                    <option value="CHUQUISACA">CHUQUISACA</option>
-                                                                    <option value="COCHABAMBA">COCHABAMBA</option>
-                                                                    <option value="BENI">BENI</option>
-                                                                    <option value="PANDO">PANDO</option>
-                                                                    <option value="TARIJA">TARIJA</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="provincia">Provincia</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="provincia" wire:model="provincia">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="form-group">
-                                                                <label for="pais">País*</label>
-                                                                <input type="text" class="form-control"
-                                                                    id="pais" wire:model="pais">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-dismiss="modal">Cerrar</button>
-                                                        {{-- <button type="button" class="btn btn-secondary"
-                                                            onclick="saveFrequentSend()">Guardar
-                                                            como envío frecuente</button> --}}
-
-
-                                                        <button type="submit"
-                                                            class="btn btn-primary">Guardar</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Botón para abrir el modal -->
-                            </div>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             @if ($showCN33Modal)
                                 <div class="modal fade show d-block" tabindex="-1" role="dialog"
                                     style="background-color: rgba(0,0,0,0.5);">
