@@ -34,6 +34,41 @@ class Recibirregional extends Component
     public $selectedSolicitudesExternas = [];
     public $selectedSolicitudesExternasData = [];
 
+
+    public function buscar()
+    {
+        if (!empty($this->searchTerm)) {
+            // 1) Filtrar Admisiones (internas) en la BD
+            $filteredAdmisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
+                ->where('estado', 6)
+                ->pluck('id')
+                ->toArray();
+
+            // Unir con lo ya seleccionado (sin duplicar)
+            $this->selectedAdmisiones = array_unique(
+                array_merge($this->selectedAdmisiones, $filteredAdmisiones)
+            );
+
+            // 2) Filtrar en las "solicitudesExternas" (array) 
+            //    Usamos EXACT MATCH, pero podrías hacer stripos() 
+            //    para coincidencia parcial
+            $filteredExternas = collect($this->solicitudesExternas)->filter(function ($solicitud) {
+                return isset($solicitud['guia']) 
+                       && ($solicitud['guia'] === $this->searchTerm);
+            });
+
+            // Unir con lo ya seleccionado
+            $this->selectedSolicitudesExternas = array_unique(
+                array_merge(
+                    $this->selectedSolicitudesExternas, 
+                    $filteredExternas->pluck('guia')->toArray()
+                )
+            );
+        }
+
+        // 3) Limpia el searchTerm
+        $this->searchTerm = '';
+    }
     public function render()
 {
     $userCity = Auth::user()->city;
@@ -117,26 +152,7 @@ class Recibirregional extends Component
     }
     
 
-    public function buscar()
-    {
-        // Si hay un término de búsqueda, aplicamos los filtros
-        if (!empty($this->searchTerm)) {
-            // Filtrar solicitudes externas
-            $filteredExternas = collect($this->solicitudesExternas)->filter(function ($solicitud) {
-                return isset($solicitud['guia']) && $solicitud['guia'] === $this->searchTerm;
-            });
     
-            // Filtrar admisiones internas en BD
-            $filteredAdmisiones = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')->pluck('id')->toArray();
-    
-            // **Actualizar selecciones sin borrar las previas**
-            $this->selectedSolicitudesExternas = array_unique(array_merge($this->selectedSolicitudesExternas, $filteredExternas->pluck('guia')->toArray()));
-            $this->selectedAdmisiones = array_unique(array_merge($this->selectedAdmisiones, $filteredAdmisiones));
-        }
-    
-        // **Limpia solo la vista, no los seleccionados**
-        $this->searchTerm = '';
-    }
     
 
 

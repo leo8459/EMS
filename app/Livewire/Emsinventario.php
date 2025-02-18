@@ -67,64 +67,114 @@ class Emsinventario extends Component
     }
 
     public function render()
-    {
-        $userCity = Auth::user()->city;
+{
+    $userCity = Auth::user()->city;
 
-        // Filtrar las admisiones según las condiciones
-        $admisiones = Admision::query()
-            ->where(function ($query) use ($userCity) {
-                // Condición para estado 7
-                $query->where(function ($subQuery) use ($userCity) {
-                    $subQuery->where('estado', 7)
-                        ->where(function ($innerQuery) use ($userCity) {
-                            $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
-                                ->orWhere(function ($orQuery) use ($userCity) {
-                                    $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                        ->where('ciudad', $userCity);    // Usar ciudad
-                                });
-                        });
-                })
-                    ->orWhere(function ($subQuery) use ($userCity) {
-                        // Condición para estado 3
-                        $subQuery->where('estado', 3)
-                            ->where('origen', $userCity); // Usar origen
-                    })
-                    ->orWhere(function ($subQuery) use ($userCity) {
-                        // Condición para estado 10
-                        $subQuery->where('estado', 10)
-                            ->where(function ($innerQuery) use ($userCity) {
-                                $innerQuery->where('reencaminamiento', $userCity) // Si hay reencaminamiento, usarlo
-                                    ->orWhere(function ($orQuery) use ($userCity) {
-                                        $orQuery->whereNull('reencaminamiento') // Si no hay reencaminamiento
-                                            ->where('ciudad', $userCity);    // Usar ciudad
-                                    });
+    // 1) Admisiones internas (estado=3|7|10 con tu condición original):
+    $admisiones = Admision::query()
+        ->where(function ($query) use ($userCity) {
+            $query->where(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 7)
+                    ->where(function ($innerQuery) use ($userCity) {
+                        $innerQuery->where('reencaminamiento', $userCity)
+                            ->orWhere(function ($orQuery) use ($userCity) {
+                                $orQuery->whereNull('reencaminamiento')
+                                        ->where('ciudad', $userCity);
                             });
                     });
             })
-            ->where('codigo', 'like', '%' . $this->searchTerm . '%'); // Filtro por código
-
-        // Filtrar por ciudad seleccionada, si aplica
-        if ($this->selectedCity) {
-            $admisiones = $admisiones->where(function ($query) {
-                $query->where('ciudad', $this->selectedCity)
-                    ->orWhere('reencaminamiento', $this->selectedCity);
+            ->orWhere(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 3)
+                         ->where('origen', $userCity);
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 10)
+                         ->where(function ($innerQuery) use ($userCity) {
+                             $innerQuery->where('reencaminamiento', $userCity)
+                                ->orWhere(function ($orQuery) use ($userCity) {
+                                    $orQuery->whereNull('reencaminamiento')
+                                            ->where('ciudad', $userCity);
+                                });
+                         });
             });
-        }
+        })
+        ->orderBy('fecha', 'desc')
+        ->paginate($this->perPage);
 
-        $admisiones = $admisiones->orderBy('fecha', 'desc') // Ordenar por fecha descendente
-            ->paginate($this->perPage);
-
-        // Marcar automáticamente los checkboxes de las admisiones mostradas
-        if ($this->cityJustUpdated) {
-            $currentPageIds = $admisiones->pluck('id')->toArray();
-            $this->selectedAdmisiones = $currentPageIds;
-            $this->cityJustUpdated = false;
-        }
-
-        return view('livewire.emsinventario', [
-            'admisiones' => $admisiones,
-        ]);
+    // 2) Solicitudes externas (por API):
+    //    Para la tabla, siempre traigo las de estado=5, 
+    //    igual que tu ejemplo:
+    $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
+    if ($response->successful()) {
+        $solicitudesExternas = collect($response->json());
+    } else {
+        $solicitudesExternas = collect();
     }
+
+    // (Opcional) Filtrar por selectedCity, etc.
+    if ($this->selectedCity) {
+        // Ejemplo: filtrar las admisiones "paginadas" en memoria
+        $filtered = collect($admisiones->items())->filter(function ($adm) {
+            return $adm->ciudad === $this->selectedCity
+                || $adm->reencaminamiento === $this->selectedCity;
+        });
+        // Rearmar la paginación con la sub-colección (un truco)
+        $admisiones = new \Illuminate\Pagination\LengthAwarePaginator(
+            $filtered,
+            $filtered->count(),
+            $this->perPage,
+            $admisiones->currentPage(),
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+
+    return view('livewire.emsinventario', [
+        'admisiones' => $admisiones,
+        'solicitudesExternas' => $solicitudesExternas,
+    ]);
+}
+
+    public function search()
+    {
+        // 1) Buscar ADMISIÓN (interno)
+        $admisionesEncontradas = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
+            ->orderBy('fecha','desc')
+            ->get(); // O ->paginate(...) si deseas.
+    
+        // Obtener IDs encontrados
+        $foundIds = $admisionesEncontradas->pluck('id')->toArray();
+    
+        // Unir con los ya seleccionados sin duplicar
+        $this->selectedAdmisiones = array_unique(
+            array_merge($this->selectedAdmisiones, $foundIds)
+        );
+    
+        // 2) Buscar en API EXTERNA
+        $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
+        if ($response->successful()) {
+            // Convertimos a colección
+            $allExternas = collect($response->json());
+    
+            // Filtramos
+            $solicitudesExternasEncontradas = $allExternas->filter(function ($item) {
+                // stripos -> busca sin importar mayúsc/minúsc
+                return stripos($item['guia'], $this->searchTerm) !== false;
+            })->values();
+    
+            // Obtenemos las guías encontradas
+            $foundGuias = $solicitudesExternasEncontradas->pluck('guia')->toArray();
+    
+            // Unir con lo que ya estaba seleccionado
+            $this->selectedSolicitudesExternas = array_unique(
+                array_merge($this->selectedSolicitudesExternas, $foundGuias)
+            );
+        }
+    
+        // 3) Limpiar searchTerm para que el usuario pueda digitar otra búsqueda
+        $this->searchTerm = '';
+    }
+        
+    
 
 
 

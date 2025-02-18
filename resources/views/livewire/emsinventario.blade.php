@@ -22,8 +22,10 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="float-left d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                    class="form-control" style="margin-right: 10px;" wire:keydown.enter="$refresh">
+                                <input type="text" wire:model="searchTerm" 
+                                placeholder="Buscar..." 
+                                class="form-control" 
+                                style="margin-right: 10px;" />
 
                                 <select wire:model="selectedCity" class="form-control" style="margin-right: 10px;">
                                     <option value="">Seleccione una ciudad</option>
@@ -38,8 +40,9 @@
                                     <option value="TARIJA">TARIJA</option>
                                 </select>
 
-                                <button type="button" class="btn btn-primary" wire:click="$refresh">Buscar</button>
-                            </div>
+                                <button type="button" class="btn btn-primary" wire:click="search">
+                                    Buscar
+                                </button>                            </div>
                             <!-- Botón para abrir el modal -->
 
                             <div class="d-flex justify-content-end align-items-center mt-3">
@@ -118,8 +121,11 @@
                                                 }
                                             @endphp
                                             <tr class="{{ $rowClass }}">
-                                                <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}"></td>
-                                                <td>{{ $loop->iteration }}</td>
+                                                <td>
+                                                    <input type="checkbox" 
+                                                           wire:model="selectedAdmisiones"
+                                                           value="{{ $admisione->id }}">
+                                                </td>                                                <td>{{ $loop->iteration }}</td>
                                                 <td><span class="badge bg-primary">EMS</span></td>
                                                 <td>{{ $admisione->origen }}</td>
                                                 <td>{{ $admisione->servicio }}</td>
@@ -137,6 +143,10 @@
                                         <!-- Solicitudes externas -->
                                         @foreach ($solicitudesExternas as $index => $solicitud)
                                             @php
+                                                                                            $now = \Carbon\Carbon::now();
+
+                                               $fechaRecojo = \Carbon\Carbon::parse($solicitud['fecha_recojo_c'] ?? now());
+                                               $diffInHours = $now->diffInHours($fechaRecojo);
                                                 $fullCode = $solicitud['guia'] ?? '';
                                                 $leftCode = substr($fullCode, 4, 3);
                                                 $rightCode = substr($fullCode, 7, 3);
@@ -172,8 +182,11 @@
                                                 }
                                             @endphp
                                             <tr class="{{ $rowClass }}">
-                                                <td><input type="checkbox" wire:model="selectedSolicitudesExternas" value="{{ $solicitud['guia'] }}"></td>
-                                                <td>{{ $loop->iteration + count($admisiones) }}</td>
+                                                <td>
+                                                    <input type="checkbox"
+                                                           wire:model="selectedSolicitudesExternas"
+                                                           value="{{ $solicitud['guia'] }}">
+                                                </td>                                                <td>{{ $loop->iteration + count($admisiones) }}</td>
                                                 <td><span class="badge bg-warning">Contratos</span></td>
                                                 <td>{{ $origen }}</td>
                                                 <td>-</td>
