@@ -70,9 +70,9 @@ public function cambiarEstadoPorCodigoEMS(Request $request)
      // Registrar el evento
      \App\Models\Eventos::create([
         'accion' => 'Asignar Cartero',
-        // 'descripcion' => "Envio con " . ($cartero ? $cartero->name : 'Desconocido'),
+        'descripcion' => "Envio En camino a ser entregado ",
         'codigo' => $admision->codigo,
-        'user_id' => Auth::id(),
+        // 'user_id' => Auth::id(),
     ]);
     Historico::create([
         'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
