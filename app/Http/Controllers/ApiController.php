@@ -72,7 +72,7 @@ public function cambiarEstadoPorCodigoEMS(Request $request)
         'accion' => 'Asignar Cartero',
         'descripcion' => "Envio En camino a ser entregado ",
         'codigo' => $admision->codigo,
-'user_id' => Auth::user()->name ?? 'Usuario desconocido',
+// 'user_id' => Auth::user()->name ?? 'Usuario desconocido',
     ]);
     Historico::create([
         'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
