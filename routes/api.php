@@ -22,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // Route::apiResource('admisiones', AdmisionController::class);
 Route::get('/admisiones/buscar-por-codigo/{codigo}', [ApiController::class, 'admisionPorCodigo']);
+Route::put('/admisiones/cambiar-estado-ems', [ApiController::class, 'cambiarEstadoPorCodigoEMS']);
