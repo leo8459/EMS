@@ -535,7 +535,7 @@ class Emsinventario extends Component
             return;
         }
     
-        // Mapeo de ciudades a códigos correctos
+        // Mapeo de ciudades a códigos abreviados
         $cityCodes = [
             'LA PAZ'       => 'LPB',
             'SANTA CRUZ'   => 'SRZ',
@@ -548,8 +548,9 @@ class Emsinventario extends Component
             'PANDO'        => 'CIJ', // Cobija
         ];
     
-        // Convertir el nombre de la ciudad al código correcto
-        $reencaminamiento = $cityCodes[$this->selectedDepartment] ?? $this->selectedDepartment;
+        // Convertir la ciudad
+        $reencaminamientoAbreviado = $cityCodes[$this->selectedDepartment] ?? $this->selectedDepartment; // Para solicitudes externas
+        $reencaminamientoCompleto = $this->selectedDepartment; // Para admisiones internas
     
         // Generar manifiesto si no se ingresó manualmente
         if (empty($this->manualManifiesto)) {
@@ -558,12 +559,12 @@ class Emsinventario extends Component
     
         $errores = [];
     
-        // Procesar solicitudes externas y actualizar en la API
+        // ✅ Procesar solicitudes externas (USAR CÓDIGO ABREVIADO)
         if (!empty($this->selectedSolicitudesExternas)) {
             foreach ($this->selectedSolicitudesExternas as $guia) {
                 $response = Http::put("http://172.65.10.52:8450/api/solicitudes/reencaminar", [
                     'guia' => $guia,
-                    'reencaminamiento' => $reencaminamiento, // Ahora enviará el código correcto
+                    'reencaminamiento' => $reencaminamientoAbreviado, // Se envía la ABREVIACIÓN (CBB, ORU, etc.)
                     'manifiesto' => $this->manualManifiesto,
                 ]);
     
@@ -573,14 +574,14 @@ class Emsinventario extends Component
             }
         }
     
-        // Procesar admisiones internas
+        // ✅ Procesar admisiones internas (USAR NOMBRE COMPLETO)
         if (!empty($this->selectedAdmisiones)) {
             $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
     
             foreach ($admisiones as $admision) {
                 $admision->estado           = 6; // Mandado a regional
                 $admision->manifiesto       = $this->manualManifiesto;
-                $admision->reencaminamiento = $reencaminamiento; // Ahora almacena el código correcto
+                $admision->reencaminamiento = $reencaminamientoCompleto; // Se almacena el NOMBRE COMPLETO
                 $admision->tipo_transporte  = $this->selectedTransport;
                 $admision->numero_vuelo     = $this->numeroVuelo;
                 $admision->save();
@@ -620,6 +621,8 @@ class Emsinventario extends Component
             session()->flash('message', 'Las solicitudes externas han sido reencaminadas y las admisiones enviadas correctamente.');
         }
     }
+    
+    
     
     
     

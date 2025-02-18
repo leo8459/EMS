@@ -135,42 +135,58 @@
                                         @endforeach
     
                                         <!-- Solicitudes externas -->
-                                        @foreach ($admisiones as $index => $admisione)
-                                        @php
-                                            $abreviaciones = [
-                                                'LA PAZ' => 'LPB',
-                                                'SANTA CRUZ' => 'SRZ',
-                                                'COCHABAMBA' => 'CBB',
-                                                'ORURO' => 'ORU',
-                                                'POTOSI' => 'POI',
-                                                'TARIJA' => 'TJA',
-                                                'CHUQUISACA' => 'SRE',
-                                                'BENI' => 'TDD', // Trinidad
-                                                'PANDO' => 'CIJ', // Cobija
-                                            ];
-                                    
-                                            // Si la admisión es interna, usar abreviaciones
-                                            $origen = $abreviaciones[$admisione->origen] ?? $admisione->origen;
-                                            $destino = $abreviaciones[$admisione->reencaminamiento ?? $admisione->ciudad] ?? ($admisione->reencaminamiento ?? $admisione->ciudad);
-                                        @endphp
-                                    
-                                        <tr class="{{ $rowClass }}">
-                                            <td><input type="checkbox" wire:model="selectedAdmisiones" value="{{ $admisione->id }}"></td>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td><span class="badge bg-primary">EMS</span></td>
-                                            <td>{{ $origen }}</td>
-                                            <td>{{ $admisione->servicio }}</td>
-                                            <td>{{ $admisione->tipo_correspondencia }}</td>
-                                            <td>{{ $admisione->cantidad }}</td>
-                                            <td>{{ $admisione->peso_ems ?: $admisione->peso }}</td>
-                                            <td>{{ $destino }}</td>
-                                            <td>{{ $admisione->codigo }}</td>
-                                            <td>{{ $admisione->fecha }}</td>
-                                            <td>{{ $admisione->observacion_entrega ?? '' }}</td>
-                                            <td><strong>{{ $statusText }}</strong></td>
-                                        </tr>
-                                    @endforeach
-                                    
+                                        @foreach ($solicitudesExternas as $index => $solicitud)
+                                            @php
+                                                $fullCode = $solicitud['guia'] ?? '';
+                                                $leftCode = substr($fullCode, 4, 3);
+                                                $rightCode = substr($fullCode, 7, 3);
+                                                $codeToCity = [
+                                                    'LPB' => 'LA PAZ',
+                                                    'SRZ' => 'SANTA CRUZ',
+                                                    'CIJ' => 'PANDO',
+                                                    'TDD' => 'BENI',
+                                                    'TJA' => 'TARIJA',
+                                                    'SRE' => 'CHUQUISACA',
+                                                    'ORU' => 'ORURO',
+                                                    'POI' => 'POTOSI',
+                                                    'CBB' => 'COCHABAMBA',
+                                                ];
+                                                $origen = $codeToCity[strtoupper($leftCode)] ?? 'DESCONOCIDO';
+                                                $destino = $codeToCity[strtoupper($rightCode)] ?? 'DESCONOCIDO';
+    
+                                                // Calcular estado según `fecha_recojo_c`
+                                                $fechaRecojo = \Carbon\Carbon::parse($solicitud['fecha_recojo_c'] ?? now());
+                                                $diffInHours = $now->diffInHours($fechaRecojo);
+                                                $rowClass = 'table-light';
+                                                $statusText = '';
+    
+                                                if ($diffInHours <= 24) {
+                                                    $rowClass = 'table-success'; // Verde
+                                                    $statusText = 'DISPONIBLE';
+                                                } elseif ($diffInHours <= 48) {
+                                                    $rowClass = 'table-warning'; // Amarillo
+                                                    $statusText = 'RETRASO';
+                                                } else {
+                                                    $rowClass = 'table-danger'; // Rojo
+                                                    $statusText = 'DEVOLVER';
+                                                }
+                                            @endphp
+                                            <tr class="{{ $rowClass }}">
+                                                <td><input type="checkbox" wire:model="selectedSolicitudesExternas" value="{{ $solicitud['guia'] }}"></td>
+                                                <td>{{ $loop->iteration + count($admisiones) }}</td>
+                                                <td><span class="badge bg-warning">Contratos</span></td>
+                                                <td>{{ $origen }}</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>{{ $solicitud['peso_o'] ?? '-' }}</td>
+                                                <td>{{ $destino }}</td>
+                                                <td>{{ $solicitud['guia'] }}</td>
+                                                <td>{{ $solicitud['fecha_recojo_c'] ?? '-' }}</td>
+                                                <td>-</td>
+                                                <td><strong>{{ $statusText }}</strong></td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             @if ($showCN33Modal)
