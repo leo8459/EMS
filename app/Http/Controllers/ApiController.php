@@ -4,7 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Admision;
-
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Eventos; // Asegúrate de importar el modelo Evento
+use App\Models\Historico; // Asegúrate de importar el modelo Evento
 class ApiController extends Controller
 {
     public function admisionPorCodigo($codigo)
@@ -60,7 +67,19 @@ public function cambiarEstadoPorCodigoEMS(Request $request)
     $admision->save();
 
     // Registrar el evento de "Despachado"
-   
+     // Registrar el evento
+     \App\Models\Eventos::create([
+        'accion' => 'Asignar Cartero',
+        // 'descripcion' => "Envio con " . ($cartero ? $cartero->name : 'Desconocido'),
+        'codigo' => $admision->codigo,
+        'user_id' => Auth::id(),
+    ]);
+    Historico::create([
+        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+        'id_estado_actualizacion' => 5, // Estado inicial: 1
+        'estado_actualizacion' => 'Fuera para entrega', // Descripción del estado
+    ]);
 
     return response()->json([
         'message' => 'Estado actualizado y evento registrado correctamente',
