@@ -184,7 +184,7 @@ class Emsinventario extends Component
             }
 
             // Obtener datos de la API solo de los registros seleccionados
-            $response = Http::get('http://127.0.0.1:9000/api/ems/estado/5');
+            $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
 
             if ($response->successful()) {
                 $solicitudes = collect($response->json()); // Convertir en colección para filtrar
@@ -561,7 +561,7 @@ class Emsinventario extends Component
         // Procesar solicitudes externas y actualizar en la API
         if (!empty($this->selectedSolicitudesExternas)) {
             foreach ($this->selectedSolicitudesExternas as $guia) {
-                $response = Http::put("http://localhost:9000/api/solicitudes/reencaminar", [
+                $response = Http::put("http://172.65.10.52:8450/api/solicitudes/reencaminar", [
                     'guia' => $guia,
                     'reencaminamiento' => $reencaminamiento, // Ahora enviará el código correcto
                     'manifiesto' => $this->manualManifiesto,
@@ -655,7 +655,7 @@ class Emsinventario extends Component
     public function mount()
     {
         // Petición al primer sistema que está en carteros.php
-        $response = Http::get('http://127.0.0.1:9000/api/ems/estado/5');
+        $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
 
         if ($response->successful()) {
             $this->solicitudesExternas = $response->json();
@@ -807,7 +807,7 @@ class Emsinventario extends Component
     $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
 
     // Consultar en la API si hay registros con ese manifiesto
-    $response = Http::get("http://localhost:9000/api/solicitudes/manifiesto/{$this->manifiestoInput}");
+    $response = Http::get("http://172.65.10.52:8450/api/solicitudes/manifiesto/{$this->manifiestoInput}");
 
     $solicitudesExternasSeleccionadas = collect(); // Inicializar colección vacía
 
@@ -958,7 +958,7 @@ class Emsinventario extends Component
     if (!empty($this->selectedSolicitudesExternas)) {
         foreach ($this->selectedSolicitudesExternas as $guia) {
             // Actualizar en la API
-            $response = Http::put("http://localhost:9000/api/solicitudes/reencaminar", [
+            $response = Http::put("http://172.65.10.52:8450/api/solicitudes/reencaminar", [
                 'guia'       => $guia,
                 'manifiesto' => $this->manualManifiesto, // Asignar el manifiesto generado
                 'estado'     => 8, // Cambiar estado a 8

@@ -101,7 +101,8 @@ class Recibirregional extends Component
      */
     public function mount()
     {
-        $response = Http::get('http://127.0.0.1:9000/api/ems/estado/8');
+        // $response = Http::get('http://127.0.0.1:9000/api/ems/estado/8');
+        $response = Http::get('http://172.65.10.52:8450/api/ems/estado/8');
 
         if ($response->successful()) {
             $this->solicitudesExternas = $response->json();
@@ -256,7 +257,7 @@ class Recibirregional extends Component
                 ]);
     
                 // **Enviar actualización del peso y observación a la API**
-                $response = Http::put('http://127.0.0.1:9000/api/solicitudes/estado', [
+                $response = Http::put('http://172.65.10.52:8450/api/solicitudes/estado', [
                     'guia' => (string) $admision->codigo, // ✅ Asegurar que se envía como string
                     'peso_r' => (string) $pesoRegional, // ✅ Enviar como string
                     'observacion' => (string) $observacion, // ✅ Enviar como string
@@ -293,7 +294,7 @@ class Recibirregional extends Component
             $pesoExterno = isset($data['peso_o']) ? number_format((float) $data['peso_o'], 3, '.', '') : null;
             $observacionExterna = $data['observacion'] ?? '';
     
-            $response = Http::put('http://127.0.0.1:9000/api/solicitudes/estado', [
+            $response = Http::put('http://172.65.10.52:8450/api/solicitudes/estado', [
                 'guia' => (string) $data['guia'], // ✅ Asegurar que se envía como string
                 'peso_r' => (string) $pesoExterno, // ✅ Enviar como string
                 'observacion' => (string) $observacionExterna, // ✅ Enviar como string

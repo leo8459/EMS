@@ -154,7 +154,8 @@ Route::middleware('auth')->group(function () {
 
 //CONTRATOS
 Route::get('/solicitudes-externo-estado/{estado}', function ($estado) {
-    $url = "http://127.0.0.1:9000/carteros/ems/estado/{$estado}";
+    // $url = "http://127.0.0.1:9000/carteros/ems/estado/{$estado}";
+    $url = "http://172.65.10.52:8450/carteros/ems/estado/{$estado}";
 
     $response = Http::get($url);
 
@@ -169,7 +170,7 @@ Route::get('/solicitudes-externo-estado/{estado}', function ($estado) {
 });
 Route::get('/registros-combinados-multi', function () {
     // Obtener registros externos (solicitudes externas) con estado = 2
-    $urlSolicitudes = "http://127.0.0.1:9000/carteros/ems/estado/2";
+    $urlSolicitudes = "http://172.65.10.52:8450/carteros/ems/estado/2";
     $responseSolicitudes = Http::get($urlSolicitudes);
     $solicitudesExternas = $responseSolicitudes->successful()
         ? $responseSolicitudes->json()
