@@ -68,18 +68,18 @@ public function cambiarEstadoPorCodigoEMS(Request $request)
 
     // Registrar el evento de "Despachado"
      // Registrar el evento
-     \App\Models\Eventos::create([
-        'accion' => 'Asignar Cartero',
-        'descripcion' => "Envio En camino a ser entregado ",
-        'codigo' => $admision->codigo,
-// 'user_id' => Auth::user()->name ?? 'Usuario desconocido',
-    ]);
-    Historico::create([
-        'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
-        'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
-        'id_estado_actualizacion' => 5, // Estado inicial: 1
-        'estado_actualizacion' => 'Fuera para entrega', // Descripción del estado
-    ]);
+//      \App\Models\Eventos::create([
+//         'accion' => 'Asignar Cartero',
+//         'descripcion' => "Envio En camino a ser entregado ",
+//         'codigo' => $admision->codigo,
+// // 'user_id' => Auth::user()->name ?? 'Usuario desconocido',
+//     ]);
+//     Historico::create([
+//         'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
+//         'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
+//         'id_estado_actualizacion' => 5, // Estado inicial: 1
+//         'estado_actualizacion' => 'Fuera para entrega', // Descripción del estado
+//     ]);
 
     return response()->json([
         'message' => 'Estado actualizado y evento registrado correctamente',
