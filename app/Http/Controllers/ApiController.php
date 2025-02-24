@@ -49,11 +49,14 @@ class ApiController extends Controller
 }
 public function cambiarEstadoPorCodigoEMS(Request $request)
 {
-    // Validar que se envíe el código y el nuevo estado
-    $request->validate([
-        'codigo' => 'required|string|max:255',
-        'estado' => 'required|integer'
-    ]);
+    // Validar los datos recibidos
+    // $request->validate([
+    //     'codigo' => 'required|string|max:255',
+    //     'estado' => 'required|integer',
+    //     'user_id' => 'required|integer',
+    //     'observacion_entrega' => 'nullable|string',
+    //     'usercartero' => 'nullable|string|max:255'
+    // ]);
 
     // Buscar la admisión por el código
     $admision = Admision::where('codigo', $request->codigo)->first();
@@ -62,29 +65,34 @@ public function cambiarEstadoPorCodigoEMS(Request $request)
         return response()->json(['message' => 'Admisión no encontrada'], 404);
     }
 
-    // Actualizar el estado de la admisión
+    // Actualizar los campos solicitados
     $admision->estado = $request->estado;
+    $admision->user_id = $request->user_id;
+    $admision->observacion_entrega = $request->observacion_entrega;
+    $admision->usercartero = $request->usercartero;
     $admision->save();
 
-    // Registrar el evento de "Despachado"
-     // Registrar el evento
-//      \App\Models\Eventos::create([
-//         'accion' => 'Asignar Cartero',
-//         'descripcion' => "Envio En camino a ser entregado ",
-//         'codigo' => $admision->codigo,
-// // 'user_id' => Auth::user()->name ?? 'Usuario desconocido',
-//     ]);
-//     Historico::create([
-//         'numero_guia' => $admision->codigo, // Asignar el código único de admisión al número de guía
-//         'fecha_actualizacion' => now(), // Usar el timestamp actual para la fecha de actualización
-//         'id_estado_actualizacion' => 5, // Estado inicial: 1
-//         'estado_actualizacion' => 'Fuera para entrega', // Descripción del estado
-//     ]);
+    // // Registrar el evento
+    // \App\Models\Eventos::create([
+    //     'accion' => 'Actualización de Estado',
+    //     'descripcion' => $request->descripcion ?? 'Actualización de estado de la admisión',
+    //     'codigo' => $admision->codigo,
+    //     'user_id' => $request->user_id,
+    // ]);
+
+    // // Registrar el histórico del estado
+    // Historico::create([
+    //     'numero_guia' => $admision->codigo, // Código único de admisión
+    //     'fecha_actualizacion' => now(), // Timestamp actual
+    //     'id_estado_actualizacion' => $request->estado, // Estado actualizado
+    //     'estado_actualizacion' => 'Estado actualizado', // Descripción genérica del estado
+    // ]);
 
     return response()->json([
-        'message' => 'Estado actualizado y evento registrado correctamente',
+        'message' => 'Admisión actualizada y evento registrado correctamente',
         'admision' => $admision
     ], 200);
 }
+
 
 }
