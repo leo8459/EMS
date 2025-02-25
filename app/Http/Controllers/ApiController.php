@@ -46,47 +46,60 @@ class ApiController extends Controller
     
     public function cambiarEstadoPorCodigoEMS(Request $request)
     {
-        // Validar los datos recibidos, incluida la acción
+        // (Opcional) Validaciones de los campos que tu endpoint requiere
         // $request->validate([
         //     'codigo' => 'required|string|max:255',
         //     'estado' => 'required|integer',
-        //     'user_id' => 'required|integer',
         //     'observacion_entrega' => 'nullable|string',
         //     'usercartero' => 'nullable|string|max:255',
-        //     'action' => 'required|string|max:255' // Validar que se mande la acción
+        //     'action' => 'required|string|max:255'
         // ]);
     
-        // Buscar la admisión por el código
+        // 1. Buscar la admisión
         $admision = Admision::where('codigo', $request->codigo)->first();
     
         if (!$admision) {
             return response()->json(['message' => 'Admisión no encontrada'], 404);
         }
     
-        // Actualizar los campos solicitados
-        $admision->estado = $request->estado;
-        $admision->user_id = $request->user_id;
+        // 2. Determinamos el user_id en base a usercartero
+        //    Buscamos en la tabla "users" quien tenga name = usercartero
+        $carteroId = null;
+        if (!empty($request->usercartero)) {
+            // Si el cartero existe
+            $userMatch = User::where('name', $request->usercartero)->first();
+            if ($userMatch) {
+                // Asignamos su id a la admisión
+                $carteroId = $userMatch->id;
+            }
+        }
+    
+        // 3. Actualizar los campos en la admisión
+        $admision->estado              = $request->estado;
+        $admision->user_id             = $carteroId; // user_id se establece con el ID encontrado (si existe)
         $admision->observacion_entrega = $request->observacion_entrega;
-        $admision->usercartero = $request->usercartero;
+        $admision->usercartero         = $request->usercartero;
         $admision->save();
     
-        // Registrar el evento con los datos del request
+        // 4. Registrar el evento
         Eventos::create([
-            'accion'      => $request->action, // La acción enviada desde el PUT
-            'descripcion' => 'Actualización de estado a ' . $request->estado, // Descripción del cambio de estado
-            'codigo'      => $admision->codigo, // Código de la admisión
-            // 'cartero_id'  => $admision->user_id, // ID del usuario responsable
-            'fecha_hora'  => now(), // Fecha y hora actual
-            'user_id'     => $request->user_id, // ID del usuario que realiza la acción
-            'observaciones' => $request->observacion_entrega ?? '', // Observaciones adicionales
-            'usercartero' => $request->usercartero // Usuario cartero que realiza la acción
+            'accion'        => $request->action,
+            'descripcion'   => 'Actualización de estado a ' . $request->estado,
+            'codigo'        => $admision->codigo,  // Código de la admisión
+            // 'cartero_id'    => $carteroId,         // ID del usercartero (si se encontró)
+            'fecha_hora'    => now(),
+            'user_id'       => $carteroId,         // ID del usuario también para el campo user_id
+            'observaciones' => $request->observacion_entrega ?? '',
+            'usercartero'   => $request->usercartero
         ]);
     
         return response()->json([
-            'message' => 'Admisión actualizada y evento registrado correctamente',
+            'message'  => 'Admisión actualizada y evento registrado correctamente',
             'admision' => $admision
         ], 200);
     }
+    
+    
     
 
 
