@@ -99,6 +99,48 @@ class ApiController extends Controller
         ], 200);
     }
     
+    public function entregarEnvio(Request $request)
+    {
+        // Validar los datos de entrada
+        // $request->validate([
+        //     'codigo'              => 'required|string|exists:admisions,codigo', // Se asegura de que el código exista
+        //     'estado'              => 'required|integer',
+        //     'firma_entrega'       => 'required|string',
+        //     'observacion_entrega' => 'nullable|string',
+        // ]);
+    
+        // Buscar la admisión por código (clave única)
+        $admision = Admision::where('codigo', $request->codigo)->first();
+    
+        if (!$admision) {
+            return response()->json(['message' => 'Admisión no encontrada'], 404);
+        }
+    
+        // Realizar la actualización solo si el código existe
+        $admision->update([
+            'estado'              => $request->estado,
+            'firma_entrega'       => $request->firma_entrega,
+            'observacion_entrega' => $request->observacion_entrega,
+        ]);
+    
+        // Registrar evento en la tabla eventos
+        Eventos::create([
+            'accion'        => 'Entrega realizada',
+            'descripcion'   => 'Se entregó el envío con código ' . $admision->codigo,
+            'codigo'        => $admision->codigo,
+            'fecha_hora'    => now(),
+            'user_id'       => Auth::id(),
+            'observaciones' => $request->observacion_entrega ?? '',
+            'usercartero'   => Auth::user()->name ?? 'Desconocido',
+        ]);
+    
+        return response()->json([
+            'message'  => 'Envío entregado con éxito',
+            'admision' => $admision
+        ], 200);
+    }
+    
+
     
     
 
