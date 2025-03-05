@@ -143,32 +143,20 @@
                                                 <td>{{ $admisione->observacion }}</td>
                                                 <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}</td>
                                                 <td>
-                                                    @php
-                                                    $extensions = ['jpg', 'jpeg', 'png', 'gif'];
-                                                    $photoPath = null;
-                                                
-                                                    foreach ($extensions as $ext) {
-                                                        // Esta es la ruta "web" (URL) para tu archivo:
-                                                        //  /storage/fotos/ELCODIGO.EXT
-                                                        $path = 'storage/fotos/' . $admisione->codigo . '.' . $ext;
-                                                
-                                                        // Físicamente el archivo está en: storage/app/public/fotos/...
-                                                        // Para validar su existencia, hacemos:
-                                                        $fullPathOnDisk = storage_path('app/public/fotos/' . $admisione->codigo . '.' . $ext);
-                                                
-                                                        if (file_exists($fullPathOnDisk)) {
-                                                            $photoPath = $path;
-                                                            break;
-                                                        }
-                                                    }
-                                                @endphp
-                                                
-
-                                                    @if ($photoPath)
+                                                    @if ($admisione->photo)
                                                         <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                            <img src="{{ asset($photoPath) }}" alt="Foto de admisión" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;" class="mb-2">
+                                                            <!-- Mostrando la imagen directamente con su contenido base64 -->
+                                                            <img src="{{ $admisione->photo }}"
+                                                                 alt="Foto de admisión"
+                                                                 style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
                                                         </div>
-                                                        <a href="{{ asset($photoPath) }}" download class="btn btn-sm btn-secondary">Descargar</a>
+                                                
+                                                        <!-- Opcional: intento de descarga. Funciona en la mayoría de navegadores modernos -->
+                                                        <a href="{{ $admisione->photo }}"
+                                                           download="foto-admision-{{ $admisione->id }}.png"
+                                                           class="btn btn-sm btn-secondary mt-1">
+                                                           Descargar
+                                                        </a>
                                                     @else
                                                         <span>Sin foto</span>
                                                     @endif

@@ -121,7 +121,9 @@ class ApiController extends Controller
             'estado'              => $request->estado,
             'firma_entrega'       => $request->firma_entrega,
             'observacion_entrega' => $request->observacion_entrega,
+            'photo'                => $request->photo  // <-- ajusta esto si tu request se llama $request->phot
         ]);
+        
     
         // Registrar evento en la tabla eventos
         Eventos::create([

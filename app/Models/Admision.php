@@ -36,6 +36,7 @@ class Admision extends Model
         'firma_entrega',
         'recepcionado',
         'estado',
+        'photo',
         'contenido',
         'reencaminamiento',
         'creacionadmision',
