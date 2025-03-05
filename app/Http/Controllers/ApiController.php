@@ -101,46 +101,41 @@ class ApiController extends Controller
     
     public function entregarEnvio(Request $request)
     {
-        // Validar los datos de entrada
-        // $request->validate([
-        //     'codigo'              => 'required|string|exists:admisions,codigo', // Se asegura de que el código exista
-        //     'estado'              => 'required|integer',
-        //     'firma_entrega'       => 'required|string',
-        //     'observacion_entrega' => 'nullable|string',
-        // ]);
-    
-        // Buscar la admisión por código (clave única)
+        // 1. Buscar la admisión por "codigo"
         $admision = Admision::where('codigo', $request->codigo)->first();
     
+        // Si no se encuentra, retornar error
         if (!$admision) {
             return response()->json(['message' => 'Admisión no encontrada'], 404);
         }
     
-        // Realizar la actualización solo si el código existe
+        // 2. Actualizar la admisión
+        //    Guardamos 'photo' tal y como llega (con la cadena base64)
         $admision->update([
             'estado'              => $request->estado,
             'firma_entrega'       => $request->firma_entrega,
             'observacion_entrega' => $request->observacion_entrega,
-            'photo'                => $request->photo  // <-- ajusta esto si tu request se llama $request->phot
+            'photo'               => $request->photo,
         ]);
-        
     
-        // Registrar evento en la tabla eventos
+        // 3. Registrar evento en la tabla "eventos"
         Eventos::create([
             'accion'        => 'Entrega realizada',
             'descripcion'   => 'Se entregó el envío con código ' . $admision->codigo,
             'codigo'        => $admision->codigo,
             'fecha_hora'    => now(),
-            'user_id'       => Auth::id(),
+            'user_id'       => Auth::id(),  // <-- asumiendo que hay un usuario autenticado
             'observaciones' => $request->observacion_entrega ?? '',
             'usercartero'   => Auth::user()->name ?? 'Desconocido',
         ]);
     
+        // 4. Retornar la respuesta JSON
         return response()->json([
             'message'  => 'Envío entregado con éxito',
             'admision' => $admision
         ], 200);
     }
+    
     
 
     
