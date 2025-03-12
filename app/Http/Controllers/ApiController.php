@@ -118,16 +118,16 @@ class ApiController extends Controller
             'photo'               => $request->photo,
         ]);
     
-        // 3. Registrar evento en la tabla "eventos"
-        Eventos::create([
-            'accion'        => 'Entrega realizada',
-            'descripcion'   => 'Se entregó el envío con código ' . $admision->codigo,
-            'codigo'        => $admision->codigo,
-            'fecha_hora'    => now(),
-            'user_id'       => Auth::id(),  // <-- asumiendo que hay un usuario autenticado
-            'observaciones' => $request->observacion_entrega ?? '',
-            'usercartero'   => Auth::user()->name ?? 'Desconocido',
-        ]);
+        // // 3. Registrar evento en la tabla "eventos"
+        // Eventos::create([
+        //     'accion'        => 'Entrega realizada',
+        //     'descripcion'   => 'Se entregó el envío con código ' . $admision->codigo,
+        //     'codigo'        => $admision->codigo,
+        //     'fecha_hora'    => now(),
+        //     'user_id'       => Auth::id(),  // <-- asumiendo que hay un usuario autenticado
+        //     'observaciones' => $request->observacion_entrega ?? '',
+        //     'usercartero'   => Auth::user()->name ?? 'Desconocido',
+        // ]);
     
         // 4. Retornar la respuesta JSON
         return response()->json([
