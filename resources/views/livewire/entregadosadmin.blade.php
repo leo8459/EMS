@@ -146,15 +146,14 @@
                                                 <td>{{ $admisione->user ? $admisione->user->name : 'No asignado' }}
                                                 </td>
                                                 <td>
-                                                    @if (!empty($admisione->photo))
+                                                    @if ($admisione->photo)
                                                         <div style="width: 100px; height: 100px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                                                            <img src="data:image/png;base64,{{ base64_encode($admisione->photo) }}" 
-                                                                 alt="Foto de admisión"
-                                                                 style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
+                                                            <img src="{{ $admisione->photo }}" alt="Firma de entrega"
+                                                                style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px;">
                                                         </div>
-                                                        <a href="data:image/png;base64,{{ base64_encode($admisione->photo) }}" download="foto_admision.png" class="btn btn-sm btn-secondary">Descargar</a>
+                                                        <a href="{{ $admisione->photo }}" download="foto_admision.png" class="btn btn-sm btn-secondary">Descargar</a>
                                                     @else
-                                                        <span>Sin foto</span>
+                                                        <span>Sin Foto</span>
                                                     @endif
                                                 </td>
                                                 
