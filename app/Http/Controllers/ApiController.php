@@ -46,15 +46,6 @@ class ApiController extends Controller
     
     public function cambiarEstadoPorCodigoEMS(Request $request)
     {
-        // (Opcional) Validaciones de los campos que tu endpoint requiere
-        // $request->validate([
-        //     'codigo' => 'required|string|max:255',
-        //     'estado' => 'required|integer',
-        //     'observacion_entrega' => 'nullable|string',
-        //     'usercartero' => 'nullable|string|max:255',
-        //     'action' => 'required|string|max:255'
-        // ]);
-    
         // 1. Buscar la admisión
         $admision = Admision::where('codigo', $request->codigo)->first();
     
@@ -63,32 +54,36 @@ class ApiController extends Controller
         }
     
         // 2. Determinamos el user_id en base a usercartero
-        //    Buscamos en la tabla "users" quien tenga name = usercartero
         $carteroId = null;
         if (!empty($request->usercartero)) {
-            // Si el cartero existe
             $userMatch = User::where('name', $request->usercartero)->first();
             if ($userMatch) {
-                // Asignamos su id a la admisión
                 $carteroId = $userMatch->id;
             }
         }
     
-        // 3. Actualizar los campos en la admisión
+        // 3. Asignar la descripción del estado
+        $estadoDescripcion = match ($request->estado) {
+            4  => 'Envío en camino',
+            5  => 'Envío entregado',
+            10 => 'Retorno',
+            default => 'En inventario'
+        };
+    
+        // 4. Actualizar los campos en la admisión
         $admision->estado              = $request->estado;
-        $admision->user_id             = $carteroId; // user_id se establece con el ID encontrado (si existe)
+        $admision->user_id             = $carteroId;
         $admision->observacion_entrega = $request->observacion_entrega;
         $admision->usercartero         = $request->usercartero;
         $admision->save();
     
-        // 4. Registrar el evento
+        // 5. Registrar el evento con la nueva descripción
         Eventos::create([
             'accion'        => $request->action,
-            'descripcion'   => 'Actualización de estado a ' . $request->estado,
-            'codigo'        => $admision->codigo,  // Código de la admisión
-            // 'cartero_id'    => $carteroId,         // ID del usercartero (si se encontró)
+            'descripcion'   => 'Actualización de estado: ' . $estadoDescripcion,
+            'codigo'        => $admision->codigo,
             'fecha_hora'    => now(),
-            'user_id'       => $carteroId,         // ID del usuario también para el campo user_id
+            'user_id'       => $carteroId,
             'observaciones' => $request->observacion_entrega ?? '',
             'usercartero'   => $request->usercartero
         ]);
@@ -98,6 +93,7 @@ class ApiController extends Controller
             'admision' => $admision
         ], 200);
     }
+    
     
     public function entregarEnvio(Request $request)
     {
