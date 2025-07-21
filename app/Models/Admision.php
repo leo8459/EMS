@@ -46,6 +46,8 @@ class Admision extends Model
         'manifiesto',
         'tipo_transporte',
         'numero_vuelo',
+        'direccion_remitente',
+        'casilla',
 
     ];
     public function user()

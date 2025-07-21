@@ -73,12 +73,12 @@
                                             <th class="d-none d-md-table-cell">Número Factura</th>
                                             <th>Nombre Remitente</th>
                                             <th>Nombre Envía</th>
-                                            <th class="d-none d-md-table-cell">Carnet</th>
+                                            <th class="d-none d-md-table-cell">CI</th>
                                             <th>Teléfono Remitente</th>
                                             <th>Nombre Destinatario</th>
                                             <th>Teléfono Destinatario</th>
                                             <th class="d-none d-lg-table-cell">Dirección</th>
-                                            <th class="d-none d-lg-table-cell">Provincia</th>
+                                            <th class="d-none d-lg-table-cell">Municipio</th>
                                             <th class="d-none d-lg-table-cell">Ciudad</th>
                                             <th class="d-none d-lg-table-cell">País</th>
                                             <th>Fecha</th>
@@ -314,7 +314,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group" style="position: relative;">
-                                    <label for="nombre_remitente">Nombre Remitente*</label>
+                                    <label for="nombre_remitente">Nombre Completo*</label>
                                     <input type="text" class="form-control" id="nombre_remitente"
                                         wire:model="nombre_remitente" oninput="showSuggestions(this.value)"
                                         wire:ignore>
@@ -331,9 +331,21 @@
                                         wire:model="nombre_envia">
                                 </div>
                             </div>
+                             <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="carnet">Direccion*</label>
+                                    <input type="text" class="form-control" id="direccion_remitente" wire:model="direccion_remitente">
+                                </div>
+                            </div>
+                        <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="carnet">Casilla</label>
+                                    <input type="text" class="form-control" id="casilla" wire:model="casilla">
+                                </div>
+                            </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="carnet">Carnet*</label>
+                                    <label for="carnet">CI*</label>
                                     <input type="text" class="form-control" id="carnet" wire:model="carnet">
                                 </div>
                             </div>
@@ -353,14 +365,14 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="nombre_destinatario">Nombre Destinatario*</label>
+                                    <label for="nombre_destinatario">Nombre Completo*</label>
                                     <input type="text" class="form-control" id="nombre_destinatario"
                                         wire:model="nombre_destinatario">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="telefono_destinatario">Teléfono Destinatario</label>
+                                    <label for="telefono_destinatario">Teléfono</label>
                                     <input type="text" class="form-control" id="telefono_destinatario"
                                         wire:model="telefono_destinatario">
                                 </div>
@@ -399,17 +411,17 @@
 
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="provincia">Provincia</label>
+                                    <label for="provincia">Municipio/Poblacion</label>
                                     <input type="text" class="form-control" id="provincia"
                                         wire:model="provincia">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            {{-- <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="pais">País*</label>
                                     <input type="text" class="form-control" id="pais" wire:model="pais">
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="modal-footer">
@@ -594,7 +606,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="carnet">Carnet*</label>
+                                        <label for="carnet">CI*</label>
                                         <input type="text" class="form-control" id="carnet"
                                             wire:model="carnet">
                                     </div>

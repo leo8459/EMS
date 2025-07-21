@@ -23,7 +23,7 @@ class Iniciar extends Component
     public $searchTerm = '';
     public $perPage = 10;
     public $admisionId;
-    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido;
+    public $origen, $fecha, $servicio, $tipo_correspondencia, $cantidad, $peso, $destino, $codigo, $precio, $numero_factura, $nombre_remitente, $nombre_envia, $carnet, $telefono_remitente, $nombre_destinatario, $telefono_destinatario, $direccion, $ciudad, $pais, $provincia, $contenido, $direccion_remitente, $casilla;
     public $codigosHoy = []; // Almacena los códigos de los registros generados hoy
     public $showModalExpedicionHoy = false; // Controla la visibilidad del modal
     public $admisionesParaExpedicion = []; // Variable para almacenar admisiones seleccionadas
@@ -47,7 +47,7 @@ class Iniciar extends Component
             // 'telefono_destinatario' => 'required|string',
             'direccion' => 'required|string',
             'ciudad' => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
-            'pais' => 'required|string',
+            // 'pais' => 'required|string',
             'contenido' => 'nullable|string|max:500', // Regla de validación
 
         ];
@@ -158,6 +158,9 @@ class Iniciar extends Component
         // Crear el registro en la base de datos
         $admision = Admision::create([
             'origen' => $this->origen,
+            'direccion_remitente' => $this->direccion_remitente,
+            'casilla' => $this->casilla,
+
             'fecha' => $this->fecha,
             'servicio' => $this->servicio,
             'tipo_correspondencia' => $this->tipo_correspondencia,
@@ -225,6 +228,8 @@ class Iniciar extends Component
             'pais' => $admision->pais,
             'qrLink' => $qrLink, // Enlace QR fijo
             'contenido' => $admision->contenido, // Agrega este campo
+            'direccion_remitente' => $this->direccion_remitente,
+            'casilla' => $this->casilla,
 
         ];
 
