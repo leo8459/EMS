@@ -49,12 +49,64 @@
             width: 250px;
             max-width: 100%;
         }
-    </style>
-</head>
+        .watermark {
+    position: absolute;
+    top: 35%;
+    left: 35%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 36px;
+    color: rgba(100, 100, 100, 0.12);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+}
+.boleta{
+    position:relative;
+    margin-bottom:10px;
+}
+.boleta table{
+    position:relative;
+    z-index:1;
+}
+.watermark-local{
+    position:absolute;
+    top:10%; left:35%;
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:42px;
+    color:rgba(120,120,120,.18);
+    white-space:nowrap;
+    pointer-events:none;
+    user-select:none;
+    z-index:5;           /* <<< siempre por encima de la tabla */
+}
 
+
+
+    </style>
+    
+</head>
+@php
+    $marcaAgua = match($destino) {
+        'SUPEREXPRESS' => 'NACIONAL SUPEREXPRESS',
+        'DEVOLUCION' => 'NACIONAL CON DEVOLUCION',
+        'NACIONAL' => 'NACIONAL EMS',
+        'POSTPAGO' => 'NACIONAL POSTPAGO',
+        'CIUDADES INTERMEDIAS' => 'CIUDADES INTERMEDIAS',
+        'TRINIDAD COBIJA' => 'TRINIDAD COBIJA',
+        'RIVERALTA GUAYARAMERIN' => 'RIVERALTA GUAYARAMERIN',
+        'EMS COBERTURA 1' => 'EMS COBERTURA 1',
+        'EMS COBERTURA 2' => 'EMS COBERTURA 2',
+        'EMS COBERTURA 3' => 'EMS COBERTURA 3',
+        'EMS COBERTURA 4' => 'EMS COBERTURA 4',
+        default => '',
+    };
+@endphp
 <body>
     <!-- Primera tabla -->
-    <div>
+<div class="boleta page-break">
+  
+
         <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
@@ -155,13 +207,17 @@
                 </tr>
             </thead>
         </table>
+          @if($marcaAgua)
+        <div class="watermark-local">{{ $marcaAgua }}</div>
+    @endif
     </div>
 
     <!-- Añadimos un margen grande entre las tablas repetidas -->
     <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
 
-    <div class="page-break">
-        <table style="width: 800px;">
+<div class="boleta page-break">
+    
+            <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
@@ -263,6 +319,9 @@
                 </tr>
             </thead>
         </table>
+        @if($marcaAgua)
+        <div class="watermark">{{ $marcaAgua }}</div>
+    @endif
     </div>
 
 
