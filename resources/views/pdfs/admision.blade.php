@@ -11,41 +11,44 @@
         }
 
         table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    font-size: 8px; /* Reducimos el tamaño de fuente */
-    margin-bottom: 3px; /* Reducimos el margen entre tablas */
-    page-break-inside: avoid;
-}
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 8px;
+            /* Reducimos el tamaño de fuente */
+            margin-bottom: 3px;
+            /* Reducimos el margen entre tablas */
+            page-break-inside: avoid;
+        }
 
         th,
         td {
-    border: 1px solid #000;
-    padding: 1px; /* Reducimos el padding */
-    vertical-align: top;
-}
+            border: 1px solid #000;
+            padding: 1px;
+            /* Reducimos el padding */
+            vertical-align: top;
+        }
 
         thead {
             background-color: #ffffff;
         }
 
         .rotated-table-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-    margin-top: 3px; /* Ajusta el margen para que haya espacio suficiente */
-}
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            margin-top: 3px;
+            /* Ajusta el margen para que haya espacio suficiente */
+        }
 
-.rotated-table {
-    transform: rotate(270deg);
-    transform-origin: right top;
-    margin-top: 20px;
-    width: 250px; 
-    max-width: 100%;
-}
-
+        .rotated-table {
+            transform: rotate(270deg);
+            transform-origin: right top;
+            margin-top: 20px;
+            width: 250px;
+            max-width: 100%;
+        }
     </style>
 </head>
 
@@ -77,18 +80,19 @@
                             <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
-                    
-                    
-                    
+
+
+
                     <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
                         <div style="text-align: center; margin: 0 auto;">
-                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code"
+                                style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
                             <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
 
                         </div>
                     </td>
-                    
+
                 </tr>
                 <tr>
                     <td>OF. ORIGEN: <br>
@@ -123,9 +127,10 @@
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
                         <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
-                            @if(!empty($contenido))
-                                {{ $contenido }}
+                            @if (!empty($contenido))
+                                {{ $contenido }}<br>
                             @endif
+                            DESTINO: {{ $destino }}
                         </div>
                     </td>
                     <td rowspan="2" style="vertical-align: top;">
@@ -133,12 +138,14 @@
                     </td>
                     <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
-                
+
                 <tr>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>FECHA Y HORA:<br>
+                        <div style="text-align: right;">{{ \Carbon\Carbon::parse($fecha)->format('Y-m-d H:i:s') }}
+                        </div>
                     </td>
-                  
+
+
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
@@ -168,7 +175,8 @@
             <thead>
                 <tr>
                     <td colspan="3">
-                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
+                        <img src="{{ public_path('images/ems.png') }}" alt="" width="150"
+                            height="50"><br>
                         <span style="font-size: 8px; font-weight: bold;">AGENCIA BOLIVIANA DE CORREOS</span>
                     </td>
                     <td colspan="3" rowspan="2" style="text-align: center; vertical-align: middle;">
@@ -179,12 +187,13 @@
                             <span style="font-size: 16px; font-weight: bold;">{{ $codigo }}</span>
                         </div>
                     </td>
-                    
-                    
-                    
+
+
+
                     <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
                         <div style="text-align: center; margin: 0 auto;">
-                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code" style="display: block; margin: 0 auto;">
+                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code"
+                                style="display: block; margin: 0 auto;">
                             <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
                             <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
 
@@ -223,23 +232,28 @@
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
-                            @if(!empty($contenido))
-                                {{ $contenido }}
+                        <div
+                            style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                            @if (!empty($contenido))
+                                {{ $contenido }}<br>
                             @endif
+                            DESTINO: {{ $destino }}
                         </div>
                     </td>
+
                     <td rowspan="2" style="vertical-align: top;">
                         {{ Auth::user()->name }}:<br>
                     </td>
                     <td colspan="2" rowspan="2" style="vertical-align: top;">FIRMA :<br></td>
                 </tr>
-                
+
                 <tr>
-                    <td>FECHA:<br>
-                        <div style="text-align: right;">{{ date('Y-m-d') }}</div>
+                    <td>FECHA Y HORA:<br>
+                        <div style="text-align: right;">{{ \Carbon\Carbon::parse($fecha)->format('Y-m-d H:i:s') }}
+                        </div>
                     </td>
-                  
+
+
                     <td>PESO:<br>
                         <div style="text-align: right;">{{ $peso }} kg</div>
                     </td>
@@ -329,7 +343,7 @@
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
                         <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
-                            @if(!empty($contenido))
+                            @if (!empty($contenido))
                                 {{ $contenido }}
                             @endif
                         </div>
@@ -431,7 +445,7 @@
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
                         <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
-                            @if(!empty($contenido))
+                            @if (!empty($contenido))
                                 {{ $contenido }}
                             @endif
                         </div>
