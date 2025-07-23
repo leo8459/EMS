@@ -320,7 +320,7 @@
             </thead>
         </table>
         @if($marcaAgua)
-        <div class="watermark">{{ $marcaAgua }}</div>
+        <div class="watermark-local">{{ $marcaAgua }}</div>
     @endif
     </div>
 
