@@ -49,45 +49,48 @@
             width: 250px;
             max-width: 100%;
         }
+
         .watermark {
-    position: absolute;
-    top: 35%;
-    left: 35%;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    font-size: 36px;
-    color: rgba(100, 100, 100, 0.12);
-    white-space: nowrap;
-    pointer-events: none;
-    user-select: none;
-    z-index: 0;
-}
-.boleta{
-    position:relative;
-    margin-bottom:10px;
-}
-.boleta table{
-    position:relative;
-    z-index:1;
-}
-.watermark-local{
-    position:absolute;
-    top:10%; left:35%;
-    transform:translate(-50%,-50%) rotate(-30deg);
-    font-size:42px;
-    color:rgba(120,120,120,.18);
-    white-space:nowrap;
-    pointer-events:none;
-    user-select:none;
-    z-index:5;           /* <<< siempre por encima de la tabla */
-}
+            position: absolute;
+            top: 35%;
+            left: 35%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 36px;
+            color: rgba(100, 100, 100, 0.12);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
 
+        .boleta {
+            position: relative;
+            margin-bottom: 10px;
+        }
 
+        .boleta table {
+            position: relative;
+            z-index: 1;
+        }
 
+        .watermark-local {
+            position: absolute;
+            top: 10%;
+            left: 35%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 42px;
+            color: rgba(120, 120, 120, .18);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 5;
+            /* <<< siempre por encima de la tabla */
+        }
     </style>
-    
+
 </head>
 @php
-    $marcaAgua = match($destino) {
+    $marcaAgua = match ($destino) {
         'SUPEREXPRESS' => 'NACIONAL SUPEREXPRESS',
         'DEVOLUCION' => 'NACIONAL CON DEVOLUCION',
         'NACIONAL' => 'NACIONAL EMS',
@@ -102,10 +105,11 @@
         default => '',
     };
 @endphp
+
 <body>
     <!-- Primera tabla -->
-<div class="boleta page-break">
-  
+    <div class="boleta page-break">
+
 
         <table style="width: 800px;">
             <colgroup>
@@ -135,15 +139,21 @@
 
 
 
-                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
-                        <div style="text-align: center; margin: 0 auto;">
-                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code"
-                                style="display: block; margin: 0 auto;">
-                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
-                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+                        <!-- QR de rastreo existente -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
+                        Rastreo QR.<br>
+                        correos.gob.bo:8000
+                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-                        </div>
+                        <!-- 🔽 NUEVO QR DE VISITA -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(
+                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
+                        ) !!}" alt="QR Web"><br>
+                        <span style="font-size:8px;">Visítanos aquí</span><br>
+                        correos.gob.bo
                     </td>
+
 
                 </tr>
                 <tr>
@@ -207,17 +217,17 @@
                 </tr>
             </thead>
         </table>
-          @if($marcaAgua)
-        <div class="watermark-local">{{ $marcaAgua }}</div>
-    @endif
+        @if ($marcaAgua)
+            <div class="watermark-local">{{ $marcaAgua }}</div>
+        @endif
     </div>
 
     <!-- Añadimos un margen grande entre las tablas repetidas -->
     <div style="height: 10px; border-top: 1px dashed #000; margin: 10px 0;"></div>
 
-<div class="boleta page-break">
-    
-            <table style="width: 800px;">
+    <div class="boleta page-break">
+
+        <table style="width: 800px;">
             <colgroup>
                 <col style="width: 87px">
                 <col style="width: 90px">
@@ -246,15 +256,21 @@
 
 
 
-                    <td rowspan="8" style="text-align: center; font-size: 7px; vertical-align: middle;">
-                        <div style="text-align: center; margin: 0 auto;">
-                            <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Code"
-                                style="display: block; margin: 0 auto;">
-                            <p style="font-size: 10px; margin-top: 5px;">Rastreo QR.</p>
-                            <p style="font-size: 10px; margin-top: 5px;">correos.gob.bo:8000</p>
+                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+                        <!-- QR de rastreo existente -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
+                        Rastreo QR.<br>
+                        correos.gob.bo:8000
+                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-                        </div>
+                        <!-- 🔽 NUEVO QR DE VISITA -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(
+                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
+                        ) !!}" alt="QR Web"><br>
+                        <span style="font-size:8px;">Visítanos aquí</span><br>
+                        correos.gob.bo
                     </td>
+
                 </tr>
                 <tr>
                     <td>OF. ORIGEN: <br>
@@ -319,9 +335,9 @@
                 </tr>
             </thead>
         </table>
-        @if($marcaAgua)
-        <div class="watermark-local">{{ $marcaAgua }}</div>
-    @endif
+        @if ($marcaAgua)
+            <div class="watermark-local">{{ $marcaAgua }}</div>
+        @endif
     </div>
 
 

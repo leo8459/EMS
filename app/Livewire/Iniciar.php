@@ -204,6 +204,8 @@ class Iniciar extends Component
 
         // Enlace QR fijo
         $qrLink = 'https://correos.gob.bo:8000/';
+        $qrWeb = 'https://correos.gob.bo/';
+
         // Preparar los datos para el PDF usando el registro recién creado
         $data = [
             'origen' => $admision->origen,
@@ -227,6 +229,7 @@ class Iniciar extends Component
             'ciudad' => $admision->ciudad,
             'pais' => $admision->pais,
             'qrLink' => $qrLink, // Enlace QR fijo
+            'qrWeb' => $qrWeb,
             'contenido' => $admision->contenido, // Agrega este campo
             'direccion_remitente' => $this->direccion_remitente,
             'casilla' => $this->casilla,
