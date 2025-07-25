@@ -333,7 +333,7 @@
                             </div>
                              <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="carnet">Direccion*</label>
+                                    <label for="carnet">Direccion</label>
                                     <input type="text" class="form-control" id="direccion_remitente" wire:model="direccion_remitente">
                                 </div>
                             </div>
@@ -345,7 +345,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="carnet">CI*</label>
+                                    <label for="carnet">CI</label>
                                     <input type="text" class="form-control" id="carnet" wire:model="carnet">
                                 </div>
                             </div>
@@ -606,7 +606,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="carnet">CI*</label>
+                                        <label for="carnet">CI</label>
                                         <input type="text" class="form-control" id="carnet"
                                             wire:model="carnet">
                                     </div>
