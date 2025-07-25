@@ -41,7 +41,7 @@ class Iniciar extends Component
             'numero_factura' => 'nullable|string',
             'nombre_remitente' => 'required|string|max:255',
             // 'nombre_envia' => 'required|string|max:255',
-            'carnet' => 'required|string',
+            // 'carnet' => 'required|string',
             'telefono_remitente' => 'required|string',
             'nombre_destinatario' => 'required|string|max:255',
             // 'telefono_destinatario' => 'required|string',
