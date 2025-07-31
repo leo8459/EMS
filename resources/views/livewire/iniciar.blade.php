@@ -1,51 +1,43 @@
+{{-- resources/views/livewire/admision/index.blade.php --}}
 <div class="container-fluid">
-    <!-- Encabezado y Breadcrumbs -->
-    <section class="content-header">
-        <!-- ... -->
-    </section>
+    {{-- … Encabezados y breadcumbs sin cambios … --}}
 
     <section class="content">
         <div class="container-fluid">
-            <!-- Tabla de despachos -->
             <div class="row">
                 <div class="col-12">
                     <div class="card">
+
+                        {{-- ---------- BARRA DE ACCIONES ---------- --}}
                         <div class="card-header">
-                            <!-- Barra de búsqueda y botón Nuevo Despacho -->
-                            <div class="d-flex flex-wrap align-items-center mb-3">
-                                <!-- Campo de búsqueda -->
-                                <div class="flex-grow-1 me-2 mb-2 mb-lg-0">
-                                    <input type="text" wire:model="searchTerm" placeholder="Buscar..."
-                                        class="form-control" wire:keydown.enter="$refresh">
-                                </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <input type="text"
+                                       class="form-control flex-grow-1"
+                                       placeholder="Buscar…"
+                                       wire:model.defer="searchTerm"
+                                       wire:keydown.enter="$refresh">
 
-                                <!-- Botón Buscar -->
-                                <button type="button" class="btn btn-primary me-2 mb-2 mb-lg-0" wire:click="$refresh">
-                                    Buscar
-                                </button>
+                                <button class="btn btn-primary" wire:click="$refresh">Buscar</button>
 
-                                <!-- Botón Nuevo -->
-                                <button type="button" class="btn btn-success me-2 mb-2 mb-lg-0" data-toggle="modal"
-                                    data-target="#createPaqueteModal">
+                                <button class="btn btn-success"
+                                        data-toggle="modal"
+                                        data-target="#createPaqueteModal">
                                     Nuevo Admision
                                 </button>
 
-                                <!-- Botón Entregar seleccionadas -->
-                                <button type="button" class="btn btn-warning me-2 mb-2 mb-lg-0"
-                                    wire:click="entregarAExpedicion">
-                                    Entregar solo seleccionadas a Expedición
+                                <button class="btn btn-warning"
+                                        wire:click="entregarAExpedicion">
+                                    Entregar solo seleccionadas
                                 </button>
 
-                                <!-- Botón Entregar todo -->
-                                <button type="button" class="btn btn-primary mb-2 mb-lg-0"
-                                    wire:click="abrirModalEntregarHoy">
-                                    Entregar todo a expedicion generado hoy
+                                <button class="btn btn-primary"
+                                        wire:click="abrirModalEntregarHoy">
+                                    Entregar todo generado hoy
                                 </button>
                             </div>
-
                         </div>
 
-                        <!-- Mensajes de éxito o error -->
+                        {{-- ---------- MENSAJES FLASH ---------- --}}
                         @if (session()->has('message'))
                             <div class="alert alert-success">{{ session('message') }}</div>
                         @endif
@@ -53,69 +45,61 @@
                             <div class="alert alert-danger">{{ session('error') }}</div>
                         @endif
 
-                        <!-- Tabla de registros -->
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead>
+                        {{-- ---------- TABLA ---------- --}}
+                        <div class="card-body p-0">
+                            <div class="tabla-scroll">
+                                <table class="table table-sm table-hover table-bordered mb-0">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <th><input type="checkbox" wire:model="selectAll" /></th>
-
-                                            <th>#</th> <!-- Columna para el número de fila -->
+                                            <th><input type="checkbox" wire:model="selectAll"></th>
+                                            <th>#</th>
                                             <th>Origen</th>
                                             <th>Servicio</th>
-                                            <th>Tipo Correspondencia</th>
-                                            <th class="d-none d-lg-table-cell">Cantidad</th>
+                                            <th>Tipo</th>
+                                            <th class="d-none d-lg-table-cell">Cant.</th>
                                             <th>Peso</th>
                                             <th>Precio (Bs)</th>
                                             <th>Destino</th>
                                             <th>Código</th>
-                                            <th class="d-none d-md-table-cell">Número Factura</th>
-                                            <th>Nombre Remitente</th>
-                                            <th>Nombre Envía</th>
-                                            <th class="d-none d-md-table-cell">CI</th>
-                                            <th>Teléfono Remitente</th>
-                                            <th>Nombre Destinatario</th>
-                                            <th>Teléfono Destinatario</th>
+                                            <th class="d-none d-md-table-cell">Factura</th>
+                                            <th>Remitente</th>
+                                            <th>Envía</th>
+                                            <th>Tel. Rem.</th>
+                                            <th>Destinatario</th>
+                                            <th>Tel. Dest.</th>
                                             <th class="d-none d-lg-table-cell">Dirección</th>
                                             <th class="d-none d-lg-table-cell">Municipio</th>
                                             <th class="d-none d-lg-table-cell">Ciudad</th>
-                                            <th class="d-none d-lg-table-cell">País</th>
                                             <th>Fecha</th>
-
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($admisiones as $admisione)
+                                        @foreach ($admisiones as $admision)
                                             <tr>
-                                                <td>
-                                                    <input type="checkbox" wire:model="selectedAdmisiones"
-                                                        value="{{ $admisione->id }}" />
-                                                </td>
-                                                <td>{{ $loop->iteration }}</td> <!-- Mostrar número de fila -->
-                                                <td>{{ $admisione->origen }}</td>
-                                                <td>{{ $admisione->servicio }}</td>
-                                                <td>{{ $admisione->tipo_correspondencia }}</td>
-                                                <td>{{ $admisione->cantidad }}</td>
-                                                <td>{{ $admisione->peso }}</td>
-                                                <td>{{ $admisione->precio }}</td>
-                                                <td>{{ $admisione->destino }}</td>
-                                                <td>{{ $admisione->codigo }}</td>
-                                                <td>{{ $admisione->numero_factura }}</td>
-                                                <td>{{ $admisione->nombre_remitente }}</td>
-                                                <td>{{ $admisione->nombre_envia }}</td>
-                                                <td>{{ $admisione->carnet }}</td>
-                                                <td>{{ $admisione->telefono_remitente }}</td>
-                                                <td>{{ $admisione->nombre_destinatario }}</td>
-                                                <td>{{ $admisione->telefono_destinatario }}</td>
-                                                <td>{{ $admisione->direccion }}</td>
-                                                <td>{{ $admisione->provincia }}</td>
-                                                <td>{{ $admisione->ciudad }}</td>
-                                                <td>{{ $admisione->pais }}</td>
-                                                <td>{{ $admisione->fecha }}</td>
-
-                                                <td>
+                                                <td><input type="checkbox"
+                                                           wire:model="selectedAdmisiones"
+                                                           value="{{ $admision->id }}"></td>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $admision->origen }}</td>
+                                                <td>{{ $admision->servicio }}</td>
+                                                <td>{{ $admision->tipo_correspondencia }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admision->cantidad }}</td>
+                                                <td>{{ $admision->peso }}</td>
+                                                <td>{{ $admision->precio }}</td>
+                                                <td>{{ $admision->destino }}</td>
+                                                <td>{{ $admision->codigo }}</td>
+                                                <td class="d-none d-md-table-cell">{{ $admision->numero_factura }}</td>
+                                                <td>{{ $admision->nombre_remitente }}</td>
+                                                <td>{{ $admision->nombre_envia }}</td>
+                                                <td>{{ $admision->telefono_remitente }}</td>
+                                                <td>{{ $admision->nombre_destinatario }}</td>
+                                                <td>{{ $admision->telefono_destinatario }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admision->direccion }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admision->provincia }}</td>
+                                                <td class="d-none d-lg-table-cell">{{ $admision->ciudad }}</td>
+                                                <td>{{ $admision->fecha }}</td>
+                                                 <td>
                                                     {{-- <button type="button" class="btn btn-info" wire:click="edit({{ $admisione->id }})">Editar</button> --}}
                                                     {{-- @hasrole('SuperAdmin|Administrador')
 
@@ -123,24 +107,24 @@
 
                                                     @hasrole('ADMINISTRADOR')
                                                         <button type="button" class="btn btn-danger"
-                                                            wire:click="delete({{ $admisione->id }})">Eliminar</button>
+                                                            wire:click="delete({{ $admision->id }})">Eliminar</button>
                                                     @endhasrole
                                                     @hasrole('ADMINISTRADOR|ADMISION')
                                                         <button type="button" class="btn btn-secondary"
-                                                            wire:click="reimprimir({{ $admisione->id }})">Reimprimir</button>
+                                                            wire:click="reimprimir({{ $admision->id }})">Reimprimir</button>
                                                     @endhasrole
 
                                                     @hasrole('ADMINISTRADOR|ADMISION')
                                                         <button type="button" class="btn btn-info"
-                                                            wire:click="edit({{ $admisione->id }})" data-toggle="modal"
+                                                            wire:click="edit({{ $admision->id }})" data-toggle="modal"
                                                             data-target="#updateDespachoModal">Editar</button>
                                                     @endhasrole
                                                     <button type="button" class="btn btn-success"
-                                                        onclick="abrirWhatsApp('{{ $admisione->telefono_remitente }}', '{{ $admisione->nombre_destinatario }}', '{{ $admisione->codigo }}')">
+                                                        onclick="abrirWhatsApp('{{ $admision->telefono_remitente }}', '{{ $admision->nombre_destinatario }}', '{{ $admision->codigo }}')">
                                                         Mandar Mensaje
                                                     </button>
                                                     <button type="button" class="btn btn-danger"
-                                                        wire:click="delete({{ $admisione->id }})"
+                                                        wire:click="delete({{ $admision->id }})"
                                                         onclick="return confirm('¿Estás seguro de eliminar esta admisión?')">
                                                         Eliminar
                                                     </button>
@@ -148,7 +132,7 @@
                                                 </td>
                                             </tr>
                                         @endforeach
-                                        <script>
+                                            <script>
                                             function abrirWhatsApp(telefono, nombre_remitente, codigo) {
                                                 // Crear la URL de WhatsApp
                                                 const mensaje =
