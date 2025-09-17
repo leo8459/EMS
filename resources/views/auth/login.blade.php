@@ -164,14 +164,14 @@
             toggleIcon.textContent = '👁️'; // Cambia al icono de mostrar
         }
     }
-        const loginForm = document.getElementById('loginForm');
-        loginForm.addEventListener('submit', function(event) {
-            const recaptchaResponse = document.querySelector('.g-recaptcha-response').value;
-            if (!recaptchaResponse) {
-                event.preventDefault();
-                alert("Por favor completa el Captcha.");
-            }
-        });
+        // const loginForm = document.getElementById('loginForm');
+        // loginForm.addEventListener('submit', function(event) {
+        //     const recaptchaResponse = document.querySelector('.g-recaptcha-response').value;
+        //     // if (!recaptchaResponse) {
+        //     //     event.preventDefault();
+        //     //     alert("Por favor completa el Captcha.");
+        //     // }
+        // });
     </script>
 </body>
 </html>
