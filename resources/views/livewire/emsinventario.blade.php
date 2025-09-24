@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Inventario <i class="el el-minus-sign"></i></h1>
+                    <h1>Inventario Encargado <i class="el el-minus-sign"></i></h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -65,6 +65,9 @@
                                     Generar Envio
                                 </button>
                                 <button class="btn btn-info" wire:click="abrirModalReimprimir">Reimprimir CN-33</button>
+<button class="btn btn-dark" wire:click="abrirModalContrato" style="margin-right: 10px;">
+  Generar contrato
+</button>
 
                             </div>
 
@@ -398,48 +401,7 @@
 
 
                   <!-- Sección REMITENTE -->
-                  <h5 class="mt-3" style="color: #003366;">REMITENTE</h5>
-                  <div class="row">
-                      <div class="col-md-4">
-                          <div class="form-group" style="position: relative;">
-                              <label for="nombre_remitente">Nombre Remitente*</label>
-                              <input type="text" class="form-control"
-                                  id="nombre_remitente"
-                                  wire:model="nombre_remitente"
-                                  oninput="showSuggestions(this.value)" wire:ignore>
-                              <!-- Contenedor para las sugerencias -->
-                              <div id="suggestions"
-                                  style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
-                              </div>
-                          </div>
-                      </div>
-                      <div class="col-md-4">
-                          <div class="form-group">
-                              <label for="nombre_envia">Nombre y Apellido del que
-                                  Envia</label>
-                              <input type="text" class="form-control"
-                                  id="nombre_envia" wire:model="nombre_envia">
-                          </div>
-                      </div>
-                      <div class="col-md-4">
-                          <div class="form-group">
-                              <label for="carnet">Carnet*</label>
-                              <input type="text" class="form-control"
-                                  id="carnet" wire:model="carnet">
-                          </div>
-                      </div>
-                  </div>
-                  <div class="row">
-                      <div class="col-md-4">
-                          <div class="form-group">
-                              <label for="telefono_remitente">Teléfono
-                                  Remitente*</label>
-                              <input type="text" class="form-control"
-                                  id="telefono_remitente"
-                                  wire:model="telefono_remitente">
-                          </div>
-                      </div>
-                  </div>
+                  
 
                   <!-- Sección DESTINATARIO -->
                   <h5 class="mt-3" style="color: #003366;">DESTINATARIO</h5>
@@ -700,6 +662,50 @@
                                 </div>
                             @endif
 
+@if ($showContratoModal)
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Generar contrato</h5>
+          <button type="button" class="close" wire:click="$set('showContratoModal', false)">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="contratoCodigo">Código</label>
+          <input type="text" wire:model.defer="contratoCodigo" class="form-control">
+@error('contratoCodigo') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
+
+          <div class="form-group">
+            <label for="contratoPeso">Peso (kg) <small class="text-muted">(se aplicará a peso, peso_ems y peso_regional)</small></label>
+           <input type="number" step="0.001" min="0" wire:model.defer="contratoPeso" class="form-control">
+@error('contratoPeso') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
+
+          <div class="form-group">
+            <label for="contratoObservacion">Observación</label>
+            <textarea id="contratoObservacion" class="form-control" rows="2" wire:model.defer="contratoObservacion" placeholder="Detalle opcional del contrato"></textarea>
+            @error('contratoObservacion') <small class="text-danger">{{ $message }}</small> @enderror
+          </div>
+
+          <div class="alert alert-info mb-0">
+            <strong>Nota:</strong> Al guardar, el <em>peso</em> se copiará a <code>peso</code>, <code>peso_ems</code> y <code>peso_regional</code> del envío indicado por <strong>código</strong>.
+          </div>
+        </div>
+
+        <div class="modal-footer">
+<button class="btn btn-primary" wire:click.prevent="generarContrato">Guardar</button>
+          <button class="btn btn-secondary" wire:click="$set('showContratoModal', false)">Cancelar</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+@endif
 
 
 

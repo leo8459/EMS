@@ -59,6 +59,14 @@ class Emsinventario extends Component
     public $solicitudesExternas = [];
     // Dentro de tu clase Livewire:
     public $selectedRecords = []; // Aquí se guardarán los identificadores unificados
+public $showContratoModal = false;
+public $contratoCodigo = '';
+public $contratoPeso = '';
+public $contratoObservacion = '';
+
+
+
+
 
     public function updatedSelectedCity()
     {
@@ -67,114 +75,114 @@ class Emsinventario extends Component
     }
 
     public function render()
-{
-    $userCity = Auth::user()->city;
+    {
+        $userCity = Auth::user()->city;
 
-    // 1) Admisiones internas (estado=3|7|10 con tu condición original):
-    $admisiones = Admision::query()
-        ->where(function ($query) use ($userCity) {
-            $query->where(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 7)
-                    ->where(function ($innerQuery) use ($userCity) {
-                        $innerQuery->where('reencaminamiento', $userCity)
-                            ->orWhere(function ($orQuery) use ($userCity) {
-                                $orQuery->whereNull('reencaminamiento')
+        // 1) Admisiones internas (estado=3|7|10 con tu condición original):
+        $admisiones = Admision::query()
+            ->where(function ($query) use ($userCity) {
+                $query->where(function ($subQuery) use ($userCity) {
+                    $subQuery->where('estado', 7)
+                        ->where(function ($innerQuery) use ($userCity) {
+                            $innerQuery->where('reencaminamiento', $userCity)
+                                ->orWhere(function ($orQuery) use ($userCity) {
+                                    $orQuery->whereNull('reencaminamiento')
                                         ->where('ciudad', $userCity);
+                                });
+                        });
+                })
+                    ->orWhere(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 3)
+                            ->where('origen', $userCity);
+                    })
+                    ->orWhere(function ($subQuery) use ($userCity) {
+                        $subQuery->where('estado', 10)
+                            ->where(function ($innerQuery) use ($userCity) {
+                                $innerQuery->where('reencaminamiento', $userCity)
+                                    ->orWhere(function ($orQuery) use ($userCity) {
+                                        $orQuery->whereNull('reencaminamiento')
+                                            ->where('ciudad', $userCity);
+                                    });
                             });
                     });
             })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 3)
-                         ->where('origen', $userCity);
-            })
-            ->orWhere(function ($subQuery) use ($userCity) {
-                $subQuery->where('estado', 10)
-                         ->where(function ($innerQuery) use ($userCity) {
-                             $innerQuery->where('reencaminamiento', $userCity)
-                                ->orWhere(function ($orQuery) use ($userCity) {
-                                    $orQuery->whereNull('reencaminamiento')
-                                            ->where('ciudad', $userCity);
-                                });
-                         });
+            ->orderBy('fecha', 'desc')
+            ->paginate($this->perPage);
+
+        // 2) Solicitudes externas (por API):
+        //    Para la tabla, siempre traigo las de estado=5, 
+        //    igual que tu ejemplo:
+        $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
+        if ($response->successful()) {
+            $solicitudesExternas = collect($response->json());
+        } else {
+            $solicitudesExternas = collect();
+        }
+
+        // (Opcional) Filtrar por selectedCity, etc.
+        if ($this->selectedCity) {
+            // Ejemplo: filtrar las admisiones "paginadas" en memoria
+            $filtered = collect($admisiones->items())->filter(function ($adm) {
+                return $adm->ciudad === $this->selectedCity
+                    || $adm->reencaminamiento === $this->selectedCity;
             });
-        })
-        ->orderBy('fecha', 'desc')
-        ->paginate($this->perPage);
+            // Rearmar la paginación con la sub-colección (un truco)
+            $admisiones = new \Illuminate\Pagination\LengthAwarePaginator(
+                $filtered,
+                $filtered->count(),
+                $this->perPage,
+                $admisiones->currentPage(),
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+        }
 
-    // 2) Solicitudes externas (por API):
-    //    Para la tabla, siempre traigo las de estado=5, 
-    //    igual que tu ejemplo:
-    $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
-    if ($response->successful()) {
-        $solicitudesExternas = collect($response->json());
-    } else {
-        $solicitudesExternas = collect();
+        return view('livewire.emsinventario', [
+            'admisiones' => $admisiones,
+            'solicitudesExternas' => $solicitudesExternas,
+        ]);
     }
-
-    // (Opcional) Filtrar por selectedCity, etc.
-    if ($this->selectedCity) {
-        // Ejemplo: filtrar las admisiones "paginadas" en memoria
-        $filtered = collect($admisiones->items())->filter(function ($adm) {
-            return $adm->ciudad === $this->selectedCity
-                || $adm->reencaminamiento === $this->selectedCity;
-        });
-        // Rearmar la paginación con la sub-colección (un truco)
-        $admisiones = new \Illuminate\Pagination\LengthAwarePaginator(
-            $filtered,
-            $filtered->count(),
-            $this->perPage,
-            $admisiones->currentPage(),
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-    }
-
-    return view('livewire.emsinventario', [
-        'admisiones' => $admisiones,
-        'solicitudesExternas' => $solicitudesExternas,
-    ]);
-}
 
     public function search()
     {
         // 1) Buscar ADMISIÓN (interno)
         $admisionesEncontradas = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->orderBy('fecha','desc')
+            ->orderBy('fecha', 'desc')
             ->get(); // O ->paginate(...) si deseas.
-    
+
         // Obtener IDs encontrados
         $foundIds = $admisionesEncontradas->pluck('id')->toArray();
-    
+
         // Unir con los ya seleccionados sin duplicar
         $this->selectedAdmisiones = array_unique(
             array_merge($this->selectedAdmisiones, $foundIds)
         );
-    
+
         // 2) Buscar en API EXTERNA
         $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
         if ($response->successful()) {
             // Convertimos a colección
             $allExternas = collect($response->json());
-    
+
             // Filtramos
             $solicitudesExternasEncontradas = $allExternas->filter(function ($item) {
                 // stripos -> busca sin importar mayúsc/minúsc
                 return stripos($item['guia'], $this->searchTerm) !== false;
             })->values();
-    
+
             // Obtenemos las guías encontradas
             $foundGuias = $solicitudesExternasEncontradas->pluck('guia')->toArray();
-    
+
             // Unir con lo que ya estaba seleccionado
             $this->selectedSolicitudesExternas = array_unique(
                 array_merge($this->selectedSolicitudesExternas, $foundGuias)
             );
         }
-    
+
         // 3) Limpiar searchTerm para que el usuario pueda digitar otra búsqueda
         $this->searchTerm = '';
     }
-        
-    
+
+
 
 
 
@@ -281,205 +289,7 @@ class Emsinventario extends Component
     {
         $this->showReimprimirModal = true;
     }
-    public function generarExcel($admisiones = null)
-    {
-        // Si no se pasa $admisiones como argumento, buscar por currentManifiesto o selectedAdmisiones
-        if ($admisiones === null) {
-            if (!empty($this->currentManifiesto)) {
-                $admisiones = Admision::where('manifiesto', $this->currentManifiesto)->get();
-            } else {
-                $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-            }
-        }
 
-        if ($admisiones->isEmpty()) {
-            session()->flash('error', 'No hay admisiones válidas para generar el Excel.');
-            return;
-        }
-
-        // Crear el documento
-        $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
-        $worksheet->setTitle('Designado Operador Postal');
-
-        // Fecha y hora actual
-        $currentDate = now()->format('d/m/Y');
-        $currentTime = now()->format('H:i');
-        $firstPackage = $admisiones->first();
-
-        // Nombre del usuario logueado
-        $loggedInUserCity = Auth::user()->city;
-
-        // Estilo para encabezado
-        $headerStyle = [
-            'font' => ['bold' => true],
-            'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
-            'borders' => [
-                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
-            ],
-        ];
-
-        // Configurar el ancho de las columnas
-        $worksheet->getColumnDimension('A')->setWidth(20);
-        $worksheet->getColumnDimension('B')->setWidth(10);
-        $worksheet->getColumnDimension('C')->setWidth(10);
-        $worksheet->getColumnDimension('D')->setWidth(15);
-        $worksheet->getColumnDimension('E')->setWidth(25);
-        $worksheet->getColumnDimension('F')->setWidth(20);
-        $worksheet->getColumnDimension('G')->setWidth(30);
-        $worksheet->getColumnDimension('H')->setWidth(30);
-
-        // Fila 1: Título
-        $worksheet->mergeCells('A1:C2');
-        $worksheet->setCellValue('A1', 'Postal designated operator');
-        $worksheet->getStyle('A1')->applyFromArray($headerStyle);
-
-        // Añadir la imagen EMS en lugar del texto "EMS"
-        $drawing = new Drawing();
-        $drawing->setName('EMS Image');
-        $drawing->setDescription('EMS Logo');
-        $drawing->setPath(public_path('images/EMS1.png')); // Ruta de la imagen
-        $drawing->setCoordinates('D1'); // Celda de inicio
-        $drawing->setHeight(80); // Altura de la imagen
-        $drawing->setWorksheet($worksheet);
-
-        $worksheet->mergeCells('H1:M2');
-        $worksheet->setCellValue('H1', 'LISTA CN-33');
-        $worksheet->getStyle('H1')->applyFromArray($headerStyle);
-
-        // Fila 3: BO-BOLIVIA y Airmails
-        $worksheet->mergeCells('A3:C3');
-        $worksheet->setCellValue('A3', 'BO-BOLIVIA');
-        $worksheet->getStyle('A3')->applyFromArray($headerStyle);
-
-        $worksheet->mergeCells('H3:M3');
-        $worksheet->setCellValue('H3', 'Airmails');
-        $worksheet->getStyle('H3')->applyFromArray($headerStyle);
-
-        // Fila 4: Office of origin y DIA
-        $worksheet->mergeCells('A4:C4');
-        $worksheet->setCellValue('A4', 'Office of origin');
-        $worksheet->getStyle('A4')->applyFromArray($headerStyle);
-
-        $worksheet->mergeCells('H4:M4');
-        $worksheet->setCellValue('H4', 'DIA');
-        $worksheet->getStyle('H4')->applyFromArray($headerStyle);
-
-        // Fila 5: Origen y Fecha actual
-        $worksheet->mergeCells('A5:C5');
-        $worksheet->setCellValue('A5', $loggedInUserCity);
-        $worksheet->getStyle('A5')->applyFromArray($headerStyle);
-
-        $worksheet->mergeCells('H5:M5');
-        $worksheet->setCellValue('H5', $currentDate);
-        $worksheet->getStyle('H5')->applyFromArray($headerStyle);
-
-        // Fila 6: Office of destination y HORA
-        $worksheet->mergeCells('A6:C6');
-        $worksheet->setCellValue('A6', 'Office of destination');
-        $worksheet->getStyle('A6')->applyFromArray($headerStyle);
-
-        $worksheet->mergeCells('H6:M6');
-        $worksheet->setCellValue('H6', 'HORA');
-        $worksheet->getStyle('H6')->applyFromArray($headerStyle);
-
-        // Fila 7: Destino y Hora actual
-        $destinationCity = $this->selectedDepartment ?? $firstPackage->reencaminamiento ?? $firstPackage->ciudad ?? '';
-        $worksheet->mergeCells('A7:C7');
-        $worksheet->setCellValue('A7', $destinationCity);
-        $worksheet->getStyle('A7')->applyFromArray($headerStyle);
-
-        $worksheet->mergeCells('H7:M7');
-        $worksheet->setCellValue('H7', $currentTime);
-        $worksheet->getStyle('H7')->applyFromArray($headerStyle);
-
-        // Fila 8: DESPACHO - Manifiesto
-        $worksheet->mergeCells('A8:M8');
-        $worksheet->setCellValue('A8', 'DESPACHO - ' . $this->currentManifiesto);
-        $worksheet->getStyle('A8')->applyFromArray($headerStyle);
-
-        // Fila 9: NUMERO DE VUELO - 1
-        $worksheet->mergeCells('A9:M9');
-        $worksheet->setCellValue('A9', 'NUMERO DE VUELO - 1');
-        $worksheet->getStyle('A9')->applyFromArray($headerStyle);
-
-        // Fila 11: Encabezado de columnas
-        $worksheet->setCellValue('A11', 'ENVIO');
-        $worksheet->setCellValue('B11', 'CAN');
-        $worksheet->setCellValue('C11', 'COR');
-        $worksheet->setCellValue('D11', 'EMS');
-        $worksheet->setCellValue('E11', 'CLIENTE');
-        $worksheet->setCellValue('F11', 'ENDAS');
-        $worksheet->setCellValue('G11', 'OFICIAL');
-        $worksheet->setCellValue('H11', 'OBSERVACION');
-        $worksheet->getStyle('A11:H11')->applyFromArray($headerStyle);
-
-        // Agregar los datos de admisiones seleccionadas
-        $currentRow = 12;
-        $totalCantidad = 0;
-        $totalPeso = 0;
-
-        foreach ($admisiones as $admision) {
-            $peso = $admision->peso_ems ?: $admision->peso; // Usa peso_ems o peso si está vacío
-
-            $worksheet->setCellValue("A$currentRow", $admision->codigo);
-            $worksheet->setCellValue("B$currentRow", 1);
-            $worksheet->setCellValue("C$currentRow", '');
-            $worksheet->setCellValue("D$currentRow", $peso);
-            $worksheet->setCellValue("E$currentRow", $admision->nombre_remitente);
-            $worksheet->setCellValue("F$currentRow", '');
-            $worksheet->setCellValue("G$currentRow", '');
-            $worksheet->setCellValue("H$currentRow", $admision->observacion);
-            $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
-
-            $totalCantidad += 1;
-            $totalPeso += $peso;
-
-            $currentRow++;
-        }
-
-        // Fila de totales
-        $worksheet->setCellValue("A$currentRow", 'TOTAL');
-        $worksheet->setCellValue("B$currentRow", $totalCantidad);
-        $worksheet->setCellValue("D$currentRow", $totalPeso);
-        $worksheet->getStyle("A$currentRow:H$currentRow")->applyFromArray($headerStyle);
-        $currentRow += 2;
-
-        // Información adicional
-        $worksheet->setCellValue("A$currentRow", 'Dispatching office of exchange');
-        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-        $currentRow++;
-
-        $worksheet->setCellValue("A$currentRow", $loggedInUserCity);
-        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-        $currentRow++;
-
-        $worksheet->setCellValue("A$currentRow", 'Signature');
-        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-        $currentRow++;
-
-        $worksheet->setCellValue("A$currentRow", '______________________');
-        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-        $currentRow++;
-
-        $worksheet->setCellValue("A$currentRow", 'Salidas Internacionales');
-        $worksheet->getStyle("A$currentRow")->applyFromArray($headerStyle);
-
-        $worksheet->setCellValue("F" . ($currentRow - 2), 'Office of exchange of destination');
-        $worksheet->getStyle("F" . ($currentRow - 2))->applyFromArray($headerStyle);
-        $worksheet->setCellValue("F$currentRow", 'Date and signature');
-
-
-        // Guardar el archivo temporalmente
-        $fileName = 'designado_operador_postal.xlsx';
-        $filePath = storage_path("app/public/$fileName");
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
-
-        // Retornar la descarga del archivo
-        return response()->download($filePath)->deleteFileAfterSend(true);
-    }
 
 
 
@@ -579,12 +389,12 @@ class Emsinventario extends Component
             session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
             return;
         }
-    
+
         if (empty($this->selectedDepartment)) {
             session()->flash('error', 'Debe seleccionar un departamento para reencaminar.');
             return;
         }
-    
+
         // Mapeo de ciudades a códigos abreviados
         $cityCodes = [
             'LA PAZ'       => 'LPB',
@@ -597,18 +407,18 @@ class Emsinventario extends Component
             'BENI'         => 'TDD', // Trinidad
             'PANDO'        => 'CIJ', // Cobija
         ];
-    
+
         // Convertir la ciudad
         $reencaminamientoAbreviado = $cityCodes[$this->selectedDepartment] ?? $this->selectedDepartment; // Para solicitudes externas
         $reencaminamientoCompleto = $this->selectedDepartment; // Para admisiones internas
-    
+
         // Generar manifiesto si no se ingresó manualmente
         if (empty($this->manualManifiesto)) {
             $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
         }
-    
+
         $errores = [];
-    
+
         // ✅ Procesar solicitudes externas (USAR CÓDIGO ABREVIADO)
         if (!empty($this->selectedSolicitudesExternas)) {
             foreach ($this->selectedSolicitudesExternas as $guia) {
@@ -617,17 +427,17 @@ class Emsinventario extends Component
                     'reencaminamiento' => $reencaminamientoAbreviado, // Se envía la ABREVIACIÓN (CBB, ORU, etc.)
                     'manifiesto' => $this->manualManifiesto,
                 ]);
-    
+
                 if (!$response->successful()) {
                     $errores[] = "Error en la solicitud externa {$guia}: " . $response->body();
                 }
             }
         }
-    
+
         // ✅ Procesar admisiones internas (USAR NOMBRE COMPLETO)
         if (!empty($this->selectedAdmisiones)) {
             $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
-    
+
             foreach ($admisiones as $admision) {
                 $admision->estado           = 6; // Mandado a regional
                 $admision->manifiesto       = $this->manualManifiesto;
@@ -635,7 +445,7 @@ class Emsinventario extends Component
                 $admision->tipo_transporte  = $this->selectedTransport;
                 $admision->numero_vuelo     = $this->numeroVuelo;
                 $admision->save();
-    
+
                 // Registrar eventos
                 Eventos::create([
                     'accion'      => 'Mandar a regional',
@@ -643,7 +453,7 @@ class Emsinventario extends Component
                     'codigo'      => $admision->codigo,
                     'user_id'     => Auth::id(),
                 ]);
-    
+
                 Historico::create([
                     'numero_guia'             => $admision->codigo,
                     'fecha_actualizacion'     => now(),
@@ -652,32 +462,32 @@ class Emsinventario extends Component
                 ]);
             }
         }
-    
+
         // Generar el PDF con las admisiones seleccionadas
         $solicitudesExternasSeleccionadas = collect($this->solicitudesExternas)
             ->whereIn('guia', $this->selectedSolicitudesExternas);
-    
+
         $this->selectedAdmisionesList = $admisiones ?? collect();
         return $this->generarPdf($solicitudesExternasSeleccionadas);
-    
+
         // Limpiar selección
         $this->selectedAdmisiones        = [];
         $this->selectedSolicitudesExternas = [];
         $this->dispatch('reloadPage');
-    
+
         if (!empty($errores)) {
             session()->flash('error', implode(', ', $errores));
         } else {
             session()->flash('message', 'Las solicitudes externas han sido reencaminadas y las admisiones enviadas correctamente.');
         }
     }
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
 
 
 
@@ -849,84 +659,84 @@ class Emsinventario extends Component
 
 
     public function reimprimirManifiesto()
-{
-    // Validar que el manifiesto haya sido ingresado o generar uno
-    if (empty($this->manifiestoInput)) {
-        // Si no hay, generamos uno automáticamente
-        $this->manifiestoInput = $this->generarManifiesto(Auth::user()->city);
+    {
+        // Validar que el manifiesto haya sido ingresado o generar uno
+        if (empty($this->manifiestoInput)) {
+            // Si no hay, generamos uno automáticamente
+            $this->manifiestoInput = $this->generarManifiesto(Auth::user()->city);
+        }
+
+        // Buscar admisiones internas con ese manifiesto
+        $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
+
+        // Consultar en la API si hay registros con ese manifiesto
+        $response = Http::get("http://172.65.10.52:8450/api/solicitudes/manifiesto/{$this->manifiestoInput}");
+
+        $solicitudesExternasSeleccionadas = collect(); // Inicializar colección vacía
+
+        if ($response->successful()) {
+            $data = $response->json();
+            // Ajustar si la respuesta está anidada, por ejemplo, en $data['data']
+            $solicitudesExternasSeleccionadas = collect($data);
+        }
+
+        // Verificar si no hay resultados en ambos sistemas
+        if ($admisionesExistentes->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+            session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado en ningún sistema.');
+            return;
+        }
+
+        // Asignar ambos para que coincidan
+        $this->manualManifiesto = $this->manifiestoInput;
+        $this->currentManifiesto = $this->manifiestoInput;
+
+        // (Opcional) Si quieres reimprimir también las admisiones locales, setéalas 
+        // en la lista seleccionada para que tu generarPdf() las lea:
+        $this->selectedAdmisionesList = $admisionesExistentes;
+
+        // Generar el PDF con todas las admisiones del manifiesto
+        return $this->generarPdf($solicitudesExternasSeleccionadas);
     }
 
-    // Buscar admisiones internas con ese manifiesto
-    $admisionesExistentes = Admision::where('manifiesto', $this->manifiestoInput)->get();
 
-    // Consultar en la API si hay registros con ese manifiesto
-    $response = Http::get("http://172.65.10.52:8450/api/solicitudes/manifiesto/{$this->manifiestoInput}");
 
-    $solicitudesExternasSeleccionadas = collect(); // Inicializar colección vacía
-
-    if ($response->successful()) {
-        $data = $response->json();
-        // Ajustar si la respuesta está anidada, por ejemplo, en $data['data']
-        $solicitudesExternasSeleccionadas = collect($data);
-    }
-
-    // Verificar si no hay resultados en ambos sistemas
-    if ($admisionesExistentes->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
-        session()->flash('error', 'No se encontraron admisiones con el manifiesto ingresado en ningún sistema.');
-        return;
-    }
-
-    // Asignar ambos para que coincidan
-    $this->manualManifiesto = $this->manifiestoInput;
-    $this->currentManifiesto = $this->manifiestoInput;
-
-    // (Opcional) Si quieres reimprimir también las admisiones locales, setéalas 
-    // en la lista seleccionada para que tu generarPdf() las lea:
-    $this->selectedAdmisionesList = $admisionesExistentes;
-
-    // Generar el PDF con todas las admisiones del manifiesto
-    return $this->generarPdf($solicitudesExternasSeleccionadas);
-}
-
-    
-    
 
 
 
     public function generarPdf($solicitudesExternasSeleccionadas)
     {
         // 1. Obtener admisiones locales seleccionadas (si las hay)
-    $admisionesSeleccionadas = $this->selectedAdmisionesList;
+        $admisionesSeleccionadas = $this->selectedAdmisionesList;
 
-    // 2. Convertir $solicitudesExternasSeleccionadas a colección si es un array
-    if (is_array($solicitudesExternasSeleccionadas)) {
-        $solicitudesExternasSeleccionadas = collect($solicitudesExternasSeleccionadas);
-    }
+        // 2. Convertir $solicitudesExternasSeleccionadas a colección si es un array
+        if (is_array($solicitudesExternasSeleccionadas)) {
+            $solicitudesExternasSeleccionadas = collect($solicitudesExternasSeleccionadas);
+        }
 
-    // 3. Verificar si hay admisiones seleccionadas o solicitudes externas
-    if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
-        session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
-        return;
-    }
-    
+        // 3. Verificar si hay admisiones seleccionadas o solicitudes externas
+        if ($admisionesSeleccionadas->isEmpty() && $solicitudesExternasSeleccionadas->isEmpty()) {
+            session()->flash('error', 'No hay admisiones válidas para generar el PDF.');
+            return;
+        }
+
         // **Cálculo de cantidad total**
         $totalCantidad = count($admisionesSeleccionadas) + count($solicitudesExternasSeleccionadas);
-    
+
         // **Cálculo de peso total**
         $totalPeso = 0;
-    
+
         // Sumar peso de admisiones internas
         foreach ($admisionesSeleccionadas as $admision) {
             $peso = (float) ($admision->peso_ems ?? $admision->peso ?? 0);
             $totalPeso += $peso;
         }
-    
+
         // Sumar peso de solicitudes externas
         foreach ($solicitudesExternasSeleccionadas as $solicitud) {
             $pesoExterno = (float) ($solicitud['peso_o'] ?? $solicitud['peso_v'] ?? $solicitud['peso_r'] ?? 0);
             $totalPeso += $pesoExterno;
         }
-    
+
         // Datos para la plantilla del PDF
         $data = [
             'admisiones'        => $admisionesSeleccionadas,
@@ -941,17 +751,17 @@ class Emsinventario extends Component
             'totalCantidad'     => $totalCantidad, // 👈 Cantidad total corregida
             'totalPeso'         => number_format($totalPeso, 2, '.', ''), // 👈 Peso total corregido con 2 decimales
         ];
-    
+
         // Generar el PDF con DomPDF
         $pdf = Pdf::loadView('pdfs.cn33', $data)->setPaper('letter', 'portrait');
-    
+
         // Descargar el PDF directamente
         return response()->streamDownload(
             fn() => print($pdf->stream('cn-33.pdf')),
             'cn-33.pdf'
         );
     }
-    
+
 
     public function updatedSelectedAdmisiones()
     {
@@ -963,76 +773,179 @@ class Emsinventario extends Component
         $this->updatedSelectedAdmisiones(); // Actualizar la lista
     }
     public function abrirModalCN33()
-{
-    if (count($this->selectedAdmisiones) > 0 || count($this->selectedSolicitudesExternas) > 0) {
-        $this->showCN33Modal = true;
-    } else {
-        session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
+    {
+        if (count($this->selectedAdmisiones) > 0 || count($this->selectedSolicitudesExternas) > 0) {
+            $this->showCN33Modal = true;
+        } else {
+            session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
+        }
     }
-}
 
 
 
     public function añadirACN33()
+    {
+        if (empty($this->selectedAdmisiones) && empty($this->selectedSolicitudesExternas)) {
+            session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
+            return;
+        }
+
+        // Validar que el usuario haya ingresado o generado un manifiesto
+        if (empty($this->manualManifiesto)) {
+            // Si no hay manifiesto manual, generar uno automáticamente
+            $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
+        }
+
+        // Procesar admisiones internas (del sistema actual)
+        if (!empty($this->selectedAdmisiones)) {
+            $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+
+            foreach ($admisiones as $admision) {
+                $admision->estado = 6; // Cambiar al estado 6 (CN-33)
+                $admision->manifiesto = $this->manualManifiesto;
+                $admision->save();
+
+                // Registrar evento
+                Eventos::create([
+                    'accion'      => 'Añadir a CN-33',
+                    'descripcion' => "Se añadió al manifiesto {$this->manualManifiesto}.",
+                    'codigo'      => $admision->codigo,
+                    'user_id'     => Auth::id(),
+                ]);
+            }
+        }
+
+        // Procesar solicitudes externas (del otro sistema)
+        $errores = [];
+
+        if (!empty($this->selectedSolicitudesExternas)) {
+            foreach ($this->selectedSolicitudesExternas as $guia) {
+                // Actualizar en la API
+                $response = Http::put("http://172.65.10.52:8450/api/solicitudes/reencaminar", [
+                    'guia'       => $guia,
+                    'manifiesto' => $this->manualManifiesto, // Asignar el manifiesto generado
+                    'estado'     => 8, // Cambiar estado a 8
+                ]);
+
+                if (!$response->successful()) {
+                    $errores[] = "Error en solicitud externa {$guia}: " . $response->body();
+                }
+            }
+        }
+
+        // Limpiar selección después de procesar
+        $this->selectedAdmisiones = [];
+        $this->selectedSolicitudesExternas = [];
+
+        $this->dispatch('reloadPage');
+
+        if (!empty($errores)) {
+            session()->flash('error', implode(', ', $errores));
+        } else {
+            session()->flash('message', 'Las admisiones y solicitudes externas han sido añadidas a CN-33 correctamente.');
+        }
+    }
+
+
+public function abrirModalContrato()
 {
-    if (empty($this->selectedAdmisiones) && empty($this->selectedSolicitudesExternas)) {
-        session()->flash('error', 'Debe seleccionar al menos una admisión o solicitud externa.');
-        return;
-    }
+    $this->resetContratoFields();
+    $this->showContratoModal = true;
+}
 
-    // Validar que el usuario haya ingresado o generado un manifiesto
-    if (empty($this->manualManifiesto)) {
-        // Si no hay manifiesto manual, generar uno automáticamente
-        $this->manualManifiesto = $this->generarManifiesto(Auth::user()->city);
-    }
+private function resetContratoFields()
+{
+    $this->contratoCodigo = '';
+    $this->contratoPeso = '';
+    $this->contratoObservacion = '';
+}
+public function generarContrato()
+{
+    // ✅ Validación obligatoria
+    $this->validate([
+        'contratoCodigo'      => 'required|string',
+        'contratoPeso'        => 'required|numeric|min:0.001',
+        'contratoObservacion' => 'nullable|string|max:500',
+    ], [
+        'contratoCodigo.required' => 'Debe ingresar un código.',
+        'contratoPeso.required'   => 'Debe ingresar un peso.',
+        'contratoPeso.numeric'    => 'El peso debe ser numérico.',
+        'contratoPeso.min'        => 'El peso debe ser mayor a 0.',
+    ]);
 
-    // Procesar admisiones internas (del sistema actual)
-    if (!empty($this->selectedAdmisiones)) {
-        $admisiones = Admision::whereIn('id', $this->selectedAdmisiones)->get();
+    try {
+        \DB::beginTransaction();
 
-        foreach ($admisiones as $admision) {
-            $admision->estado = 6; // Cambiar al estado 6 (CN-33)
-            $admision->manifiesto = $this->manualManifiesto;
+        $admision = Admision::where('codigo', trim((string)$this->contratoCodigo))->first();
+
+        $peso = (float) $this->contratoPeso;
+        $textoObs = trim((string) ($this->contratoObservacion ?? ''));
+
+        if ($admision) {
+            // --- ACTUALIZA ---
+            $admision->peso          = $peso;
+            $admision->peso_ems      = $peso;
+            $admision->peso_regional = $peso;
+
+            if ($textoObs !== '') {
+                $admision->observacion = trim(($admision->observacion ? $admision->observacion.' | ' : '').$textoObs);
+            }
+
             $admision->save();
 
-            // Registrar evento
             Eventos::create([
-                'accion'      => 'Añadir a CN-33',
-                'descripcion' => "Se añadió al manifiesto {$this->manualManifiesto}.",
+                'accion'      => 'Generar Contrato',
+                'descripcion' => "Actualización por contrato: peso/peso_ems/peso_regional = {$peso}.",
                 'codigo'      => $admision->codigo,
                 'user_id'     => Auth::id(),
             ]);
+
+            \DB::commit();
+
+            $this->showContratoModal = false;
+            $this->resetContratoFields();
+            $this->dispatch('reload-page');
+            session()->flash('message', 'Contrato actualizado: pesos y observación guardados.');
+            return;
         }
-    }
 
-    // Procesar solicitudes externas (del otro sistema)
-    $errores = [];
+        // --- CREA NUEVO ---
+        $tarifaIdDefecto = 1; // ajusta si tu tarifa base es otra
 
-    if (!empty($this->selectedSolicitudesExternas)) {
-        foreach ($this->selectedSolicitudesExternas as $guia) {
-            // Actualizar en la API
-            $response = Http::put("http://172.65.10.52:8450/api/solicitudes/reencaminar", [
-                'guia'       => $guia,
-                'manifiesto' => $this->manualManifiesto, // Asignar el manifiesto generado
-                'estado'     => 8, // Cambiar estado a 8
-            ]);
+        $admision = Admision::create([
+            'origen'       => Auth::user()->city ?? 'LA PAZ',
+            'fecha'        => now(),
+            'servicio'     => 'CONTRATO',
+            'cantidad'     => 1,
+            'peso'         => $peso,
+            'peso_ems'     => $peso,
+            'peso_regional'=> $peso,
+            'observacion'  => ($textoObs !== '' ? $textoObs : null),
+            'codigo'       => trim((string)$this->contratoCodigo),
+            'precio'       => 0,
+            'ciudad'       => Auth::user()->city ?? 'LA PAZ',
+            'creacionadmision' => Auth::user()->name ?? null,
+            'estado'       => 3,
+            'tarifa_id'    => $tarifaIdDefecto,
+            'user_id'      => Auth::id(),
+        ]);
 
-            if (!$response->successful()) {
-                $errores[] = "Error en solicitud externa {$guia}: " . $response->body();
-            }
-        }
-    }
+        Eventos::create([
+            'accion'      => 'Generar Contrato',
+            'descripcion' => "Creación por contrato: peso/peso_ems/peso_regional = {$peso}.",
+            'codigo'      => $admision->codigo,
+            'user_id'     => Auth::id(),
+        ]);
 
-    // Limpiar selección después de procesar
-    $this->selectedAdmisiones = [];
-    $this->selectedSolicitudesExternas = [];
+        \DB::commit();
 
-    $this->dispatch('reloadPage');
-
-    if (!empty($errores)) {
-        session()->flash('error', implode(', ', $errores));
-    } else {
-        session()->flash('message', 'Las admisiones y solicitudes externas han sido añadidas a CN-33 correctamente.');
+        $this->showContratoModal = false;
+        $this->resetContratoFields();
+        $this->dispatch('reload-page');
+        session()->flash('message', 'Contrato creado: registro nuevo con pesos guardados.');
+    } catch (\Throwable $e) {
+        \DB::rollBack();
+        session()->flash('error', 'No se pudo guardar el contrato: '.$e->getMessage());
     }
 }
 
