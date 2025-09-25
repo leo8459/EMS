@@ -28,9 +28,8 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/login'); // redirige a la ruta de login (si usas Breeze/Jetstream/Fortify)
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
