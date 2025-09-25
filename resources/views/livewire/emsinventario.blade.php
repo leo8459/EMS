@@ -22,10 +22,13 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="float-left d-flex align-items-center">
-                                <input type="text" wire:model="searchTerm" 
-                                placeholder="Buscar..." 
-                                class="form-control" 
-                                style="margin-right: 10px;" />
+                                <input type="text"
+       wire:model.defer="searchTerm"
+       wire:keydown.enter.prevent="search"
+       placeholder="Buscar..."
+       class="form-control"
+       style="margin-right: 10px;" />
+
 
                                 <select wire:model="selectedCity" class="form-control" style="margin-right: 10px;">
                                     <option value="">Seleccione una ciudad</option>
@@ -675,16 +678,32 @@
 
         <div class="modal-body">
           <div class="form-group">
-            <label for="contratoCodigo">Código</label>
+            <label for="contratoCodigo">Código*</label>
           <input type="text" wire:model.defer="contratoCodigo" class="form-control">
 @error('contratoCodigo') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
 
           <div class="form-group">
-            <label for="contratoPeso">Peso (kg) <small class="text-muted">(se aplicará a peso, peso_ems y peso_regional)</small></label>
+            <label for="contratoPeso">Peso (kg)* <small class="text-muted">(se aplicará a peso, peso_ems y peso_regional)</small></label>
            <input type="number" step="0.001" min="0" wire:model.defer="contratoPeso" class="form-control">
 @error('contratoPeso') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
+<div class="form-group">
+  <label for="contratoDestino">Departamento de destino <span class="text-danger">*</span></label>
+  <select id="contratoDestino" class="form-control" wire:model.defer="contratoDestino">
+    <option value="">Seleccione un departamento</option>
+    <option value="LA PAZ">LA PAZ</option>
+    <option value="POTOSI">POTOSI</option>
+    <option value="ORURO">ORURO</option>
+    <option value="SANTA CRUZ">SANTA CRUZ</option>
+    <option value="CHUQUISACA">CHUQUISACA</option>
+    <option value="COCHABAMBA">COCHABAMBA</option>
+    <option value="BENI">BENI</option>
+    <option value="PANDO">PANDO</option>
+    <option value="TARIJA">TARIJA</option>
+  </select>
+  @error('contratoDestino') <small class="text-danger">{{ $message }}</small> @enderror
+</div>
 
           <div class="form-group">
             <label for="contratoObservacion">Observación</label>
@@ -692,10 +711,7 @@
             @error('contratoObservacion') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
 
-          <div class="alert alert-info mb-0">
-            <strong>Nota:</strong> Al guardar, el <em>peso</em> se copiará a <code>peso</code>, <code>peso_ems</code> y <code>peso_regional</code> del envío indicado por <strong>código</strong>.
-          </div>
-        </div>
+     
 
         <div class="modal-footer">
 <button class="btn btn-primary" wire:click.prevent="generarContrato">Guardar</button>

@@ -63,6 +63,7 @@ public $showContratoModal = false;
 public $contratoCodigo = '';
 public $contratoPeso = '';
 public $contratoObservacion = '';
+public $contratoDestino = '';
 
 
 
@@ -141,46 +142,96 @@ public $contratoObservacion = '';
             'solicitudesExternas' => $solicitudesExternas,
         ]);
     }
+public function search()
+{
+    $userCity = Auth::user()->city;
 
-    public function search()
-    {
-        // 1) Buscar ADMISIÓN (interno)
-        $admisionesEncontradas = Admision::where('codigo', 'like', '%' . $this->searchTerm . '%')
-            ->orderBy('fecha', 'desc')
-            ->get(); // O ->paginate(...) si deseas.
+    // === 1) ADMISIÓN INTERNA: misma condición que en render + filtro por ciudad DESTINO ===
+    $baseQuery = Admision::query()
+        ->where(function ($query) use ($userCity) {
+            $query->where(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 7)
+                    ->where(function ($innerQuery) use ($userCity) {
+                        $innerQuery->where('reencaminamiento', $userCity)
+                            ->orWhere(function ($orQuery) use ($userCity) {
+                                $orQuery->whereNull('reencaminamiento')
+                                    ->where('ciudad', $userCity);
+                            });
+                    });
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 3)
+                    ->where('origen', $userCity);
+            })
+            ->orWhere(function ($subQuery) use ($userCity) {
+                $subQuery->where('estado', 10)
+                    ->where(function ($innerQuery) use ($userCity) {
+                        $innerQuery->where('reencaminamiento', $userCity)
+                            ->orWhere(function ($orQuery) use ($userCity) {
+                                $orQuery->whereNull('reencaminamiento')
+                                    ->where('ciudad', $userCity);
+                            });
+                    });
+            });
+        });
 
-        // Obtener IDs encontrados
-        $foundIds = $admisionesEncontradas->pluck('id')->toArray();
+    // Filtro por ciudad de DESTINO (igual que en render)
+    if ($this->selectedCity) {
+        $baseQuery->where(function ($q) {
+            $q->where('ciudad', $this->selectedCity)
+              ->orWhere('reencaminamiento', $this->selectedCity);
+        });
+    }
 
-        // Unir con los ya seleccionados sin duplicar
-        $this->selectedAdmisiones = array_unique(
-            array_merge($this->selectedAdmisiones, $foundIds)
-        );
+    // Filtro por el texto del buscador
+    if (trim($this->searchTerm) !== '') {
+        $baseQuery->where('codigo', 'like', '%'.$this->searchTerm.'%');
+    }
 
-        // 2) Buscar en API EXTERNA
-        $response = Http::get('http://172.65.10.52:8450/api/ems/estado/5');
-        if ($response->successful()) {
-            // Convertimos a colección
-            $allExternas = collect($response->json());
+    // IDs que cumplen la condición de DESTINO
+    $foundIds = $baseQuery->pluck('id')->toArray();
 
-            // Filtramos
-            $solicitudesExternasEncontradas = $allExternas->filter(function ($item) {
-                // stripos -> busca sin importar mayúsc/minúsc
-                return stripos($item['guia'], $this->searchTerm) !== false;
-            })->values();
+    $this->selectedAdmisiones = array_values(array_unique(
+        array_merge($this->selectedAdmisiones, $foundIds)
+    ));
 
-            // Obtenemos las guías encontradas
-            $foundGuias = $solicitudesExternasEncontradas->pluck('guia')->toArray();
+    // === 2) SOLICITUDES EXTERNAS: SOLO DESTINO ===
+    $response = \Illuminate\Support\Facades\Http::get('http://172.65.10.52:8450/api/ems/estado/5');
+    if ($response->successful()) {
+        $externas = collect($response->json());
 
-            // Unir con lo que ya estaba seleccionado
-            $this->selectedSolicitudesExternas = array_unique(
-                array_merge($this->selectedSolicitudesExternas, $foundGuias)
-            );
+        if ($this->selectedCity) {
+            $map = [
+                'LPB' => 'LA PAZ', 'SRZ' => 'SANTA CRUZ', 'CBB' => 'COCHABAMBA',
+                'ORU' => 'ORURO',  'POI' => 'POTOSI',     'TJA' => 'TARIJA',
+                'SRE' => 'CHUQUISACA', 'TDD' => 'BENI',   'CIJ' => 'PANDO',
+            ];
+
+            $externas = $externas->filter(function ($item) use ($map) {
+                $guia = $item['guia'] ?? '';
+                $right  = strtoupper(substr($guia, 7, 3));  // DESTINO
+                $destino = $map[$right] ?? null;
+                return $destino === $this->selectedCity;
+            });
         }
 
-        // 3) Limpiar searchTerm para que el usuario pueda digitar otra búsqueda
-        $this->searchTerm = '';
+        // Aplica texto del buscador
+        if (trim($this->searchTerm) !== '') {
+            $externas = $externas->filter(function ($item) {
+                return stripos($item['guia'] ?? '', $this->searchTerm) !== false;
+            });
+        }
+
+        $this->selectedSolicitudesExternas = array_values(array_unique(
+            array_merge($this->selectedSolicitudesExternas, $externas->pluck('guia')->toArray())
+        ));
     }
+
+    // Limpia el buscador para la siguiente lectura
+    $this->searchTerm = '';
+}
+
+
 
 
 
@@ -858,19 +909,24 @@ private function resetContratoFields()
     $this->contratoCodigo = '';
     $this->contratoPeso = '';
     $this->contratoObservacion = '';
+    $this->contratoDestino = '';
 }
+
 public function generarContrato()
 {
     // ✅ Validación obligatoria
     $this->validate([
         'contratoCodigo'      => 'required|string',
         'contratoPeso'        => 'required|numeric|min:0.001',
+        'contratoDestino'     => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
         'contratoObservacion' => 'nullable|string|max:500',
     ], [
-        'contratoCodigo.required' => 'Debe ingresar un código.',
-        'contratoPeso.required'   => 'Debe ingresar un peso.',
-        'contratoPeso.numeric'    => 'El peso debe ser numérico.',
-        'contratoPeso.min'        => 'El peso debe ser mayor a 0.',
+        'contratoCodigo.required'  => 'Debe ingresar un código.',
+        'contratoPeso.required'    => 'Debe ingresar un peso.',
+        'contratoPeso.numeric'     => 'El peso debe ser numérico.',
+        'contratoPeso.min'         => 'El peso debe ser mayor a 0.',
+        'contratoDestino.required' => 'Debe seleccionar el departamento de destino.',
+        'contratoDestino.in'       => 'El departamento de destino no es válido.',
     ]);
 
     try {
@@ -880,12 +936,16 @@ public function generarContrato()
 
         $peso = (float) $this->contratoPeso;
         $textoObs = trim((string) ($this->contratoObservacion ?? ''));
+        $destino = (string) $this->contratoDestino;
 
         if ($admision) {
             // --- ACTUALIZA ---
             $admision->peso          = $peso;
             $admision->peso_ems      = $peso;
             $admision->peso_regional = $peso;
+
+            // ⇩ Guardar destino desde el modal
+            $admision->destino       = $destino;
 
             if ($textoObs !== '') {
                 $admision->observacion = trim(($admision->observacion ? $admision->observacion.' | ' : '').$textoObs);
@@ -895,7 +955,7 @@ public function generarContrato()
 
             Eventos::create([
                 'accion'      => 'Generar Contrato',
-                'descripcion' => "Actualización por contrato: peso/peso_ems/peso_regional = {$peso}.",
+                'descripcion' => "Actualización por contrato: peso/peso_ems/peso_regional = {$peso}; destino = {$destino}.",
                 'codigo'      => $admision->codigo,
                 'user_id'     => Auth::id(),
             ]);
@@ -905,7 +965,7 @@ public function generarContrato()
             $this->showContratoModal = false;
             $this->resetContratoFields();
             $this->dispatch('reload-page');
-            session()->flash('message', 'Contrato actualizado: pesos y observación guardados.');
+            session()->flash('message', 'Contrato actualizado: pesos, destino y observación guardados.');
             return;
         }
 
@@ -913,26 +973,27 @@ public function generarContrato()
         $tarifaIdDefecto = 1; // ajusta si tu tarifa base es otra
 
         $admision = Admision::create([
-            'origen'       => Auth::user()->city ?? 'LA PAZ',
-            'fecha'        => now(),
-            'servicio'     => 'CONTRATO',
-            'cantidad'     => 1,
-            'peso'         => $peso,
-            'peso_ems'     => $peso,
-            'peso_regional'=> $peso,
-            'observacion'  => ($textoObs !== '' ? $textoObs : null),
-            'codigo'       => trim((string)$this->contratoCodigo),
-            'precio'       => 0,
-            'ciudad'       => Auth::user()->city ?? 'LA PAZ',
+            'origen'           => Auth::user()->city ?? 'LA PAZ',
+            'fecha'            => now(),
+            'servicio'         => 'CONTRATO',
+            'cantidad'         => 1,
+            'peso'             => $peso,
+            'peso_ems'         => $peso,
+            'peso_regional'    => $peso,
+            'observacion'      => ($textoObs !== '' ? $textoObs : null),
+            'codigo'           => trim((string)$this->contratoCodigo),
+            'precio'           => 0,
+            'destino'          => $destino, // ⇦ NUEVO: destino desde el modal
+            'ciudad'           => Auth::user()->city ?? 'LA PAZ',
             'creacionadmision' => Auth::user()->name ?? null,
-            'estado'       => 3,
-            'tarifa_id'    => $tarifaIdDefecto,
-            'user_id'      => Auth::id(),
+            'estado'           => 3,
+            'tarifa_id'        => $tarifaIdDefecto,
+            'user_id'          => Auth::id(),
         ]);
 
         Eventos::create([
             'accion'      => 'Generar Contrato',
-            'descripcion' => "Creación por contrato: peso/peso_ems/peso_regional = {$peso}.",
+            'descripcion' => "Creación por contrato: peso/peso_ems/peso_regional = {$peso}; destino = {$destino}.",
             'codigo'      => $admision->codigo,
             'user_id'     => Auth::id(),
         ]);
@@ -942,7 +1003,7 @@ public function generarContrato()
         $this->showContratoModal = false;
         $this->resetContratoFields();
         $this->dispatch('reload-page');
-        session()->flash('message', 'Contrato creado: registro nuevo con pesos guardados.');
+        session()->flash('message', 'Contrato creado: registro nuevo con pesos, destino y observación guardados.');
     } catch (\Throwable $e) {
         \DB::rollBack();
         session()->flash('error', 'No se pudo guardar el contrato: '.$e->getMessage());
