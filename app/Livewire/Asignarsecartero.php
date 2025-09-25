@@ -182,4 +182,32 @@ public function searchAdmision()
         ->orderBy('fecha', 'desc')
         ->paginate($this->perPage);
 }
+public function assignByEnter()
+{
+    $codigo = trim($this->searchTerm);
+
+    if ($codigo === '') {
+        return;
+    }
+
+    // Buscar la admisión por código
+    $admision = Admision::where('codigo', $codigo)->first();
+
+    if ($admision) {
+        // Usar la misma lógica de selectAdmision
+        if (!in_array($admision->id, array_column($this->assignedAdmisiones, 'id'))) {
+            $this->assignedAdmisiones[] = [
+                'id' => $admision->id,
+                'codigo' => $admision->codigo,
+                'destino' => $admision->destino,
+                'direccion' => $admision->direccion,
+                'user_id' => $this->selectedCarteroForAll ?? null,
+            ];
+        }
+    }
+
+    // Limpiar el input después de asignar
+    $this->searchTerm = '';
+}
+
 }

@@ -3,7 +3,11 @@
         <!-- Columna izquierda: Lista de admisiones en estado 3 -->
         <div class="col-md-6">
             <h4>Asignar Envios</h4>
-            <input type="text" wire:model="searchTerm" placeholder="Buscar admisión..." class="form-control mb-3" wire:keydown.enter="searchAdmision">
+<input type="text" 
+       wire:model="searchTerm" 
+       placeholder="Buscar admisión..." 
+       class="form-control mb-3"
+       wire:keydown.enter="assignByEnter">
             <table class="table table-striped">
                 <thead>
                     <tr>
