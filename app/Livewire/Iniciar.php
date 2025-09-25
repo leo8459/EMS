@@ -28,30 +28,72 @@ class Iniciar extends Component
     public $showModalExpedicionHoy = false; // Controla la visibilidad del modal
     public $admisionesParaExpedicion = []; // Variable para almacenar admisiones seleccionadas
 
-    protected function rules()
-    {
-        return [
-            'origen' => 'required|string|max:255',
-            'servicio' => 'required|string|max:255',
-            'tipo_correspondencia' => 'required|string|max:255',
-            'cantidad' => 'required|integer',
-            'peso' => ['required', 'regex:/^[0-9]*[.,]?[0-9]+$/', 'min:0', 'max:20'],
-            'destino' => 'required|string|max:255',
-            // 'codigo' => 'string|unique:admisions,codigo' . ($this->admisionId ? ',' . $this->admisionId : ''),
-            'numero_factura' => 'nullable|string',
-            'nombre_remitente' => 'required|string|max:255',
-            // 'nombre_envia' => 'required|string|max:255',
-            // 'carnet' => 'required|string',
-            'telefono_remitente' => 'required|string',
-            'nombre_destinatario' => 'required|string|max:255',
-            // 'telefono_destinatario' => 'required|string',
-            'direccion' => 'required|string',
-            'ciudad' => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
-            // 'pais' => 'required|string',
-            'contenido' => 'nullable|string|max:500', // Regla de validación
+   protected function rules()
+{
+    return [
+        // Obligatorios (con asterisco):
+        'origen'               => 'required|string|max:255',
+        'servicio'             => 'required|string|max:255',
+        'tipo_correspondencia' => 'required|string|max:255',
+        'cantidad'             => 'required|integer|min:1',
+        'destino'              => 'required|string|max:255',
+        'codigo'               => 'required|string|unique:admisions,codigo' . ($this->admisionId ? ',' . $this->admisionId : ''),
+        'peso'                 => ['required','regex:/^[0-9]*[.,]?[0-9]+$/','min:0','max:20'],
+        'nombre_remitente'     => 'required|string|max:255',
+        'nombre_destinatario'  => 'required|string|max:255',
+        'direccion'            => 'required|string',
+        'ciudad'               => 'required|in:LA PAZ,POTOSI,ORURO,SANTA CRUZ,CHUQUISACA,COCHABAMBA,BENI,PANDO,TARIJA',
 
-        ];
-    }
+        // Opcionales (sin asterisco):
+        'numero_factura'       => 'nullable|string',
+        'nombre_envia'         => 'nullable|string|max:255',
+        'carnet'               => 'nullable|string',
+        'telefono_remitente'   => 'nullable|string',
+        'telefono_destinatario'=> 'nullable|string',
+        'provincia'            => 'nullable|string',
+        'pais'                 => 'nullable|string',
+        'contenido'            => 'nullable|string|max:500',
+        'direccion_remitente'  => 'nullable|string',
+        'casilla'              => 'nullable|string',
+    ];
+}
+protected $messages = [
+    'required' => 'Debes llenar el campo :attribute.',
+    'integer'  => 'El campo :attribute debe ser un número entero.',
+    'min'      => 'El campo :attribute debe ser al menos :min.',
+    'max'      => 'El campo :attribute no puede ser mayor a :max.',
+    'in'       => 'El valor seleccionado en :attribute no es válido.',
+    'regex'    => 'El formato de :attribute no es válido (usa punto o coma para decimales).',
+    'codigo.unique' => 'El Código ya existe. Debe ser único.',
+];
+
+protected $validationAttributes = [
+    // Con asterisco (obligatorios)
+    'origen'               => 'Origen *',
+    'servicio'             => 'Tipo de Servicio *',
+    'tipo_correspondencia' => 'Correspondencia *',
+    'cantidad'             => 'Cantidad *',
+    'destino'              => 'Destino *',
+    'codigo'               => 'Código *',
+    'peso'                 => 'Peso (Kg.) *',
+    'nombre_remitente'     => 'Nombre Completo (Remitente) *',
+    'nombre_destinatario'  => 'Nombre Completo (Destinatario) *',
+    'direccion'            => 'Dirección *',
+    'ciudad'               => 'Ciudad *',
+
+    // Sin asterisco (opcionales)
+    'numero_factura'       => 'Número de factura',
+    'nombre_envia'         => 'Nombre de quien envía',
+    'carnet'               => 'Carnet',
+    'telefono_remitente'   => 'Teléfono remitente',
+    'telefono_destinatario'=> 'Teléfono destinatario',
+    'provincia'            => 'Provincia',
+    'pais'                 => 'País',
+    'contenido'            => 'Contenido',
+    'direccion_remitente'  => 'Dirección del remitente',
+    'casilla'              => 'Casilla',
+];
+
     //rescatar datos 
     public function mount()
     {

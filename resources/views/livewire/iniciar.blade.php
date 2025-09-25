@@ -179,34 +179,32 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="origen">Origen*</label>
-                                    <input type="text" class="form-control" id="origen" wire:model="origen"
-                                        readonly>
+                                   <input type="text"
+       class="form-control @error('origen') is-invalid @enderror"
+       id="origen" wire:model.defer="origen" readonly>
+@error('origen') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="servicio">Tipo de Servicio*</label>
-                                    <select class="form-control" id="servicio" wire:model="servicio">
-                                        <option value="">Seleccione el servicio</option>
-                                        <option value="EMS">EMS</option>
-                                        <option value="SUPEREXPRESS">SUPEREXPRESS</option>
-                                        {{-- <option value="EMS">ENVIO CON DEVOLUCION</option>
-                                        <option value="EMS">POSTPAGO</option> --}}
+                                   <select class="form-control @error('servicio') is-invalid @enderror"
+        id="servicio" wire:model.defer="servicio">
+    <option value="">Seleccione el servicio</option>
+    <option value="EMS">EMS</option>
+    <option value="SUPEREXPRESS">SUPEREXPRESS</option>
+</select>
+@error('servicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
-                                        {{-- <option value="ENCOMIENDA">ENCOMIENDA</option>
-                                        <option value="TRADICIONAL">TRADICIONAL</option>
-                                        <option value="CERTIFICADA">CERTIFICADA</option>
-                                        <option value="ORDINARIA">ORDINARIA</option>
-                                        <option value="EXPRESO">EXPRESO</option> --}}
-                                    </select>
 
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="tipo_correspondencia">Correspondencia*</label>
-                                    <select class="form-control" id="tipo_correspondencia"
-                                        wire:model="tipo_correspondencia" wire:ignore>
+                                 <select class="form-control @error('tipo_correspondencia') is-invalid @enderror"
+        id="tipo_correspondencia" wire:model.defer="tipo_correspondencia">
                                         <option value="">Seleccione el tipo de correspondencia</option>
                                         <option value="CARTA">CARTA</option>
                                         <option value="ENCOMIENDA">ENCOMIENDA</option>
@@ -219,6 +217,8 @@
                                         <option value="PEQUEÑO PAQUETE">PEQUEÑO PAQUETE</option>
 
                                     </select>
+                                    @error('tipo_correspondencia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
                             </div>
                         </div>
@@ -231,16 +231,19 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="cantidad">Cantidad*</label>
-                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad"
-                                        wire:model="cantidad" value="1" disabled>
+                                   <input type="number"
+       class="form-control @error('cantidad') is-invalid @enderror"
+       id="cantidad" wire:model.defer="cantidad" min="1" value="1" disabled>
+@error('cantidad') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
 
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="destino">Destino*</label>
-                                    <select class="form-control" id="destino" wire:model="destino" wire:ignore
-                                        wire:change="updatePrice">
+                                   <select class="form-control @error('destino') is-invalid @enderror"
+        id="destino" wire:model.defer="destino" wire:change="updatePrice">
                                         <option value="">Seleccione el destino</option>
                                         <option value="SUPEREXPRESS">NACIONAL SUPEREXPRESS</option>
                                         <option value="DEVOLUCION">NACIONAL CON DEVOLUCION</option>
@@ -255,6 +258,8 @@
                                         <option value="EMS COBERTURA 3">EMS COBERTURA 3</option>
                                         <option value="EMS COBERTURA 4">EMS COBERTURA 4</option>
                                     </select>
+                                    @error('destino') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -276,8 +281,11 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="peso">Peso (Kg.)*</label>
-                                    <input type="text" class="form-control" id="peso" wire:model="peso"
-                                        placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
+                                    <input type="text"
+       class="form-control @error('peso') is-invalid @enderror"
+       id="peso" wire:model.defer="peso" placeholder="Ej: 1.001 o 1,001" autocomplete="off" spellcheck="false">
+@error('peso') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
 
 
 
@@ -299,9 +307,10 @@
                             <div class="col-md-4">
                                 <div class="form-group" style="position: relative;">
                                     <label for="nombre_remitente">Nombre Completo*</label>
-                                    <input type="text" class="form-control" id="nombre_remitente"
+                                  <input type="text" class="form-control" id="nombre_remitente"
                                         wire:model="nombre_remitente" oninput="showSuggestions(this.value)"
                                         wire:ignore>
+
                                     <!-- Contenedor para las sugerencias -->
                                     <div id="suggestions"
                                         style="position: absolute; background-color: white; border: 1px solid #ccc; width: 100%; max-height: 150px; overflow-y: auto; z-index: 1000;">
@@ -350,8 +359,9 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="nombre_destinatario">Nombre Completo*</label>
-                                    <input type="text" class="form-control" id="nombre_destinatario"
+                                   <input type="text" class="form-control" id="nombre_destinatario"
                                         wire:model="nombre_destinatario">
+
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -366,8 +376,11 @@
                             <div class="col-12"> <!-- Cambiado a col-12 para ocupar todo el ancho -->
                                 <div class="form-group">
                                     <label for="direccion">Dirección*</label>
-                                    <input type="text" class="form-control" id="direccion"
-                                        wire:model="direccion">
+                                   <input type="text"
+       class="form-control @error('direccion') is-invalid @enderror"
+       id="direccion" wire:model.defer="direccion">
+@error('direccion') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
                             </div>
                         </div>
@@ -377,7 +390,8 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="ciudad">Ciudad*</label>
-                                    <select class="form-control" id="ciudad" wire:model="ciudad">
+                                  <select class="form-control @error('ciudad') is-invalid @enderror"
+        id="ciudad" wire:model.defer="ciudad">
                                         <option value="">Seleccione una ciudad</option>
                                         <option value="LA PAZ">LA PAZ</option>
                                         <option value="POTOSI">POTOSI</option>
@@ -389,6 +403,8 @@
                                         <option value="PANDO">PANDO</option>
                                         <option value="TARIJA">TARIJA</option>
                                     </select>
+                                    @error('ciudad') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                                 </div>
                             </div>
 
