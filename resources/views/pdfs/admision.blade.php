@@ -141,15 +141,14 @@
 
                     <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
                         <!-- QR de rastreo existente -->
-                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
+{!! QrCode::format('svg')->size(60)->margin(0)->generate($qrLink) !!}
                         Rastreo QR.<br>
                         correos.gob.bo:8000
                         <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
                         <!-- 🔽 NUEVO QR DE VISITA -->
-                        <img src="data:image/svg+xml;base64, {!! base64_encode(
-                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
-                        ) !!}" alt="QR Web"><br>
+                        {!! QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/') !!}
+
                         <span style="font-size:8px;">Visítanos aquí</span><br>
                         correos.gob.bo
                     </td>
