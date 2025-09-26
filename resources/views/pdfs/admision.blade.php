@@ -105,6 +105,10 @@
         default => '',
     };
 @endphp
+    @php
+    $qrRastreo = 'https://trackingbo.correos.gob.bo:8100/';
+    $qrWeb = $qrWeb ?? 'https://correos.gob.bo/';
+@endphp
 
 <body>
     <!-- Primera tabla -->
@@ -139,21 +143,23 @@
 
 
 
-                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-                        <!-- QR de rastreo existente -->
-                         <img src="data:image/png;base64, {!! base64_encode(
-     QrCode::format('png')->size(120)->margin(0)->generate($qrLink)
- ) !!}" alt="QR Rastreo"><br>
-                        correos.gob.bo:8000
-                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+                   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+    <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+    <img
+        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->errorCorrection('H')->generate($qrRastreo)) !!}"
+        alt="Código de rastreo"><br>
+    <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
-                        <!-- 🔽 NUEVO QR DE VISITA -->
-                       <img src="data:image/png;base64, {!! base64_encode(
-     QrCode::format('png')->size(120)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/')
- ) !!}" alt="QR Web"><br>
-                        <span style="font-size:8px;">Visítanos aquí</span><br>
-                        correos.gob.bo
-                    </td>
+    <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+
+    <img
+        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb)) !!}"
+        alt="QR Web"><br>
+    <span style="font-size:8px;">Visítanos aquí</span><br>
+    correos.gob.bo
+</td>
+
+
 
 
                 </tr>
@@ -221,6 +227,8 @@
         @if ($marcaAgua)
             <div class="watermark-local">{{ $marcaAgua }}</div>
         @endif
+   
+
     </div>
 
     <!-- Añadimos un margen grande entre las tablas repetidas -->
@@ -257,20 +265,23 @@
 
 
 
-                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-                        <!-- QR de rastreo existente -->
-                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
-                        Rastreo QR.<br>
-                        correos.gob.bo:8000
-                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+               <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+    <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+    <img
+        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->errorCorrection('H')->generate($qrRastreo)) !!}"
+        alt="Código de rastreo"><br>
+    <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
-                        <!-- 🔽 NUEVO QR DE VISITA -->
-                        <img src="data:image/svg+xml;base64, {!! base64_encode(
-                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
-                        ) !!}" alt="QR Web"><br>
-                        <span style="font-size:8px;">Visítanos aquí</span><br>
-                        correos.gob.bo
-                    </td>
+    <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+
+    <img
+        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb)) !!}"
+        alt="QR Web"><br>
+    <span style="font-size:8px;">Visítanos aquí</span><br>
+    correos.gob.bo
+</td>
+
+
 
                 </tr>
                 <tr>
