@@ -122,7 +122,7 @@
                 <col style="width: 20px">
                 <col style="width: 125px">
             </colgroup>
-            <tbody>
+            <thead>
                 <tr>
                     <td colspan="3">
                         <img src="{{ public_path('images/ems.png') }}" alt="" width="150" height="50"><br>
@@ -140,15 +140,19 @@
 
 
                     <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-                        {!! QrCode::format('svg')->size(60)->margin(0)->generate($qrLink) !!}
-                        <br>Rastreo&nbsp;QR.<br>correos.gob.bo:8000
-
+                        <!-- QR de rastreo existente -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
+                        Rastreo QR.<br>
+                        correos.gob.bo:8000
                         <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-                        {!! QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/') !!}
-                        <br><span style="font-size:8px;">Visítanos aquí</span><br>correos.gob.bo
+                        <!-- 🔽 NUEVO QR DE VISITA -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(
+                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
+                        ) !!}" alt="QR Web"><br>
+                        <span style="font-size:8px;">Visítanos aquí</span><br>
+                        correos.gob.bo
                     </td>
-
 
 
                 </tr>
@@ -211,7 +215,7 @@
                         <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
-            </tbody>
+            </thead>
         </table>
         @if ($marcaAgua)
             <div class="watermark-local">{{ $marcaAgua }}</div>
@@ -234,7 +238,7 @@
                 <col style="width: 20px">
                 <col style="width: 125px">
             </colgroup>
-            <tbody>
+            <thead>
                 <tr>
                     <td colspan="3">
                         <img src="{{ public_path('images/ems.png') }}" alt="" width="150"
@@ -253,15 +257,19 @@
 
 
                     <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-                        {!! QrCode::format('svg')->size(60)->margin(0)->generate($qrLink) !!}
-                        <br>Rastreo&nbsp;QR.<br>correos.gob.bo:8000
-
+                        <!-- QR de rastreo existente -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrLink)) !!}" alt="QR Rastreo"><br>
+                        Rastreo QR.<br>
+                        correos.gob.bo:8000
                         <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-                        {!! QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/') !!}
-                        <br><span style="font-size:8px;">Visítanos aquí</span><br>correos.gob.bo
+                        <!-- 🔽 NUEVO QR DE VISITA -->
+                        <img src="data:image/svg+xml;base64, {!! base64_encode(
+                            QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb ?? 'https://correos.gob.bo/'),
+                        ) !!}" alt="QR Web"><br>
+                        <span style="font-size:8px;">Visítanos aquí</span><br>
+                        correos.gob.bo
                     </td>
-
 
                 </tr>
                 <tr>
@@ -296,7 +304,8 @@
                 <tr></tr>
                 <tr>
                     <td colspan="3">DESCRIPCIÓN:
-                        <div style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
+                        <div
+                            style="text-align: justify; font-size: 8px; word-wrap: break-word; white-space: pre-line;">
                             @if (!empty($contenido))
                                 {{ $contenido }}<br>
                             @endif
@@ -324,7 +333,7 @@
                         <div style="text-align: right;">{{ $precio }}</div>
                     </td>
                 </tr>
-            </tbody>
+            </thead>
         </table>
         @if ($marcaAgua)
             <div class="watermark-local">{{ $marcaAgua }}</div>
