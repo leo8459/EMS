@@ -106,9 +106,14 @@
     };
 @endphp
 @php
-    $qrRastreoPngB64 = base64_encode(file_get_contents(public_path('images/qr_trackingbo_8100.png'))); // el primero
-    $qrWebPngB64     = base64_encode(file_get_contents(public_path('images/qr_correos_gob_bo.png'))); // el segundo (nuevo)
+    $qrRastreoPath = public_path('images/qr_trackingbo_8100.png');
+    $qrWebPath     = public_path('images/qr_correos_gob_bo.png');
+
+    $qrRastreoPngB64 = file_exists($qrRastreoPath) ? base64_encode(file_get_contents($qrRastreoPath)) : null;
+    $qrWebPngB64     = file_exists($qrWebPath) ? base64_encode(file_get_contents($qrWebPath)) : null;
 @endphp
+
+
 
 
 
@@ -145,20 +150,20 @@
 
 
 
-   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-    <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+                        <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+                        <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="QR Rastreo" width="60"
+                            height="60"><br>
+                        <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
-    {{-- Primer QR (rastreo fijo) --}}
-    <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="Código de rastreo" width="60" height="60"><br>
-    <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
+                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-    <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+                        <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
+                        <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web" width="60"
+                            height="60"><br>
+                        <span style="font-size:8px;">correos.gob.bo</span>
+                    </td>
 
-    {{-- Segundo QR (nuevo) — https://correos.gob.bo/ --}}
-    <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
-    <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web correos.gob.bo" width="60" height="60"><br>
-    <span style="font-size:8px;">correos.gob.bo</span>
-</td>
 
 
 
@@ -230,7 +235,7 @@
         @if ($marcaAgua)
             <div class="watermark-local">{{ $marcaAgua }}</div>
         @endif
-   
+
 
     </div>
 
@@ -268,20 +273,20 @@
 
 
 
-   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
-    <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+                    <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+                        <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
+                        <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="QR Rastreo" width="60"
+                            height="60"><br>
+                        <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
-    {{-- Primer QR (rastreo fijo) --}}
-    <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="Código de rastreo" width="60" height="60"><br>
-    <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
+                        <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-    <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
+                        <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
+                        <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web" width="60"
+                            height="60"><br>
+                        <span style="font-size:8px;">correos.gob.bo</span>
+                    </td>
 
-    {{-- Segundo QR (nuevo) — https://correos.gob.bo/ --}}
-    <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
-    <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web correos.gob.bo" width="60" height="60"><br>
-    <span style="font-size:8px;">correos.gob.bo</span>
-</td>
 
 
 
