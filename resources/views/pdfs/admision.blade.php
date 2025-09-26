@@ -105,10 +105,12 @@
         default => '',
     };
 @endphp
-    @php
-    $qrRastreo = 'https://trackingbo.correos.gob.bo:8100/';
-    $qrWeb = $qrWeb ?? 'https://correos.gob.bo/';
+@php
+    $qrRastreoPngB64 = base64_encode(file_get_contents(public_path('images/qr_trackingbo_8100.png'))); // el primero
+    $qrWebPngB64     = base64_encode(file_get_contents(public_path('images/qr_correos_gob_bo.png'))); // el segundo (nuevo)
 @endphp
+
+
 
 <body>
     <!-- Primera tabla -->
@@ -143,21 +145,22 @@
 
 
 
-                   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
     <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
-    <img
-        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->errorCorrection('H')->generate($qrRastreo)) !!}"
-        alt="Código de rastreo"><br>
+
+    {{-- Primer QR (rastreo fijo) --}}
+    <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="Código de rastreo" width="60" height="60"><br>
     <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
     <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-    <img
-        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb)) !!}"
-        alt="QR Web"><br>
-    <span style="font-size:8px;">Visítanos aquí</span><br>
-    correos.gob.bo
+    {{-- Segundo QR (nuevo) — https://correos.gob.bo/ --}}
+    <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
+    <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web correos.gob.bo" width="60" height="60"><br>
+    <span style="font-size:8px;">correos.gob.bo</span>
 </td>
+
+
 
 
 
@@ -265,21 +268,21 @@
 
 
 
-               <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
+   <td rowspan="8" style="text-align:center;font-size:7px;vertical-align:middle;">
     <div style="font-size:8px; margin-bottom:2px;">Código de rastreo</div>
-    <img
-        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->errorCorrection('H')->generate($qrRastreo)) !!}"
-        alt="Código de rastreo"><br>
+
+    {{-- Primer QR (rastreo fijo) --}}
+    <img src="data:image/png;base64,{{ $qrRastreoPngB64 }}" alt="Código de rastreo" width="60" height="60"><br>
     <span style="font-size:8px;">trackingbo.correos.gob.bo:8100</span>
 
     <hr style="border:0;border-top:1px dotted #000;margin:4px 0;">
 
-    <img
-        src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate($qrWeb)) !!}"
-        alt="QR Web"><br>
-    <span style="font-size:8px;">Visítanos aquí</span><br>
-    correos.gob.bo
+    {{-- Segundo QR (nuevo) — https://correos.gob.bo/ --}}
+    <div style="font-size:8px; margin-bottom:2px;">Sitio web</div>
+    <img src="data:image/png;base64,{{ $qrWebPngB64 }}" alt="QR Web correos.gob.bo" width="60" height="60"><br>
+    <span style="font-size:8px;">correos.gob.bo</span>
 </td>
+
 
 
 
