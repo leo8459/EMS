@@ -38,7 +38,7 @@ class Entregarenviosfirma extends Component
     public function guardarAdmision()
     {
         $this->validate([
-            'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:20480',
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:51200',
             'recepcionado' => 'required|string|max:255',
             'observacion_entrega' => 'nullable|string|max:1000',
             'firma' => 'nullable|string',
@@ -113,7 +113,7 @@ class Entregarenviosfirma extends Component
     public function noEntregado()
     {
         $this->validate([
-            'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:20480',
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:51200',
             'observacion_entrega' => 'nullable|string|max:1000',
         ]);
 
