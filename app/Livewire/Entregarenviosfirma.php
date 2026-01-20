@@ -48,7 +48,7 @@ class Entregarenviosfirma extends Component
         $photoBase64 = null;
         if ($this->photo) {
             try {
-                $image = Image::make($this->photo->getRealPath())->fit(400, 400, function ($constraint) {
+                $image = Image::make($this->photo->get())->fit(400, 400, function ($constraint) {
                     $constraint->upsize();
                 });
                 $photoBase64 = (string) $image->encode('data-url');
@@ -116,7 +116,7 @@ class Entregarenviosfirma extends Component
         $photoBase64 = null;
         if ($this->photo) {
             try {
-                $image = Image::make($this->photo->getRealPath())->fit(400, 400, function ($constraint) {
+                $image = Image::make($this->photo->get())->fit(400, 400, function ($constraint) {
                     $constraint->upsize();
                 });
                 $photoBase64 = (string) $image->encode('data-url');
