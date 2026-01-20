@@ -55,7 +55,8 @@ class Entregarenviosfirma extends Component
                     ->read($this->photo->get())
                     ->cover(400, 400);
 
-                $photoBase64 = $image->toDataUri();
+                $encoded = $image->toJpeg(80); // calidad 80 (ajustable)
+                $photoBase64 = 'data:image/jpeg;base64,' . base64_encode($encoded);
             } catch (\Exception $e) {
                 session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
                 return;
@@ -129,7 +130,8 @@ class Entregarenviosfirma extends Component
                     ->read($this->photo->get())
                     ->cover(400, 400);
 
-                $photoBase64 = $image->toDataUri();
+                $encoded = $image->toJpeg(80); // calidad 80 (ajustable)
+                $photoBase64 = 'data:image/jpeg;base64,' . base64_encode($encoded);
             } catch (\Exception $e) {
                 session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
                 return;
