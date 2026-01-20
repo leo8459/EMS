@@ -11,6 +11,7 @@ use App\Models\Historico;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 
+
 class Entregarenviosfirma extends Component
 {
     use WithPagination, WithFileUploads;
@@ -52,16 +53,18 @@ class Entregarenviosfirma extends Component
                 $manager = new ImageManager(new Driver());
 
                 $image = $manager
-                    ->read($this->photo->get())
+                    ->read($this->photo->getRealPath()) // 🔥 CLAVE
                     ->cover(400, 400);
 
-                $encoded = $image->toJpeg(80); // calidad 80 (ajustable)
+                $encoded = $image->toJpeg(80);
+
                 $photoBase64 = 'data:image/jpeg;base64,' . base64_encode($encoded);
-            } catch (\Exception $e) {
-                session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                session()->flash('error', 'Error imagen: ' . $e->getMessage());
                 return;
             }
         }
+
 
         // Determinar dirección según rol
         $nuevaDireccion = $this->admision->direccion;
@@ -127,16 +130,18 @@ class Entregarenviosfirma extends Component
                 $manager = new ImageManager(new Driver());
 
                 $image = $manager
-                    ->read($this->photo->get())
+                    ->read($this->photo->getRealPath()) // 🔥 CLAVE
                     ->cover(400, 400);
 
-                $encoded = $image->toJpeg(80); // calidad 80 (ajustable)
+                $encoded = $image->toJpeg(80);
+
                 $photoBase64 = 'data:image/jpeg;base64,' . base64_encode($encoded);
-            } catch (\Exception $e) {
-                session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                session()->flash('error', 'Error imagen: ' . $e->getMessage());
                 return;
             }
         }
+
 
         $this->admision->update([
             'observacion_entrega' => $this->observacion_entrega,
