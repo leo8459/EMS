@@ -152,21 +152,21 @@ Route::middleware('auth')->group(function () {
 
 
 //CONTRATOS
-Route::get('/solicitudes-externo-estado/{estado}', function ($estado) {
-    // $url = "http://127.0.0.1:9000/carteros/ems/estado/{$estado}";
-    $url = "http://172.65.10.52:8450/carteros/ems/estado/{$estado}";
+// Route::get('/solicitudes-externo-estado/{estado}', function ($estado) {
+//     // $url = "http://127.0.0.1:9000/carteros/ems/estado/{$estado}";
+//     $url = "http://172.65.10.52:8450/carteros/ems/estado/{$estado}";
 
-    $response = Http::get($url);
+//     $response = Http::get($url);
 
-    if ($response->successful()) {
-        return $response->json();
-    } else {
-        return response()->json([
-            'error' => 'No se pudo conectar o la respuesta falló',
-            'status' => $response->status(),
-        ], $response->status());
-    }
-});
+//     if ($response->successful()) {
+//         return $response->json();
+//     } else {
+//         return response()->json([
+//             'error' => 'No se pudo conectar o la respuesta falló',
+//             'status' => $response->status(),
+//         ], $response->status());
+//     }
+// });
 Route::get('/registros-combinados-multi', function () {
     // Obtener registros externos (solicitudes externas) con estado = 2
     $urlSolicitudes = "http://172.65.10.52:8450/carteros/ems/estado/2";

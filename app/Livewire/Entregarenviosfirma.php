@@ -8,6 +8,7 @@ use App\Models\Admision;
 use Livewire\WithFileUploads;
 use App\Models\Eventos;
 use App\Models\Historico;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class Entregarenviosfirma extends Component
 {
@@ -37,7 +38,7 @@ class Entregarenviosfirma extends Component
     {
         // Validar datos
         $this->validate([
-            'photo' => 'nullable|image|max:10240',
+            'photo' => 'nullable|image|max:20480',
             'recepcionado' => 'required|string|max:255',
             'observacion_entrega' => 'nullable|string|max:1000',
             'firma' => 'nullable|string',
@@ -46,13 +47,15 @@ class Entregarenviosfirma extends Component
         // Convirtiendo la imagen a Base64 si existe
         $photoBase64 = null;
         if ($this->photo) {
-            // Obtenemos el contenido binario
-            $imageContents = file_get_contents($this->photo->getRealPath());
-            // Codificamos en Base64
-            $base64 = base64_encode($imageContents);
-            // Construimos la cadena con el mime-type para poder mostrarla directamente en un <img src="...">
-            $extension = $this->photo->extension();
-            $photoBase64 = 'data:image/' . $extension . ';base64,' . $base64;
+            try {
+                $image = Image::make($this->photo->getRealPath())->fit(400, 400, function ($constraint) {
+                    $constraint->upsize();
+                });
+                $photoBase64 = (string) $image->encode('data-url');
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+                return;
+            }
         }
 
         // Determinar la nueva dirección según el rol
@@ -105,17 +108,22 @@ class Entregarenviosfirma extends Component
     {
         // Validar datos, incluyendo la imagen (photo)
         $this->validate([
-            'photo' => 'nullable|image|max:10240',
+            'photo' => 'nullable|image|max:20480',
             'observacion_entrega' => 'nullable|string|max:1000',
         ]);
 
         // Convertir la imagen a Base64 (si existe)
         $photoBase64 = null;
         if ($this->photo) {
-            $imageContents = file_get_contents($this->photo->getRealPath());
-            $base64 = base64_encode($imageContents);
-            $extension = $this->photo->extension();
-            $photoBase64 = 'data:image/' . $extension . ';base64,' . $base64;
+            try {
+                $image = Image::make($this->photo->getRealPath())->fit(400, 400, function ($constraint) {
+                    $constraint->upsize();
+                });
+                $photoBase64 = (string) $image->encode('data-url');
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+                return;
+            }
         }
 
         // Actualizar la admisión con la observación y la posible foto en Base64
