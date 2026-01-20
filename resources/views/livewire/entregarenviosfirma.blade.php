@@ -115,12 +115,11 @@
                                     @endhasrole
 
                                     <div class="col-md-3">
-                                        <label for="photo">Seleccionar Foto (máx. 50MB)</label>
+                                        <label for="photo">Seleccionar Foto (máx. 50MB) - Cámara o Galería</label>
                                         <input type="file"
                                                id="photo"
                                                wire:model="photo"
                                                accept="image/*"
-                                               capture="environment"
                                                max="52428800"
                                                class="form-control">
                                         <small class="text-muted">Si falla la subida, intenta con una foto de menor resolución o desde la galería.</small>
