@@ -4,22 +4,23 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Admision;
 use Livewire\WithFileUploads;
+use App\Models\Admision;
 use App\Models\Eventos;
 use App\Models\Historico;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class Entregarenviosfirma extends Component
 {
     use WithPagination, WithFileUploads;
 
     public $admision;
-    public $photo;             // Almacena la foto subida (archivo)
-    public $recepcionado;      // Nombre de quien recibe
-    public $observacion_entrega; 
+    public $photo;                   // Imagen subida
+    public $recepcionado;            // Nombre de quien recibe
+    public $observacion_entrega;
     public $id;
-    public $firma;             // Firma en Base64
+    public $firma;                   // Firma en Base64
 
     /**
      * Montar el componente con los datos iniciales.
@@ -32,11 +33,10 @@ class Entregarenviosfirma extends Component
     }
 
     /**
-     * Guardar la admisión con los datos actualizados.
+     * Guardar la admisión como ENTREGADA.
      */
     public function guardarAdmision()
     {
-        // Validar datos
         $this->validate([
             'photo' => 'nullable|image|max:20480',
             'recepcionado' => 'required|string|max:255',
@@ -44,96 +44,104 @@ class Entregarenviosfirma extends Component
             'firma' => 'nullable|string',
         ]);
 
-        // Convirtiendo la imagen a Base64 si existe
+        // Procesar imagen a Base64 (si existe)
         $photoBase64 = null;
+
         if ($this->photo) {
             try {
-                $image = Image::make($this->photo->get())->fit(400, 400, function ($constraint) {
-                    $constraint->upsize();
-                });
-                $photoBase64 = (string) $image->encode('data-url');
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager
+                    ->read($this->photo->get())
+                    ->cover(400, 400);
+
+                $photoBase64 = $image->toDataUri();
             } catch (\Exception $e) {
                 session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
                 return;
             }
         }
 
-        // Determinar la nueva dirección según el rol
+        // Determinar dirección según rol
         $nuevaDireccion = $this->admision->direccion;
         if (auth()->user()->hasRole('VENTANILLA')) {
             $nuevaDireccion = 'VENTANILLA';
         }
 
-        // Guardar en la base de datos
+        // Actualizar admisión
         $resultado = $this->admision->update([
-            'estado' => 5, // Estado entregado
+            'estado' => 5, // Entregado
             'recepcionado' => $this->recepcionado,
             'observacion_entrega' => $this->observacion_entrega,
             'firma_entrega' => $this->firma,
-            'user_id' => auth()->id(),       // Guardar el ID del usuario logueado
-            'direccion' => $nuevaDireccion,  // Actualizar dirección según el rol
-            // Aquí guardas el Base64 en la columna "photo" de tu tabla (si ese es el nombre)
+            'user_id' => auth()->id(),
+            'direccion' => $nuevaDireccion,
             'photo' => $photoBase64,
         ]);
 
         if ($resultado) {
-            // Registrar el evento
+            // Evento
             Eventos::create([
                 'accion' => 'Entregar Envío',
                 'descripcion' => 'La admisión fue entregada correctamente.',
                 'codigo' => $this->admision->codigo,
                 'user_id' => auth()->id(),
             ]);
+
+            // Histórico
             Historico::create([
                 'numero_guia' => $this->admision->codigo,
                 'fecha_actualizacion' => now(),
-                'id_estado_actualizacion' => 6, 
+                'id_estado_actualizacion' => 6,
                 'estado_actualizacion' => 'Entregado al destinatario',
             ]);
 
             session()->flash('message', 'Admisión entregada correctamente.');
 
-            // Redirigir según el rol del usuario
+            // Redirección por rol
             if (auth()->user()->hasRole('VENTANILLA')) {
                 return redirect()->route('entregasventanilla');
-            } else {
-                return redirect()->route('encaminocarteroentrega');
             }
-        } else {
-            session()->flash('message', 'Error al guardar la admisión.');
+
+            return redirect()->route('encaminocarteroentrega');
         }
+
+        session()->flash('error', 'Error al guardar la admisión.');
     }
 
+    /**
+     * Marcar como NO ENTREGADO.
+     */
     public function noEntregado()
     {
-        // Validar datos, incluyendo la imagen (photo)
         $this->validate([
             'photo' => 'nullable|image|max:20480',
             'observacion_entrega' => 'nullable|string|max:1000',
         ]);
 
-        // Convertir la imagen a Base64 (si existe)
         $photoBase64 = null;
+
         if ($this->photo) {
             try {
-                $image = Image::make($this->photo->get())->fit(400, 400, function ($constraint) {
-                    $constraint->upsize();
-                });
-                $photoBase64 = (string) $image->encode('data-url');
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager
+                    ->read($this->photo->get())
+                    ->cover(400, 400);
+
+                $photoBase64 = $image->toDataUri();
             } catch (\Exception $e) {
                 session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
                 return;
             }
         }
 
-        // Actualizar la admisión con la observación y la posible foto en Base64
         $this->admision->update([
             'observacion_entrega' => $this->observacion_entrega,
             'user_id' => auth()->id(),
             'photo' => $photoBase64,
         ]);
 
-        // Registrar evento
         Eventos::create([
             'accion' => 'No Entregado',
             'descripcion' => 'La admisión permanece en el estado actual.',
@@ -145,15 +153,16 @@ class Entregarenviosfirma extends Component
         return redirect(request()->header('Referer'));
     }
 
+    /**
+     * Marcar como RETURN.
+     */
     public function return()
     {
-        // Cambiar estado a 10 y eliminar el user_id
         $this->admision->update([
             'estado' => 10,
             'user_id' => null,
         ]);
 
-        // Registrar evento
         Eventos::create([
             'accion' => 'Return',
             'descripcion' => 'La admisión fue marcada como Return y el usuario asignado fue eliminado.',
@@ -168,12 +177,12 @@ class Entregarenviosfirma extends Component
             'estado_actualizacion' => 'Sin acceso al lugar de entrega',
         ]);
 
-        session()->flash('message', 'La admisión fue marcada como Return y el usuario asignado fue eliminado.');
+        session()->flash('message', 'La admisión fue marcada como Return.');
         return redirect(request()->header('Referer'));
     }
 
     /**
-     * Renderizar la vista Livewire.
+     * Renderizar vista.
      */
     public function render()
     {
