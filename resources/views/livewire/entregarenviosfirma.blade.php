@@ -119,6 +119,8 @@
                                         <input type="file"
                                                id="photo"
                                                wire:model="photo"
+                                               accept="image/*"
+                                               capture="environment"
                                                class="form-control">
                                         @error('photo')
                                             <span class="text-danger">{{ $message }}</span>

@@ -9,7 +9,7 @@ use App\Models\Admision;
 use App\Models\Eventos;
 use App\Models\Historico;
 use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Drivers\Imagick\Driver;
 
 class Entregarenviosfirma extends Component
 {
@@ -52,7 +52,7 @@ class Entregarenviosfirma extends Component
 
                 // Leer imagen temporal (ANDROID OK)
                 $jpegBinary = $manager
-                    ->read($this->photo->getRealPath())
+                    ->read($this->photo->get())
                     ->scaleDown(800)     // reduce peso
                     ->toJpeg(80)         // calidad
                     ->toString();        // binario real
@@ -124,8 +124,8 @@ class Entregarenviosfirma extends Component
                 $manager = new ImageManager(new Driver());
 
                 $jpegBinary = $manager
-                    ->read($this->photo->getRealPath())
-                    ->scaleDown(800)
+                    ->read($this->photo->get())
+                    ->scaleDown(400)
                     ->toJpeg(80)
                     ->toString();
 
